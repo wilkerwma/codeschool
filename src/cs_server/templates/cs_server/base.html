@@ -1,0 +1,25 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}{{ page_title }}{% endblock %}</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="{% static "codemirror/lib/codemirror.css" %}" type="text/css">
+    <link rel="stylesheet" href="{% static "cs_server/style.css" %}" type="text/css">
+    <link rel="stylesheet" href="{% static "cs_server/normalize.css" %}" type="text/css">
+    {% block head_extra %}{{ page_body }}{% endblock %}
+</head>
+
+<body>
+{% block header %}
+<img id="logo_image" src={% static "cs_server/logo.png" %}>
+<div class="menu">
+<span><a href="/">Problemas</a></span>
+<span><a href="/notas/">Notas</a></span>
+<span><a href="{% static "cs_server/README.html" %}">Ajuda Pytuguês</a></span>
+</div>
+
+{% endblock %}
+{% block body %}{{ page_body }}{% endblock %}
+{% block footer %}{{ page_footer }}{% endblock %}
+</body>

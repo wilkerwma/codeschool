@@ -1,0 +1,756 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.12: http://docutils.sourceforge.net/" />
+<link rel="stylesheet" href="style.css" type="text/css">
+<title>Pytuguês</title>
+<style type="text/css">
+
+/*
+:Author: David Goodger (goodger@python.org)
+:Id: $Id: html4css1.css 7614 2013-02-21 15:55:51Z milde $
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+object[type="image/svg+xml"], object[type="application/x-shockwave-flash"] {
+  overflow: hidden;
+}
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title, .code .error {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin: 0 0 0.5em 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left, .figure.align-left, object.align-left {
+  clear: left ;
+  float: left ;
+  margin-right: 1em }
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right ;
+  float: right ;
+  margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.align-left {
+  text-align: left }
+
+.align-center {
+  clear: both ;
+  text-align: center }
+
+.align-right {
+  text-align: right }
+
+/* reset inner alignment in figures */
+div.align-right {
+  text-align: inherit }
+
+/* div.align-center * { */
+/*   text-align: left } */
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font: inherit }
+
+pre.literal-block, pre.doctest-block, pre.math, pre.code {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+pre.code .ln { color: grey; } /* line numbers */
+pre.code, code { background-color: #eeeeee }
+pre.code .comment, code .comment { color: #5C6576 }
+pre.code .keyword, code .keyword { color: #3B0D06; font-weight: bold }
+pre.code .literal.string, code .literal.string { color: #0C5404 }
+pre.code .name.builtin, code .name.builtin { color: #352B84 }
+pre.code .deleted, code .deleted { background-color: #DEB0A1}
+pre.code .inserted, code .inserted { background-color: #A3D289}
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+/* "booktabs" style (no vertical lines) */
+table.docutils.booktabs {
+  border: 0px;
+  border-top: 2px solid;
+  border-bottom: 2px solid;
+  border-collapse: collapse;
+}
+table.docutils.booktabs * {
+  border: 0px;
+}
+table.docutils.booktabs th {
+  border-bottom: thin solid;
+  text-align: left;
+}
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+
+<h1>Tutorial</h1>
+<p>Um programa de computador pode ser entendido como uma série de instruções que
+são executadas em sequência para completar uma determinada tarefa. Podemos
+iniciar o ambiente de programação em modo texto invocando o comando &quot;pytuga&quot;
+no terminal. Uma alternativa gráfica mais amigável é o &quot;Tugalinhas&quot; que também
+é instalado junto com este pacote.</p>
+<p>Uma vez aberto, tanto o &quot;Tugalinhas&quot; quanto o &quot;pytuga&quot; disponibilizam um shell
+de Pytuguês (que inicia com &quot;&gt;&gt;&gt;&quot;) onde podemos digitar comandos diretamente.
+Para mostrar uma mensagem na tela, por exemplo, digite:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; mostre(&quot;olá, mundo!&quot;)
+olá, mundo
+</pre>
+<p>Experimente também com operações básicas, para ter um sabor dos recursos do
+terminal de Pytuguês:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; 5 * 4 * 3 * 2 * 1
+120
+&gt;&gt;&gt; 40 + 2
+42
+</pre>
+<p>A sintaxe do Pytuguês foi criada para produzir códigos que se assemelhem o
+máximo possível com um pseudocódigo em português. Queremos que o significado dos
+programas mais simples seja óbvio para um usuário que não conhece a
+linguagem (ou que nunca programou na vida) e que a linguagem seja fácil de
+aprender e pareça natural para programadores iniciantes. O Python oferece isto
+para falantes do inglês, queremos oferecer o mesmo para Brasileiros, Portugueses,
+Angolanos, etc.</p>
+<p>Esta seção vai percorrer os principais recursos do Pytuguês para que você
+possa programar em poucos minutos. Normalmente a primeira interação com a
+linguagem se dá através da programação gráfica, onde controlamos a trajetória de
+um pequeno &quot;robô&quot; na tela para desenhar figuras geométricas. Inicie ou o
+Tugalinhas ou o pytuga para começar. Os comandos básicos para interagir com
+o cursor na tela são:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; frente(100)   # avança 100 pixels
+&gt;&gt;&gt; trás(100)     # recua 100 pixels
+&gt;&gt;&gt; direita(90)   # gira 90 graus no sentido horário
+&gt;&gt;&gt; esquerda(90)  # gira 90 graus no sentido anti-horário
+</pre>
+<p>Digite os comandos no terminal interativo para ver o Tuga se mexer. Aos poucos
+podemos construir interações complexas e interessantes utilizando estes blocos
+básicos e os recursos comuns de programação como repetições, execução
+condicional, interação com o usuário, etc.</p>
+<p><strong>Desafio!</strong></p>
+<p>Faça um programa que desenhe figuras regulares como quadrado, triângulo,
+pentágono, etc.</p>
+<div class="section" id="comandos-basicos">
+<h2>Comandos básicos</h2>
+<p>Esta seção apresenta os recursos mais básicos do Pytuguês que serão utilizados
+posteriormente para construir programas mais complexos e interessantes.</p>
+<div class="section" id="operacoes-matematicas">
+<h3>Operações matemáticas</h3>
+<p>Talvez o uso mais simples do interpretador de Pytuguês seja como uma calculadora
+avançada. Além das operações aritméticas comuns, podemos salvar variáveis,
+utilizar funções científicas, definir nossas próprias funções e vários outros
+recursos.</p>
+<p>A notação para as operações matemáticas é a usual, onde apenas lembramos que
+as casas decimais são separadas por pontos e não por vírgulas:</p>
+<pre class="literal-block">
+1 + 1     # soma
+2 - 1     # subtração
+3.14 * 2  # multiplicação
+1 / 2     # divisão
+3**2      # potência
+</pre>
+<p>É possível criar variáveis e reaproveitá-las em outras partes do código e
+chamar as funções matemáticas mais comuns. Experimente estes comandos no
+terminal interativo:</p>
+<pre class="literal-block">
+&gt;&gt;&gt; x = raiz(4)
+&gt;&gt;&gt; x + 1
+3.0
+&gt;&gt;&gt; x * x
+4.0
+&gt;&gt;&gt; módulo(1 - x)
+1.0
+</pre>
+<p>O operador de igual &quot;=&quot;, possui o sentido usual da maioria das linguagens de
+programação, mas que é diferente da matemática. Ela na verdade significa
+atribuição de variáveis. Portanto um código do tipo:</p>
+<pre class="literal-block">
+x = x + 1
+</pre>
+<p>não é uma falsidade matemática. Na realidade, estamos atribuindo um novo valor</p>
+<p><strong>Desafio!</strong></p>
+<p>Calcule 42 ** 42. Muito provavelmente este resultado é maior que o que cabe na
+sua calculadora! Confira.</p>
+</div>
+<div class="section" id="interacao-com-o-usuario">
+<h3>Interação com o usuário</h3>
+<p>Em um programa de computador muitas vezes queremos perguntar algum tipo de
+informação ao usuário. O Pytuguês oferece algumas funções para salvar valores
+digitados pelo usuário em variáveis. Os principais métodos de entrada são as
+funções &quot;leia_texto(msg)&quot;, &quot;leia_número(msg)&quot;  e &quot;leia_arquivo(arquivo)&quot;. O
+código a seguir, por exemplo, pergunta o nome e a idade do usuário:</p>
+<pre class="literal-block">
+nome = leia_texto(&quot;Qual é o seu nome? &quot;)
+idade = leia_número(&quot;Qual é a sua idade? &quot;)
+</pre>
+<p>A variável <tt class="docutils literal">nome</tt> contêm o texto que o usuário digitou como sendo o nome e a
+variável <tt class="docutils literal">idade</tt> guarda a idade em formato numérico. A diferença entre
+<tt class="docutils literal">leia_número(msg)</tt> e <tt class="docutils literal">leia_texto(msg)</tt> está em que a primeira salva o
+resultado em formato numérico e obriga o usuário a digitar um número válido. A segunda
+conterá sempre um texto, mesmo quando o usuário digitar um número.</p>
+<p>As funções mencionadas acima são conhecidas como &quot;funções de entrada&quot;, já que
+permitem que o usuário do programa dê a entrada em alguns valores que serão
+utilizados pelo programa. As &quot;funções de saída&quot; são aquelas que fornecem
+informação de volta para o usuário. A mais importante é a função <tt class="docutils literal">mostre(valor)</tt>,
+que mostra o conteúdo do argumento na tela. Podemos fazer a saída na forma
+de um arquivo, utilizando a função <cite>salve_arquivo(arquivo, valor)</cite>.</p>
+<div class="section" id="teste">
+<h4>Teste</h4>
+<p>Crie uma função que pergunte o ano de nascimento do usuário e calcule a sua
+idade.</p>
+</div>
+</div>
+</div>
+<div class="section" id="controle-de-fluxo-de-codigo">
+<h2>Controle de fluxo de código</h2>
+<p>Alguns comandos do Pytuguês executam ações imediatas, como por exemplo, o
+comando &quot;frente(passo)&quot;. Podemos construir programas interessantes como uma
+receita de bolo encadeando vários destes comandos. O programa abaixo, por
+exemplo, desenha um triângulo:</p>
+<pre class="literal-block">
+frente(100)
+esquerda(120)
+frente(100)
+esquerda(120)
+frente(100)
+</pre>
+<p>(você consegue fazer o triângulo apontar para baixo?)</p>
+<p>Em alguns casos é necessário controlar o &quot;fluxo de código&quot;; ou seja, temos que
+decidir quais comandos serão executados e quantas vezes será realizada cada
+execução. Esta seção mostra as principais estruturas de controle de fluxo de
+código do Pytuguês, o &quot;repetir&quot;, o &quot;para cada&quot;, o &quot;enquanto&quot; e o &quot;se/senão&quot;.</p>
+<div class="section" id="repeticoes-repetir">
+<h3>Repetições: &quot;repetir&quot;</h3>
+<p>Muitas tarefas que um programa realiza envovem um grande número de repetições
+de tarefas mais simples. Na realidade computadores são muito bons nisso: podem
+repetir exatamente a mesma sequência de passos uma quantidade gigantesca de vezes sem
+ficarem cansados, errarem ou reclamarem. O comando mais básico de repetição do
+Pytuguês é o comando <tt class="docutils literal">repetir</tt>. Ele simplesmente repete um bloco de instruções
+pelo número dado de vezes:</p>
+<pre class="literal-block">
+repetir 3 vezes:
+    frente(100)
+    esquerda(120)
+</pre>
+<p>Em programação, chamamos cada uma destas repetições de uma &quot;iteração&quot; do loop
+&quot;repetir&quot;. Neste caso, aplicamos 3 iterações da sequência de comandos <tt class="docutils literal">frente/esquerda</tt>.</p>
+<p>No exemplo acima ele repete os comandos &quot;frente(100)&quot; e &quot;esquerda(120)&quot; três
+vezes, nesta ordem. De modo mais abstrato, podemos descrever o comando repetir
+como:</p>
+<pre class="literal-block">
+repetir &lt;número&gt; vezes:
+    &lt;bloco de instruções&gt;
+</pre>
+<p>Onde o campo &lt;número&gt; representa qualquer número inteiro ou variável numérica e
+&lt;bloco de instruções&gt; é uma sequência de instruções como a &quot;frente(100)/esquerda(90)&quot;
+dada anteriormente. Devemos nos atentar na definição do bloco de instruções para
+os espaços em branco. São eles que delimitam o bloco e dizem para o Pytuguês
+quando as instruções dentro do bloco de repetição terminam.</p>
+<p>O código abaixo, por exemplo, é muito semelhate ao anterior, mas o comando
+&quot;esquerda(120)&quot; està alinhado ao início da linha. Isto fáz com que apenas a
+parte &quot;frente(100)&quot; seja executada as três vezes. O comando esquerda está fora
+do bloco &quot;repetir&quot; e portanto é executado apenas uma única vez após o bloco
+terminar:</p>
+<pre class="literal-block">
+repetir 3 vezes:
+    frente(100)
+esquerda(120)
+</pre>
+<p><strong>Desafio!</strong></p>
+<p>Faça uma estrela de 5 pontas utilizando o comando repetir. Depois tente fazer
+a estrela de Davi (neste caso pode ser necessário usar 2 repetições).</p>
+</div>
+<div class="section" id="repeticoes-para-cada">
+<h3>Repetições: &quot;para cada&quot;</h3>
+<p>Muitas vezes queremos repetir um bloco de comandos onde em cada iteração uma
+variável deve mudar de valor de forma previsível. Por exemplo, se quisermos
+cumprimentar várias pessoas numa lista, é possível escrever algo como:</p>
+<pre class="literal-block">
+para cada nome em [&quot;Maria&quot;, &quot;João&quot;, &quot;José&quot;] faça:
+    mostre(&quot;Olá &quot; + nome)
+</pre>
+<p>Neste caso, a variável &quot;nome&quot; assume um valor diferente em cada iteração,
+obtendo-os a patir da lista de nomes dada.</p>
+<p>É muito comum também realizar iterações sobre sequências numéricas. O comando
+muda ligeiramente, onde especificamos o intervalo de valores inteiros que
+queremos percorrer. O exemplo abaixo soma todos os números de 1 até 10:</p>
+<pre class="literal-block">
+soma = 0
+
+para cada x de 1 até 10 faça:
+    soma = soma + x
+
+mostre(soma)
+</pre>
+<p>Se quisermos pular de dois em dois, a sintaxe seria:</p>
+<pre class="literal-block">
+soma = 0
+
+para cada x de 1 até 10 a cada 2 faça:
+    soma = soma + x
+
+mostre(soma)
+</pre>
+<p>Neste caso, somente os ímpares seriam contabilizados na soma.</p>
+<p>A sintaxe geral do comando &quot;para cada&quot; é dada abaixo. Na forma de sequência,
+ela funciona como:</p>
+<pre class="literal-block">
+para cada &lt;nome&gt; em &lt;sequência&gt; faça:
+    &lt;bloco de comandos&gt;
+</pre>
+<p>Caso seja uma sequência numérica, podemos usar:</p>
+<pre class="literal-block">
+para cada &lt;nome&gt; de &lt;início&gt; até &lt;fim&gt; a cada &lt;passo&gt; faça:
+    &lt;bloco de comandos&gt;
+</pre>
+<p>Assim como no bloco &quot;repetir&quot;, o comando &quot;faça&quot; é opcional. Podemos também
+trocar o comando &quot;para cada&quot; por simplesmente &quot;para&quot;, na forma compacta.
+Finalmente, podemos omitir o passo na segunda versão do comando caso ele seja
+igual à 1.</p>
+<p><strong>Desafio!</strong></p>
+<p>Desenhe uma espiral quadrada de 10 braços em que o tamanho de cada avanço varie
+segundo o padrão 10px, 20px, 30px, ..., 100px. A forma ingênua criar este
+programa seria algo do tipo:</p>
+<pre class="literal-block">
+frente(10)
+esquerda(90)
+
+frente(20)
+esquerda(90)
+
+frente(30)
+esquerda(90)
+
+frente(40)
+esquerda(90)
+...
+</pre>
+<p>É lógico que podemos fazer bem melhor com o comando &quot;para cada&quot; (ou até mesmo
+com o comando repetir).</p>
+</div>
+<div class="section" id="repeticoes-enquanto">
+<h3>Repetições: enquanto</h3>
+<p>O comando &quot;para cada&quot; é útil quando sabemos de antemão o número de iterações
+que devem ser executadas. Muitas vezes, no entanto, queremos repetir um bloco
+de código por um número indefinido de vezes até que um determinado critério de
+parada seja satisfeito. O código abaixo, por exemplo, repete uma pergunta até
+que o usuário acerte a resposta correta:</p>
+<pre class="literal-block">
+enquanto ler_texto(&quot;Qual é o baterista dos Beatles? &quot;) != &quot;Ringo&quot; faça:
+    mostre(&quot;Resposta errada! Tente novamente...&quot;) ele
+</pre>
+<p>De um modo geral, o comando &quot;enquanto&quot; possui a estrutura:</p>
+<pre class="literal-block">
+enquanto &lt;condição&gt; faça:
+    &lt;bloco de comandos&gt;
+</pre>
+<p>Ele executa o bloco de comandos indefinidamente enquanto a condição fornecida
+for verdadeira. Caso a condição seja falsa, ele interrompe <em>antes</em> de executar
+o bloco de comandos.</p>
+<p>O comando &quot;enquanto&quot; é talvez a forma mais geral das estruturas de repetição.
+Podemos, reescrever todos os laços do tipo &quot;para cada&quot; ou &quot;repetir&quot; utilizando
+o comando &quot;enquanto&quot;. Existe um custo nisto: o código pode ficar mais longo e
+confuso e, em alguns casos, até mesmo um pouco mais lento. O código abaixo,
+por exemplo, desenha um triângulo utilizando o comando &quot;enquanto&quot;. No entanto,
+O fato de termos que lidar com variáveis adicionais tira a elegância e concisão
+do comando &quot;repetir&quot;:</p>
+<pre class="literal-block">
+n_iterações = 0
+
+enquanto n_iterações &lt; 3:
+    frente(100)
+    esquerda(120)
+    n_iterações = n_iterações + 1
+</pre>
+<p><strong>Desafio!</strong></p>
+<p>A função <tt class="docutils literal">aleatório()</tt> produz um número aleatório entre 0 e 1. O programa
+abaixo, por exemplo, produz 100 &quot;passos do bêbado&quot; e imprime a coordenada x
+após o passo:</p>
+<pre class="literal-block">
+repetir 100 vezes:
+    # Dá um passo
+    frente(50)
+    esquerda(aleatório() * 360)
+
+    # Imprime a coordenada x
+    x, y = posição()
+    mostre(x)
+</pre>
+<p>Modifique o comando acima para que o &quot;passo do bêbado&quot; termine quando o cursor
+atingir uma distância de 300 px da origem.</p>
+</div>
+<div class="section" id="condicionais">
+<h3>Condicionais</h3>
+<p>Se quisermos executar um comando apenas se determinada condição for satisfeita,
+então usamos o bloco &quot;se&quot;:</p>
+<pre class="literal-block">
+x = leia_número(&quot;Diga um número: &quot;)
+
+se x &gt; 10 então faça:
+    mostre(&quot;x é muito grande&quot;)
+</pre>
+<p>Neste caso, o comando <tt class="docutils literal"><span class="pre">mostre(...)</span></tt> será executado somente se o usuário
+digitar um valor maior que 10. Se quisermos adicionar uma condição que deva
+ser executada caso o teste x &gt; 10 falhe, basta adicionar um bloco do tipo
+&quot;senão&quot;:</p>
+<pre class="literal-block">
+x = leia_número(&quot;Diga um número: &quot;)
+
+se x &gt; 10 então faça:
+    mostre(&quot;x é muito grande&quot;)
+senão faça:
+    mostre(&quot;x é pequeno&quot;)
+</pre>
+<p>Este código imprime na tela que x é muito grande, caso o usuário diga um número
+maior que 10 ou imprime que x é pequeno, caso contrário. É possível adicionar
+condições intermediárias usando o bloco &quot;ou então se&quot;. Neste caso, somente a
+primeira condição a ser satisfeita é executada. A sintaxe completa é portanto:</p>
+<pre class="literal-block">
+x = leia_número(&quot;Diga um número: &quot;)
+
+se x &gt; 10 então faça:
+    mostre(&quot;x é muito grande&quot;)
+ou então se x == 7 faça:
+    mostre(&quot;x é meu número da sorte&quot;)
+senão faça:
+    mostre(&quot;x é pequeno&quot;)
+</pre>
+<p>De um modo geral, a estrutura condicional pode ser escrita como:</p>
+<pre class="literal-block">
+se &lt;condição 1&gt; então faça:
+    &lt;bloco de código 1&gt;
+ou então se &lt;condição 2&gt; faça:
+    &lt;bloco de código 2&gt;
+ou então se &lt;condição 3&gt; faça:
+    &lt;bloco de código 3&gt;
+...
+senão faça:
+    &lt;bloco de código senão&gt;
+</pre>
+<p>Onde no máximo um dos blocos de código será executado, sendo o que corresponde
+à primeira condição que é satisfeita. Analogamente aos laços repetição, os
+termos &quot;então faça&quot; e &quot;faça&quot; são opcionais.</p>
+<p>O condicional funciona assim.</p>
+<ul class="simple">
+<li>Primeiramente testamos a &quot;condição 1&quot;. Se ela for satisfeita, o bloco de
+código correspondente é executado e o Pytuguês ignora todos os outros
+blocos restantes e continua a execução a partir daí.</li>
+<li>Caso a condição seja falsa, partimos para a &quot;condição 2&quot;. Se ela for
+satisfeita, executamos o segundo bloco de código e pulamos sobre todos os
+outros.</li>
+<li>Somente se nenhuma das condições forem satisfeitas, executa-se o bloco
+senão. Caso o bloco senão não exista, nenhum comando é executado.</li>
+</ul>
+<p>Talvez fique mais claro em um exemplo:</p>
+<pre class="literal-block">
+se x == 1:
+    mostre(&quot;uma unidade&quot;)
+ou então se x &gt; 10:
+    mostre(&quot;x é grande&quot;)
+ou então se x &lt; 0:
+    mostre(&quot;x é pequeno&quot;)
+ou então se x % 2 == 0:
+    mostre(&quot;x é par&quot;)
+ou então se x == 20:
+    mostre(&quot;esta linha nunca será executada pois 20 &gt; 10&quot;)
+senão:
+    mostre(x)
+</pre>
+<p>Se <strong>x</strong> for igual à 4, o programa imprimirá &quot;x é par&quot;, pois a
+condição <tt class="docutils literal">x % 2 == 0</tt> (resto da divisão de <strong>x</strong> por 2 é igual à zero) é a
+primeira condição satisfeita no bloco condicional. Caso <strong>x</strong> seja igual à 12, a
+mensagem mostrada será &quot;x é grande&quot;, pois apesar de tanto <tt class="docutils literal">x &gt; 10</tt> quanto
+<tt class="docutils literal">x % 2 == 0</tt> serem satisfeitos para este valor, a primeira condição é
+selecionada pois aparece primeiro no bloco condicional. Para executarmos o bloco
+&quot;senão&quot;, é necessário utilizar um valor de <strong>x</strong> que viole todas as condições
+apresentadas. Neste caso, qualquer um dos valores 3, 5, 7 e 9 funcionam.</p>
+<p><strong>Desafio!</strong></p>
+<p>Pergunte a idade do usuário e imprima uma das mensagens abaixo dependendo da
+faixa em que ele se situa.</p>
+<ul class="simple">
+<li>negativo: &quot;você ainda não nasceu!&quot;</li>
+<li>0-3: &quot;você é um bebê&quot;</li>
+<li>4-9: &quot;você é uma criança&quot;</li>
+<li>10-12: &quot;você é um pré-adolescente&quot;</li>
+<li>13-19: &quot;você é um adolescente&quot;</li>
+<li>20-59: &quot;você é um adulto&quot;</li>
+<li>60 ou mais: &quot;você é um idoso&quot;</li>
+</ul>
+<p>O Pytuguês aceita condições compostas, assim podemos usar o teste <tt class="docutils literal">0 &lt;= idade &lt;= 3</tt>
+para verificar se a idade está no intervalo entre 0 e 3.</p>
+</div>
+</div>
+</div>
+<div class="section" id="biblioteca-de-funcoes">
+<h1>Biblioteca de funções</h1>
+<p>...</p>
+</div>
+<div class="section" id="migrando-para-python">
+<h1>Migrando para Python</h1>
+<p>Pytuguês foi criado, desde o início, como uma linguagem simplificada para
+ajudar no aprendizado de programação. Pense como se fossem as rodinhas numa
+bicicleta: elas ajudam no início quando não conseguimos manter o equilíbrio,
+mas uma vez que você consegue manter a bicicleta equilibrada, elas começam a
+atrapalhar.</p>
+<p>...</p>
+</div>
+</div>
+</body>
+</html>
