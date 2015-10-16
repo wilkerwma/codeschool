@@ -42,4 +42,5 @@ setup(
     package_dir={'': 'src'},
     packages=setuptools.find_packages('src'),
     license='GPL',
+    install_requires=['django', 'pyjudge', 'numpy', 'pandas'],
 )

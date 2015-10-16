@@ -1,0 +1,88 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}{{ page_title }}{% endblock %}</title>
+  <meta charset="utf-8" />
+
+  <!-- JQuery -->
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
+  <!-- Code mirror -->
+  <script src="{% static "codemirror/lib/codemirror.js" %}"></script>
+  <script src="{% static "codemirror/addon/edit/matchbrackets.js" %}"></script>
+  <script src="{% static "codemirror/mode/python/python.js" %}"></script>
+
+  <!-- Crispy Forms -->
+  <link rel="stylesheet" href="{% static 'uni-form/uni-form.css' %}" type="text/css" />
+  <link rel="stylesheet" href="{% static 'uni-form/default.uni-form.css' %}" type="text/css" />
+  <script src="{% static 'uni-form/uni-form.jquery.js' %}" type="text/javascript"/>
+  <script src="{% static 'uni-form/uni-form-validation.jquery.js' %}" type="text/javascript"/>
+  <script>
+  $(function(){
+    $('form.uniForm').uniform();
+  });
+  </script>
+
+  {% block head_extra %}{{ head_extra }}{% endblock %}
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="{% static 'cs_app/style.css' %}" type="text/css"/>
+  <link rel="stylesheet" href="{% static 'codemirror/lib/codemirror.css' %}" type="text/css"/>
+</head>
+
+
+<body>
+
+<!-- Main website sidebar navigation -->
+{% block navigation %}
+<nav id="nav-area" class="panel" role="navigation">
+  <a href="/"><img id="logo_image" src="{% static 'cs_app/logo.png' %}"></a>
+  <ul>
+    <li><a href="/disciplines/">Disciplinas</a></li>
+    <li><a href="/questions/">Problemas</a></li>
+    <li><a href="/grades/">Notas</a></li>
+    <li><a href="{% static 'cs_app/pytg_readme.html' %}">Ajuda Pytuguês</a></li>
+    <li><a href="{% static 'cs_app/python.html' %}">Ajuda Python</a></li>
+  </ul>
+  </div>
+</nav>
+{% endblock %}
+
+<!-- Navigation is fixed: this is the part of the page that flows -->
+<div id="flowing-area">
+
+<!-- Body of the page -->
+<div id="header-area">
+  <div id="header-title">
+    CodeSchool 0.1 - <em>Beta</em>
+  </div>
+  <div id="header-user">
+    Bem vindo
+    {% if user.is_authenticated %}
+    {{ user.username }}! <br/> [ <a href="/logout/">logout</a> ]
+    {% else %}
+    <br/> [ <a href="/login/">login</a> ]
+    {% endif %}
+  </div>
+</div>
+
+{% block navegationpath %}
+<div id="navigation-path-area" class="flowing-area-box">
+  <span>Você está aqui</span>
+  <span>
+    <a href="/">CodeSchool</a> / {{ navigation_path|default:'<a href="/">Home</a>' }}
+  </span>
+</div>
+
+<div id="content-area" class="flowing-area-box">
+{% endblock %}
+{% block body %}
+{% endblock %}
+</div>
+
+<!-- An optional footer -->
+{% block footer %}{{ page_footer }}{% endblock %}
+</div>
+
+</body>
