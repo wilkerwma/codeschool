@@ -1,0 +1,7 @@
+include INSTALL.rst
+include README.rst
+include LICENSE
+include VERSION
+include requirements.txt
+include src/manage.py
+include src/pytest.ini
