@@ -1,0 +1,152 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <section class="content-cards">
+        <aside>
+            <h1>{{ course.name }}</h1>
+            <p>Atividades para o dia de hoje</p>
+        </aside>
+
+        <article>
+            {% for activity in course.get_user_activities(user) -%}
+            <a href="../../../questions/{{ activity.pk }}" class="card">
+                <i class="material-icons">help_outline</i>
+                <h1>{{ activity.name }}</h1>
+                <p>{{ activity.short_description }}</p>
+            </a>
+            {%- endfor %}
+
+            {% if course.teacher != user %}
+            <a onclick="alert('em construção')" class="card-faded">
+                <i class="material-icons">add_circle</i>
+                <h1>Aprofunde-se</h1>
+                <p>Atividades e desafios adicionais selecionados para você :)</p>
+            </a>
+            {% else %}
+            <a onclick="toggle_activities_dialog()" id="add-content" class="card-faded" >
+                <i class="material-icons">add_circle</i>
+                <h1>Adicione conteúdo</h1>
+                <p>Clique aqui para adicionar novas atividades em seu curso.</p>
+            </a>
+            {% endif %}
+        </article>
+    </section>
+
+    <section class="content-cards">
+        <aside>
+            <h1>Material adicional</h1>
+            <p>Lista com os materiais disponíveis para o curso.</p>
+        </aside>
+
+        <article>
+            Em construção!
+        </article>
+
+    </section>
+
+    <section class="content-cards">
+        <aside>
+            <h1>Alunos inscritos</h1>
+            <p>Acesse a lista de todos alunos inscritos no curso.</p>
+        </aside>
+
+        <article>
+            <div>
+                <h2>Amigos</h2>
+                <ul>
+                {% for student in course.students.all() %}
+
+                    <li><a href="/user/{{ student.pk }}">{{ user.full_name }}</a></li>
+                {% endfor %}
+                </ul>
+                <h2>Outros</h2>
+                <ul>
+                {% for student in course.students.all() %}
+                    <li><a href="/user/{{ student.pk }}">{{ user.full_name }}</a></li>
+                </ul>
+                {% endfor %}
+            </div>
+        </article>
+    </section>
+
+{% endblock %}
+
+{% block hidden_content %}d
+    {%- if course.teacher == user %}
+    <paper-dialog id="add-activities-dialog"  class="dialog" modal
+            exit-animation="fade-out-animation">
+        <header>
+            <h2>Atividades disponíveis</h2>
+            <paper-icon-button icon="close" onclick="toggle_activities_dialog()"></paper-icon-button>
+        </header>
+
+        <paper-tabs selected="0">
+            <paper-tab>Em aberto</paper-tab>
+            <paper-tab>Atividades passadas</paper-tab>
+            <paper-tab>Nova</paper-tab>
+        </paper-tabs>
+
+        <iron-pages selected="0">
+            <div>
+                <form action="/courses/add-activities/{{ course.pk }}" method="POST">
+                {% csrf_token %}
+                {% if pending_activities %}
+                {% for activity in pending_activities %}
+                    <p><input type="checkbox" name="check-{{ activity.pk }}">{{ activity.name }}</p>
+                {% endfor %}
+                {% else %}
+                    <p>Nenhuma atividade encontrada</p>
+                {% endif %}
+                    <footer>
+                        <input type="submit" name="add-now" value="Adicionar agora">
+                        <input type="submit" name="add-next" value="Próxima aula">
+                        <input type="submit" name="edit" value="Editar">
+                    </footer>
+                </form>
+            </div>
+
+            <div>
+                <form action="/courses/add-activities/{{ course.pk }}" method="POST">
+                {% csrf_token %}
+                {% if past_activities %}
+                {% for activity in past_activities %}
+                    <p><input type="checkbox" name="check-{{ activity.pk }}">{{ activity.name }}</p>
+                {% endfor %}
+
+                {% else %}
+                    <p>Nenhuma atividade encontrada</p>
+                {% endif %}
+                    <footer>
+                        <input type="submit" name="add-now" value="Reabrir agora">
+                        <input type="submit" name="add-next" value="Reabrir na próxima aula">
+                        <input type="submit" name="edit" value="Editar">
+                        <input type="submit" name="copy" value="Copiar">
+                    </footer>
+                </form>
+            </div>
+
+            <div>
+            <ul>
+                {% for tt in activity_types %}
+                    <li><a href="{{ tt.url }}">{{ tt.name }}</a></li>
+                {% endfor %}
+            </ul>
+            </div>
+        </iron-pages>
+    </paper-dialog>
+    {% endif %}
+{% endblock %}
+
+{% block javascript %}
+    {{ super() }}
+    var toggle_activities_dialog = function () {
+        document.getElementById('add-activities-dialog').toggle();
+    }
+
+    // Binds iron pages to paper-tabs
+    var pages = document.querySelector('iron-pages');
+    var tabs = document.querySelector('paper-tabs');
+    tabs.addEventListener('iron-select', function() {
+        pages.selected = tabs.selected;
+    });
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.jinja2" %}
+
+{% block style %}
+    <style is="custom-style">
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-flow: column;
+            justify-content: space-between;
+        }
+
+        body > * {
+            padding: 30px 15%;
+        }
+
+        header, footer {
+            background: #666 url('{{ static('img/bg_gray_noise.png') }}') repeat;
+            color: #eee;
+
+        }
+
+        header {
+            flex-grow: 1;
+            padding-bottom: 0px;
+            display: flex;
+            flex-flow: column;
+            align-content: flex-end;
+        }
+
+        header h1 {
+            margin-top: auto;
+            font-size: 3em;
+        }
+
+        main {
+            margin: 30px 15%;
+            padding: 0px;
+        }
+
+        main iron-pages {
+            margin: 10px 10%;
+        }
+
+        footer {
+            text-align: right;
+            flex-grow: 1;
+        }
+
+        button,
+        paper-button {
+            padding: 10px 15px;
+            font-size: 1.1em;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <header>
+        <h1>Bem vindo ao Codeschool!</h1>
+        <paper-tabs selected="{{ selected_tab|default(0) }}">
+            <paper-tab>Login</paper-tab>
+            <paper-tab>Novo usuário</paper-tab>
+        </paper-tabs>
+    </header>
+
+    <main>
+        <iron-pages selected="{{ selected_tab|default(0) }}">
+            <section class="login">
+                <form method="POST"  action="/auth/login/" id="login-form">
+                    {% csrf_token %}
+                    {{ login_form.as_p() }}
+                </form>
+            </section>
+
+            <section class="register">
+                <form method="POST" action="/auth/register/" id="register-form">
+                    {% csrf_token %}
+                    {{ register_form.as_p() }}
+                </form>
+            </section>
+        </iron-pages>
+    </main>
+
+    <footer>
+        <paper-button raised onclick="submit_form()">Avançar</paper-button>
+    </footer>
+
+    <script>
+        var pages = document.querySelector('iron-pages');
+        var tabs = document.querySelector('paper-tabs');
+        var login_form = document.getElementById('login-form');
+        var register_form = document.getElementById('register-form');
+
+        tabs.addEventListener('iron-select', function() {
+            pages.selected = tabs.selected;
+        });
+
+        function submit_form() {
+            console.log(tabs.selected);
+
+            if (tabs.selected == 0) {
+                login_form.submit();
+            } else {
+                register_form.submit();
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,144 @@
+
+/*============================================================================*
+ *                           Nav bar and main content
+ *============================================================================*/
+
+#content-area nav { display: none; }
+
+#content-area main > * {
+    background-color: white;
+    color: black;
+    padding: 5px;
+}
+
+#content-area main > *:nth-child(odd) {
+    background-color: #fcaf3e;
+    color: white;
+}
+
+
+@media only screen and (min-width: 600px) {
+    #content-area {
+        display: flex;
+        flex-direction: row-reverse;
+        width: 100%;
+    }
+
+    #content-area main {
+        flex-grow: 7;
+    }
+
+    #content-area > nav {
+        display: block;
+        background: #eee;
+        padding: 10px;
+        font: 1.4em 'Amatic SC', cursive;
+        font-weight: bold;
+        flex-grow: 1;
+        min-width: 180px;
+        width: 20%;
+        color: #222;
+    }
+
+    #content-area > nav img {
+        margin: 35px auto;
+        display: block;
+        width: 60%;
+        max-width: 90px;
+    }
+
+    #content-area > nav p {
+        margin: 10px 0px;
+    }
+
+    #content-area > nav ul {
+        list-style-type: none;
+        padding: 5px;
+        margin: 0px;
+    }
+
+    #content-area a {
+        color: black;
+    }
+
+    #content-area *.disabled-link {
+        color: darkgray;
+    }
+
+    #content-area main > * {
+        padding: 20px;
+    }
+
+
+}
+
+@media only screen and (min-width: 1000px) {
+    #content-area main > * {padding-left: 40px;}
+
+    #content-area > nav {
+        font-size: 1.6em;
+    }
+}
+
+
+/*============================================================================*
+ *                              Content cards
+ *============================================================================*/
+.content-cards > aside > p {display: none}
+
+.card,
+.card-faded {
+    display: block;
+    padding: 20px;
+    background-color: white;
+    color: #333;
+    margin: 20px;
+    text-align: center;
+    vertical-align: center;
+    min-height: 150px;
+}
+
+.card-faded {
+    background-color: rgba(220, 220, 220, 170);
+}
+
+.card > i,
+.card-faded > i {
+    font-size: 4em;
+}
+
+.card h1,
+.card-faded h1 {
+    font-size: 1.7em;
+}
+
+@media only screen and (min-width: 600px) {
+    .content-cards > aside > p {display: block}
+
+    .content-cards {
+        display: flex;
+    }
+
+    .content-cards > aside {
+        max-width: 35%;
+    }
+
+    .content-cards > article {
+        margin-left: 30px;
+        flex-grow: 1;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: stretch;
+    }
+
+    .content-cards > article > * {
+        flex: 1 1 30%;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    .content-cards > article {
+        margin-left: 60px;
+    }
+}

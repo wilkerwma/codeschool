@@ -1,0 +1,19 @@
+.dialog {
+    min-width: 50%;
+}
+.dialog > header{
+    display: flex;
+    justify-content: space-between;
+}
+
+.dialog footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.dialog paper-item > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}

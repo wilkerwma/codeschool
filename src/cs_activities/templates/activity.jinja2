@@ -1,0 +1,18 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <section>
+        <h1>{{ activity.name }}</h1>
+        <dl>
+            <dt>Inicio</dt>
+            <dd>{{ activity.begins }}</dd>
+
+            <dt>Expira</dt>
+            <dd>{{ activity.expires }}</dd>
+
+            <dt>Curso</dt>
+            <dd>{{ activity.course.name }}</dd>
+        </dl>
+        {{ activity.description }}
+    </section>
+{% endblock %}

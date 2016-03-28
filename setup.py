@@ -1,35 +1,38 @@
-#-*- coding: utf8 -*-
+# -*- coding: utf8 -*-
+#
+# This file were created by Python Boilerplate. Use boilerplate to start simple
+# usable and best-practices compliant Python projects.
+#
+# Learn more about it at: http://github.com/fabiommendes/boilerplate/
+#
+
 import os
-import setuptools
-from setuptools import setup
+from setuptools import setup, find_packages
 
-VERSION = '0.1a1'
-AUTHOR = 'Fábio Macêdo Mendes'
 
-#
-# Create meta.py file with updated version/author info
-#
-base, _ = os.path.split(__file__)
-path = os.path.join(base, 'src', 'codeschool', 'meta.py')
-with open(path, 'w') as F:
-    F.write(
-        '# Auto-generated file. Please do not edit\n'
-        '__version__ = %r\n' % VERSION +
-        '__author__ = %r\n' % AUTHOR)
+# Meta information
+name = 'codeschool'
+author = 'Fábio Macêdo Mendes'
+version = open('VERSION').read().strip()
+dirname = os.path.dirname(__file__)
 
-#
-# Main configuration script
-#
+
+# Save version and author to __meta__.py
+with open(os.path.join(dirname, 'src', name, '__meta__.py'), 'w') as F:
+    F.write('__version__ = %r\n__author__ = %r\n' % (version, author))
+
+
 setup(
-    name='codeschool',
-    version=VERSION,
-    description='Simple online judge for Django for Python and Pytuguês files',
-    author='Fábio Macêdo Mendes',
+    # Basic info
+    name=name,
+    version=version,
+    author=author,
     author_email='fabiomacedomendes@gmail.com',
-    url='https://github.com/fabiommendes/codeschool',
-    long_description=(
-        r'''...'''),
+    url='',
+    description='A short description for your project.',
+    long_description=open('README.rst').read(),
 
+    # Classifiers
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -39,8 +42,33 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
 
+    # Packages and depencies
     package_dir={'': 'src'},
-    packages=setuptools.find_packages('src'),
+    packages=find_packages('src'),
+    package_data={
+        '': ['templates/*.*'],
+        'codeschool': ['static/*.*', 'static/*/*.*', 'static/*/*/*.*'],
+    },
+    install_requires=['django',
+                      'django-model-utils', 'django_jinja',
+                      'django-picklefield', 'wagtail',
+                      'frozendict', 'markdown',
+                      'django-annoying', 'django-debug-toolbar',
+                      'django-extensions', 'django-guardian',
+                      'ejudge>=0.3.2', 'iospec>=0.1.3'],
+    extras_require={
+        'testing': ['pytest'],
+    },
+
+    # Scripts
+    entry_points={
+        'console_scripts': ['codeschool = codeschool.__main__:main'],
+    },
+
+    # Other configurations
+    zip_safe=False,
+    platforms='any',
     license='GPL',
-    install_requires=['django', 'pyjudge', 'numpy', 'pandas'],
+    test_suite='%s.test.test_%s' % (name, name),
 )
+

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="no-js">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>
+        {% block title %}
+            {% if page %}
+                {% if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif %}
+            {% else %}{{ title|default('Codeschool') }}{% endif %}
+        {% endblock %}
+        {% block title_suffix %}{{ title_suffix|default('') }}{% endblock %}
+    </title>
+    <meta name="description" content="{{ page_description|default('Codeschool - learn through coding') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="apple-touch-icon" href="{{ static('apple-touch-icon.png') }}">
+    <script src="{{ static('js/vendor/modernizr-2.8.3.min.js')  }}"></script>
+    <script src="{{ static('bower_components/webcomponentsjs/webcomponents-lite.js') }}"></script>
+    <link rel="import" href="{{ static('components/main.html') }}">
+    <link rel="stylesheet" href="{{ static('css/main.css') }}">
+    {% block extra_components %}
+        {# Override this in templates to add extra compontents #}
+        {% for html in extra_components %}
+            <link rel="import" href="{{ html }}">
+        {% endfor %}
+    {% endblock %}
+    {% block extra_css %}
+        {# Override this in templates to add extra stylesheets #}
+        {% for css in extra_css %}
+            <link rel="stylesheet" href="{{ css }}">
+        {% endfor %}
+    {% endblock %}
+    {% block header_js %}
+        {# Override this in templates to add extra javascript that must be in
+          the header #}
+        {% for js in header_js %}
+            <script src="{{ js }}"></script>
+        {% endfor %}
+    {% endblock %}
+    {% block style %}
+        {# Override this in templates to add an <style> tag #}
+    {% endblock %}
+</head>
+
+<body class="fullbleed layout vertical{% block body_class %}{% if body_class %} {{ body_class }}{% endif %}{% endblock %}">
+    <!--[if lt IE 8]>
+        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+    {% block body %}
+    {{ wagtailuserbar() }}
+
+    <header id="nav-header">
+        <div class="logo">
+            <img src="{{ static('img/logo.svg') }}" alt="Codeschool">
+            <paper-icon-button onclick="page.toggle_menu()" icon="menu"></paper-icon-button>
+        </div>
+        <ul>
+            <li><a href="#" class="disabled-link">Opções</a></li>
+            <li><a href="#" class="disabled-link">Avisos</a></li>
+            <li><a href="/courses/">Cursos</a></li>
+            <li><a href="/login/">Login</a></li>
+            <li><button>{{ user.first_name[0] }}</button></li>
+        </ul>
+    </header>
+
+    <div id="content-area">
+        <nav>
+            <ul>
+                <li>
+                    <p>Curso</p>
+                    <ul>
+                        <li class="disabled-link">Atividades</li>
+                        <li class="disabled-link">Material de apoio</li>
+                        <li class="disabled-link">Fórum de mensagens</li>
+                        <li class="disabled-link">Notas</li>
+                        <li class="disabled-link">Opções</li>
+                    </ul>
+                </li>
+
+                <li>
+                    <p>Perfil</p>
+                    <ul>
+                        <li><a href="/courses/">Página inicial</a></li>
+                        <li class="disabled-link">Amigos</li>
+                        <li class="disabled-link">Configurações</li>
+                    </ul>
+                </li>
+            </ul>
+            <img src="{{ static('img/dingbat.svg') }}">
+        </nav>
+
+        <main>
+            {% block content %}
+            {{ content }}
+            {% endblock %}
+        </main>
+    </div>
+
+    <footer id="nav-footer">
+        <div class="flex">
+            <p>Amigos</p>
+            <ul>
+                <li>Fulano fez isso</li>
+                <li>Cicrano fez aquilo</li>
+                <li>Beltrano fez aquio outro</li>
+            </ul>
+        </div>
+
+        <div class="flex">
+            <p>Agenda</p>
+            <ul>
+                <li>Prova dia X</li>
+                <li>Trabalho para dia Y</li>
+                <li>Estudar XY</li>
+            </ul>
+        </div>
+
+        <div class="flex">
+            <p>Notícias</p>
+            <ul>
+                <li>Adicionou notas</li>
+                <li>Mensagem do prof. CB</li>
+                <li>Não haverá prova dia XXX</li>
+            </ul>
+        </div>
+    </footer>
+
+    <footer id="copyright-footer">
+        <p>Copyright 2016 - <a href="http://github.com/fabiommendes/codeschool">Codeschool</a></p>
+        <p>Site gerenciado por Fábio M. Mendes na UnB/Gama.</p>
+    </footer>
+    {% endblock %}
+
+    {% block hidden_content %}{% endblock %}
+
+    <!-- Global javascript -->
+    <script src="{{ static('js/main.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script>window.jQuery || document.write('<script src="{{ static('js/vendor/jquery-1.12.0.min.js') }}"><\/script>')</script>
+    <script src="{{ static('js/plugins.js') }}"></script>
+    <script src="{{ static('js/main.js') }}"></script>
+    {% block extra_js %}
+        {# Override this in templates to add extra javascript #}
+    {% endblock %}
+    {% if google_analytics|default(False)  %}
+    <!-- Google Analytics -->
+    <script>
+        (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+        function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+        e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+        e.src='https://www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+        ga('create','{{ google_analytics_site_id|default('codeschool') }}','auto');ga('send','pageview');
+    </script>
+    {% endif %}
+
+    <!-- Aditional javascript -->
+    <script>
+        {% block javascript %}
+        {% endblock %}
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <section class="content-cards">
+        <aside>
+            <h1>Cursos inscritos</h1>
+            <p>Acesse a lista de cursos inscritos</p>
+        </aside>
+
+        <article>
+            {% for course in courses -%}
+            <a href="detail/{{ course.pk }}" class="card">
+                <i class="material-icons">help</i>
+                <h1>{{ course.name }}</h1>
+                <p>{{ course.short_description }}</p>
+            </a>
+            {%- endfor %}
+
+            <a onclick="alert('Em construção')" class="card-faded">
+                <i class="material-icons">add_circle</i>
+                <h1>Adicionar</h1>
+                <p>Cadastre-se em outros cursos.</p>
+            </a>
+        </article>
+    </section>
+
+    <section class="content-separated">
+        <aside></aside>
+        <article></article>
+    </section>
+
+{% endblock %}
