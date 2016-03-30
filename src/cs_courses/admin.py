@@ -4,6 +4,19 @@ from cs_courses import models
 
 @admin.register(models.Course)
 class CourseAdmin(admin.ModelAdmin):
+    # Inline models
+    class TimeSlotInline(admin.TabularInline):
+        model = models.TimeSlot
+        extra = 0
+
+    class LessonInline(admin.TabularInline):
+        model = models.Lesson
+        extra = 2
+        fields = ['title']
+
+    inlines = [TimeSlotInline, LessonInline]
+
+    # Common options
     date_hierarchy = 'created'
     filter_horizontal = ('students',)
     list_filter = ('is_active', 'start')
