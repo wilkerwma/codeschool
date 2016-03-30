@@ -6,6 +6,7 @@ __pycache__/
 *.so
 *.dll
 *.egg
+*.sqlite3
 *.egg-info/
 
 # Build directories
@@ -13,8 +14,6 @@ doc/_build/
 build/
 dist/
 .cache/
-src/db.sqlite3.bak
-src/db.sqlite3
 src/.cache/
 collect/
 src/codeschool/bower/
