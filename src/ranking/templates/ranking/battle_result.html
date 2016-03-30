@@ -1,7 +1,47 @@
 <!doctype html>
 <html>
 <head>
+    <meta charset="utf-8">
+    <title>
+    {% block title %}
+        Battle winners
+    {% endblock %}
+    </title>
 </head>
 <body>
+     <header>
+        <nav>
+        Uma logo aqui: <img src="#"></img>
+        <ul>
+            <li>Um monte de links aqui</li>
+            <li>Um monte de links aqui</li>
+            <li>Um monte de links aqui</li>
+        </ul> 
+        </nav>
+    </header>
+    {% block content %} 
+    <h1>Resultado da Batalha</h1>
+    <div>
+        <h2>Winner</h2>
+        User: "user name"<br>
+        Ranking position: "number"
+        Time: "time slapsed"<br>
+        Code winner: "show the code"<br>
+        Characters count: "the number of characters"<br>
+        Time execution code: "in seconds"
+        Number of submitions: "a lot!"
+        ...
+    </div>
+    <div>
+        <h2>Looser</h2>
+        User: "user name"<br>
+        Time: "time slapsed"<br>
+        Code winner: "show the code"<br>
+        Characters count: "the number of characters"<br>
+        ...
+
+    </div>
+    {% endblock %}
+   
 </body>
 </html>
