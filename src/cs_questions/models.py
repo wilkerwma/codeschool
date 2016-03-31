@@ -1,7 +1,6 @@
 from iospec import parse_string as parse_iospec
 from iospec import feedback as iofeedback
 import ejudge
-import ejudge.contrib.pytuga_language
 from django.db import models
 from model_utils.managers import InheritanceManager
 from picklefield import PickledObjectField

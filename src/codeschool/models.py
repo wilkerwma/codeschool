@@ -10,6 +10,7 @@
 from django.utils import timezone
 from django.db.models import *
 from django.db.models.fields.reverse_related import OneToOneRel as _OneToOneRel
+from django.utils.translation import ugettext_lazy as _
 from model_utils.models import *
 from model_utils import Choices
 from model_utils import managers as _mu_managers
@@ -110,6 +111,74 @@ class TimeTrackingStatusModel(TimeTrackingModel, StatusModel):
 
     class Meta:
         abstract = True
+
+
+class DateFramedModel(models.Model):
+    """Like a :cls:`TimeFramedModel`, but it's start and end fields are dates
+    rather than datetimes."""
+
+    class Meta:
+        abstract = True
+
+    start = DateField(_('start'), null=True, blank=True)
+    end = DateField(_('start'), null=True, blank=True)
+
+
+#
+# Custom generic purpose models
+#
+class ListItemModel(models.Model):
+    """
+    An object that is an item in a list-like query set in the foreign key.
+
+    Subclasses must implement the ``root = models.ForeignKey(...)`` field
+    pointing to the object that should hold the list. It is also desirable to
+    implement a property that returns the related set from the root field.
+    """
+
+    index = models.PositiveIntegerField()
+
+    class Meta:
+        abstract = True
+
+    @property
+    def root(self):
+        raise NotImplementedError(
+            'you model should provide a root ForeignKey as a db-level field.')
+
+    @property
+    def siblings(self):
+        rel_name = self._meta.get_field('root').related_name
+        return getattr(self.root, rel_name)
+
+    def save(self, *args, **kwds):
+        if self.pk is None:
+            siblings = self.siblings
+            if siblings:
+                self.index = siblings.order_by('index').last()
+            else:
+                self.index = 0
+
+        super().save(*args, **kwds)
+
+    def delete(self, *args, **kwds):
+        if self.index != self.siblings.size() - 1:
+            for item in self.siblings.filter(index__gt=self.index):
+                item.index -= 1
+        super().delete(*args, **kwds)
+
+    def next(self, skip=1):
+        """Return the next siblings (or the one skiping skip positions)."""
+
+        try:
+            return self.siblings.get(index=self.index + skip)
+        except self.DoesNotExist:
+            return None
+
+    def prev(self, skip=1):
+        """Like next(), but goes backwards."""
+
+        return self.next(-skip)
 
 
 # Implements codeschool.models.cs.* namespace in which models from other

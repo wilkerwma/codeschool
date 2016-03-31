@@ -8,7 +8,7 @@
         </aside>
 
         <article>
-            {% for activity in course.get_user_activities(user) -%}
+            {% for activity in user_activities -%}
             <a href="../../../questions/{{ activity.pk }}" class="card">
                 <i class="material-icons">help_outline</i>
                 <h1>{{ activity.name }}</h1>

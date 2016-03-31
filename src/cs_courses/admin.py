@@ -38,13 +38,6 @@ class CourseAdmin(admin.ModelAdmin):
             'classes': ('collapse',),
             'fields': ('is_active', 'start', 'end'),
         }),
-        ('Descrição', {
-            'classes': ('collapse',),
-            'description': 'Estas opções permitem trocar a descrição padrão '
-                           'na disciplina associada ao curso para uma descrição '
-                           'personalizada específica para o curso em questão',
-            'fields': ('short_description_override', 'long_description_override'),
-        }),
     )
     save_as = True
     search_fields = (
