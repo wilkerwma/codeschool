@@ -2,35 +2,31 @@ from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib import admin
 from django.views.generic.base import RedirectView
-
-from wagtail.wagtailadmin import urls as wagtailadmin_urls
-from wagtail.wagtaildocs import urls as wagtaildocs_urls
-from wagtail.wagtailcore import urls as wagtail_urls
-
 from cs_search import views as search_views
-from cs_auth import urls as auth_urls
-from cs_courses import urls as courses_urls
-from cs_questions import urls as questions_urls
-from cs_linktable import urls as linktable_urls
 
 
 urlpatterns = [
     # Basic wagtail/django functionality
     url(r'^$', RedirectView.as_view(url='/auth/', permanent=False)),
     url(r'^django-admin/', include(admin.site.urls)),
-    url(r'^admin/', include(wagtailadmin_urls)),
-    url(r'^documents/', include(wagtaildocs_urls)),
+    url(r'^admin/', include('wagtail.wagtailadmin.urls')),
+    url(r'^documents/', include('wagtail.wagtaildocs.urls')),
     url(r'^search/$', search_views.search, name='search'),
-    url(r'^cms/', include(wagtail_urls)),
+    url(r'^cms/', include('wagtail.wagtailcore.urls')),
+
+    # RPC and api
+    url(r'^srvice/', include('srvice.urls')),
+    #url(r'^api/', include(core_urls.router.urls)),
+    #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Authentication
-    url(r'^auth/', include(auth_urls)),
+    url(r'^auth/', include('cs_auth.urls')),
     url(r'^login/$', RedirectView.as_view(url='/auth/', permanent=False)),
 
     # Local apps and functionality
-    url(r'^courses/', include(courses_urls)),
-    url(r'^questions/', include(questions_urls)),
-    url(r'^linktables/', include(linktable_urls)),
+    url(r'^courses/', include('cs_courses.urls')),
+    url(r'^questions/', include('cs_questions.urls')),
+    url(r'^linktables/', include('cs_linktable.urls')),
 ]
 
 

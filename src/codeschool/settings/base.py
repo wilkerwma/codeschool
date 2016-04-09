@@ -31,6 +31,7 @@ PROJECT_DIR = os.path.dirname(SOURCE_FOLDER_DIR)
 
 INSTALLED_APPS = [
     # Local apps
+    'cs_core',
     'cs_pages',
     'cs_search',
     'cs_auth',
@@ -56,12 +57,14 @@ INSTALLED_APPS = [
     'taggit',
 
     # 3rd party
+    #'debug_toolbar',
     'annoying',
     'djangobower',
     'django_jinja',
-    #'debug_toolbar',
     'django_extensions',
     'guardian',
+    'srvice',
+    'rest_framework',
 
     # Django
     'django.contrib.admin',
@@ -307,9 +310,24 @@ BOWER_INSTALLED_APPS = [
     'PolymerElements/platinum-https-redirect',
     'PolymerElements/platinum-push-messaging',
     'PolymerElements/platinum-sw',
+
+    # 3rd party web components
+    'Sortable',
 ]
+
+
+# Django REST framework settings
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "codeschool"
+

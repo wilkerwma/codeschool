@@ -1,22 +1,22 @@
 import inspect
 import functools
-from json import loads, dumps
+from json import loads
 from django import http
-from django.conf.urls import url
-
+from django.views.decorators.csrf import csrf_exempt
+from srvice.client import Client
 
 rpc_namespace = {}
 rpc_safe_namespace = {}
 
 
-def remote_call(*args, method='POST'):
+def srvice(*args, method='POST'):
     """
     Marks a view method that process JSON remote procedure calls.
     """
 
     if not args:
-        def decorator(func):
-            return remote_call(func, method=method)
+        def decorator(function):
+            return srvice(function, method=method)
         return decorator
 
     func, = args
@@ -24,7 +24,7 @@ def remote_call(*args, method='POST'):
 
     # API name
     qualname = func.__module__ + '.' + func.__name__
-    qualname = qualname.replace('.views.', '')
+    qualname = qualname.replace('.views.', '.').replace('_', '-')
 
     # Annotated types
     types = spec.annotations
@@ -32,9 +32,10 @@ def remote_call(*args, method='POST'):
 
     # Required keywords
     required = spec.args[:]
-    for _ in spec.defaults:
+    for _ in (spec.defaults or []):
         required.pop()
     required = set(required)
+    request_required = spec and (spec.args[0] == 'request')
 
     # JSON content types
     valid_content_types = {
@@ -52,11 +53,15 @@ def remote_call(*args, method='POST'):
 
         # Check content
         try:
-            json = loads(request.body)
+            json = loads(request.body.decode('utf8'))
+            if request_required:
+                json['request'] = request
         except Exception as ex:
-            request.content_type = 'broken json (%s)' % ex
-        if request.content_type not in valid_content_types:
-            msg = 'invalid content: %s' % method
+            return http.HttpResponseBadRequest('invalid JSON data: %s' % ex)
+
+        content_type = request.META.get('CONTENT_TYPE')
+        if content_type not in valid_content_types:
+            msg = 'invalid content type: %s' % content_type
             return http.HttpResponseBadRequest(msg)
 
         # Checks if all arguments were passed
@@ -68,32 +73,38 @@ def remote_call(*args, method='POST'):
         # Check types
         if not all(isinstance(json[k], tt) for (k, tt) in types.items()):
             error = {k for (k, tt) in types.items()
-                       if not isinstance(json[k], tt)}
+                     if not isinstance(json[k], tt)}
             msg = 'invalid types: %s' % list(error)
             return http.HttpResponseBadRequest(msg)
 
-        result = func(**json)
-        json_response = dumps(result)
-        return http.HttpResponse(json_response,
-                                 content_type='application/json',
-                                 charset='utf8')
+        # Prepare response
+        try:
+            result = func(**json)
+        except Exception as ex:
+            result = {'error-message': str(ex),
+                      'error': type(ex).__name__}
+        else:
+            if isinstance(result, Client):
+                result = result.as_json_result()
+            else:
+                result = {"result": result}
+        print(result)
+        return http.JsonResponse(result)
 
     # Register view function
     rpc_namespace[qualname] = callback
+    print(qualname)
     return func
 
 
+@csrf_exempt
 def dispatch_view(request, apiname):
-    """Dispatch request to the correct rpc function."""
+    """Dispatch request to the correct srvice function."""
 
     try:
         method = rpc_namespace[apiname]
     except KeyError:
-        return http.Http404
+        raise http.Http404(rpc_namespace)
     else:
         return method(request)
 
-
-urlpatterns = [
-    url(r'^(.*)$', dispatch_view, name='json-rpc'),
-]

@@ -1,0 +1,12 @@
+{% extends "base.jinja2" %}
+
+{% block body %}
+    <sortable-js id="course-lessons" {% if can_edit %}sync-api="cs_courses.sort-lessons" sync-id="{{ course.pk }}"{% else %}disabled{% endif %}>
+    {% for lesson in lessons %}
+        <div data-id="{{ lesson.pk }}">
+            <h1>{{ lesson.title }} {% if can_edit %}<i class="sortable-remove">✖</i>{% endif %}</h1>
+            {% if lesson.description %}<div>{{ lesson.description }}</div>{% endif %}
+        </div>
+    {% endfor %}
+    </sortable-js>
+{% endblock %}

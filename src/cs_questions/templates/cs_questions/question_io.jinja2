@@ -18,6 +18,10 @@
     </style>
 {% endblock %}
 
+
+{% block script %}
+{% endblock %}
+
 {% block extra_js %}
     <script type="text/javascript" src="{{ static('bower_components/codemirror/lib/codemirror.js') }}"></script>
     <script type="text/javascript" src="{{ static('bower_components/codemirror/addon/edit/matchbrackets.js') }}"></script>
@@ -46,6 +50,9 @@
 
 {% block content %}
     <section>
+    {% if can_download %}
+        <a href="./download"><i class="material-icons config-handle">file_download</i></a>
+    {% endif %}
         <h1>{{ question.title }}
           {% if can_download_question and download_url %}
           <a id href="{{ download_url }}" title="Baixar questão">&crarr;</a>

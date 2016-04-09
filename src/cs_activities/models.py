@@ -23,8 +23,8 @@ class Activity(models.InheritableModel, models.TimeFramedStatusModel):
     max_grade = models.FloatField(default=0, blank=True)
 
     class Meta:
-        verbose_name = _('Activity')
-        verbose_name_plural = _('Activities')
+        verbose_name = _('activity')
+        verbose_name_plural = _('activities')
 
     @property
     def students(self):

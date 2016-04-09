@@ -8,11 +8,13 @@ class CourseAdmin(admin.ModelAdmin):
     class TimeSlotInline(admin.TabularInline):
         model = models.TimeSlot
         extra = 0
+        classes = ('collapse',)
 
     class LessonInline(admin.TabularInline):
         model = models.Lesson
         extra = 2
         fields = ['title']
+        classes = ('collapse',)
 
     inlines = [TimeSlotInline, LessonInline]
 

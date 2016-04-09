@@ -1,19 +1,25 @@
-.dialog {
+#dialog-close {
+    background-color: #9A0606;
+    color: white;
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    padding: 2px;
+    border: 2px solid white;
+}
+
+#dialog {
     min-width: 50%;
 }
-.dialog > header{
-    display: flex;
+
+#dialog .no-content {
+    padding: 50px;
+    text-align: center;
+}
+
+#new-activity > div {
     justify-content: space-between;
-}
-
-.dialog footer {
+    align-items: center;
     display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-}
-
-.dialog paper-item > a {
-    display: block;
-    width: 100%;
-    height: 100%;
+    padding: 10px;
 }

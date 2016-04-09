@@ -1,0 +1,9 @@
+.config-handle {
+    background-color: rgba(0, 0, 0, 0.1);
+    display: inline;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.3);
+    position: relative;
+    float: right;
+    padding: 2px;
+}

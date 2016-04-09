@@ -9,7 +9,7 @@
 
         <article>
             {% for course in courses -%}
-            <a href="detail/{{ course.pk }}" class="card">
+            <a href="{{ course.pk }}" class="card">
                 <i class="material-icons">help</i>
                 <h1>{{ course.name }}</h1>
                 <p>{{ course.short_description }}</p>

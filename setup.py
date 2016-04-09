@@ -52,10 +52,10 @@ setup(
     install_requires=['django>=1.9',
                       'django-model-utils', 'django_jinja',
                       'django-picklefield', 'wagtail',
-                      'frozendict', 'markdown',
-                      'django-annoying', 'django-debug-toolbar',
+                      'frozendict', 'markdown', 'djangorestframework',
+                      'django-annoying', 'django-autoslug', 'django-compressor',
                       'django-extensions', 'django-guardian',
-                      'ejudge>=0.3.4', 'iospec>=0.1.3'],
+                      'ejudge>=0.3.6', 'iospec>=0.2.1'],
     extras_require={
         'testing': ['pytest'],
     },

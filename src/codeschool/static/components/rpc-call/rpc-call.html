@@ -1,14 +1,26 @@
 <dom-module id="rpc-call">
-  <link rel="import" type="css" href="contact-card.css">
+  <script>
+      function handleResponse() {
+          var xhttp
+
+      }
+  </script>
   <template>
-    <content></content>
-    <iron-icon icon="star" hidden$="{{!starred}}"></iron-icon>
+    <iron-ajax
+        auto
+        url="/json/call/"
+        handle-as="json"
+        params='{"func": "{{function}}", "args": {{params}}}'
+        on-response="handleResponse()"
+        debouce-duration="300">
+    </iron-ajax>
   </template>
   <script>
     Polymer({
-      is: 'contact-card',
+      is: 'rpc-call',
       properties: {
-        starred: Boolean
+        func: String,
+        args: Object
       }
     });
   </script>

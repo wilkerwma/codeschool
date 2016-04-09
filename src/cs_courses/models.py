@@ -148,31 +148,17 @@ class Lesson(models.ListItemModel):
     """A single lesson in a doubly linked list."""
 
     class Meta:
-        unique_together = ('course', 'index')
+        verbose_name = _('Lesson')
+        verbose_name_plural = _('Lessons')
+        root_field = 'course'
 
     title = models.CharField(max_length=140, blank=True)
     description = models.TextField(blank=True)
     date = models.DateField(null=True, blank=True)
-    course = models.ForeignKey(Course, related_name='lessons')
-
-    @property
-    def root(self):
-        return self.course
-
-    @property
-    def siblings(self):
-        return self.course.lessons
-
-    @classmethod
-    def from_db(cls, db, field_names, values):
-        obj = super().from_db(db, field_names, values)
-        if obj.date is None and obj.index != 0:
-            obj.root.next_date(obj.prev.date())
-            obj.current_lesson = obj.lessons.first()
-            obj.date = timezone.now().date()
-            obj.save(update_fields=['current_lesson', 'date'])
-        return obj
+    course = models.ForeignKey(Course)
 
     def __str__(self):
-        return self.description
+        return self.title
 
+
+Course.lessons = Lesson.get_descriptor()

@@ -1,0 +1,72 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <section class="content-cards">
+        <aside>
+            <h1>{{ course.name }}</h1>
+            <p>Atividades para o dia de hoje</p>
+        </aside>
+
+        <article>
+            {% for activity in user_activities -%}
+            <a href="../../../questions/{{ activity.pk }}" class="card">
+                <i class="material-icons">help_outline</i>
+                <h1>{{ activity.name }}</h1>
+                <p>{{ activity.short_description }}</p>
+            </a>
+            {%- endfor %}
+
+            {% if course.teacher != user %}
+            <a onclick="alert('em construção')" class="card-faded">
+                <i class="material-icons">add_circle</i>
+                <h1>Aprofunde-se</h1>
+                <p>Atividades e desafios adicionais selecionados para você :)</p>
+            </a>
+            {% else %}
+            <a onclick="srvice.dialog({url: 'add-activities'})" class="card-faded" >
+                <i class="material-icons">add_circle</i>
+                <h1>Adicione conteúdo</h1>
+                <p>Clique aqui para adicionar novas atividades em seu curso.</p>
+            </a>
+            {% endif %}
+        </article>
+    </section>
+
+    <section class="content-cards">
+        <aside>
+            <h1>Material adicional</h1>
+            <p>Lista com os materiais disponíveis para o curso.</p>
+        </aside>
+
+        <article>
+            Em construção!
+        </article>
+
+    </section>
+
+    <section class="content-cards">
+        <aside>
+            <h1>Alunos inscritos</h1>
+            <p>Acesse a lista de todos alunos inscritos no curso.</p>
+        </aside>
+
+        <article>
+            <div>
+                <h2>Amigos</h2>
+                <ul>
+                {% for student in course.students.all() %}
+
+                    <li><a href="/user/{{ student.pk }}">{{ user.full_name }}</a></li>
+                {% endfor %}
+                </ul>
+                <h2>Outros</h2>
+                <ul>
+                {% for student in course.students.all() %}
+                    <li><a href="/user/{{ student.pk }}">{{ user.full_name }}</a></li>
+                </ul>
+                {% endfor %}
+            </div>
+        </article>
+    </section>
+
+{% endblock %}

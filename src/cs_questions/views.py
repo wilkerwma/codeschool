@@ -3,8 +3,8 @@ Control authentication and new users registrations.
 """
 
 from django.contrib.auth.models import User
-from django.shortcuts import get_object_or_404
-from codeschool.shortcuts import render_context
+from django import http
+from codeschool.shortcuts import render_context, get_object_or_404
 from cs_activities import models as activity_models
 from cs_auth import models as auth_models
 from cs_questions import models
@@ -35,8 +35,18 @@ def question_io(request, id):
             feedback=feedback,
             grade=grade,
             question=question,
-            placeholder_text = answer_key.placeholder,
+            placeholder_text=answer_key.placeholder,
+            can_download=request.user == activity.course.teacher,
     )
+
+
+def question_io_download(request, pk):
+    activity = get_object_or_404(models.CodeIoActivity, pk=pk)
+    question = activity.question.codeioquestion
+    if request.user != activity.course.teacher:
+        return http.HttpResponseForbidden()
+    return http.HttpResponse(question.as_markio(),
+                             content_type='text/markdown')
 
 
 def index(request):
