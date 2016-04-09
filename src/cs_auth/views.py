@@ -58,7 +58,7 @@ def register(request):
         users.get(username=username)
         form.add_error('username', 'Usuário existente')
         return index(request, register_form=form, selected_tab=1)
-    except User.DoesNotExist:
+    except models.User.DoesNotExist:
         user = users.create_user(username, email, password,
                                 first_name=name,
                                 last_name=surname)
