@@ -1,3 +1,4 @@
+from django.db.utils import OperationalError
 from django.utils.translation import ugettext as __, ugettext_lazy as _
 from codeschool import models
 
@@ -40,4 +41,7 @@ class ProgrammingLanguage(models.Model):
     def __str__(self):
         return '%s (%s)' % (self.ref, self.name)
 
-ProgrammingLanguage.populate()
+try:
+    ProgrammingLanguage.populate()
+except OperationalError:
+    pass
