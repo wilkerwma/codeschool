@@ -54,6 +54,9 @@ class Activity(models.InheritableModel, models.TimeFramedStatusModel):
 
 
 class GenericActivity(Activity):
+    """
+    A generic activity defined just by its name and description.
+    """
     name = models.CharField(max_length=200)
     short_description = models.CharField(max_length=140)
     long_description = models.TextField()
@@ -82,6 +85,12 @@ class TextualResponse(Response):
 
 
 class Feedback(models.InheritableModel, models.TimeStampedModel):
+    """
+    A graded feedback to a response.
+
+    Subclasses may add extra fields for specialized feedbacks. The grade is
+    between 0 and 1.
+    """
 
     response = models.ForeignKey(Response)
     grade = models.DecimalField(

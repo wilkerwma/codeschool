@@ -1,0 +1,40 @@
+{% extends "cs_auth/base.jinja2" %}
+
+{% block header %}
+    {{ super() }}
+    <paper-tabs id="tabs" selected="{{ '{{ selected }}' }}">
+        <paper-tab>{{ _('Login') }}</paper-tab>
+        <paper-tab>{{ _('New users') }}</paper-tab>
+    </paper-tabs>
+{% endblock %}
+
+{% block content %}
+    <iron-pages selected="{{ '{{ selected }}' }}">
+        <section class="login">
+            <form id="signin" method="POST" action="../signin/">
+                {% csrf_token %}
+                {{ signin.as_p() }}
+            </form>
+        </section>
+
+        <section class="register">
+            <form id="signup" method="POST"action="../signup/">
+                {% csrf_token %}
+                {{ signup.as_p() }}
+            </form>
+        </section>
+    </iron-pages>
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+    <script>
+        function submit() {
+            if ($('#tabs')[0].selected === 0) {
+                $('#signin')[0].submit();
+            } else {
+                $('#signup')[0].submit();
+            }
+        }
+    </script>
+{% endblock %}

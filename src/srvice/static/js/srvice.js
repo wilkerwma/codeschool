@@ -396,6 +396,14 @@ var srvice = (function($) {
         }
     };
 
+    srvice.go = function(url, replace) {
+        if (replace) {
+            window.location.replace(url);
+        } else {
+            window.location.href = url;
+        }
+    }
+
     return srvice;
 })(jQuery);
 

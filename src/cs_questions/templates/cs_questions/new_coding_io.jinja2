@@ -1,0 +1,62 @@
+{% extends "base.jinja2" %}
+
+{% block extra_css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/codemirror/lib/codemirror.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    {{ super() }}
+    <script type="text/javascript" src="{% static 'bower_components/codemirror/lib/codemirror.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/codemirror/addon/edit/matchbrackets.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bower_components/codemirror/mode/python/python.js' %}"></script>
+    <script>
+        $(function () {
+            var editor = CodeMirror.fromTextArea(
+                    document.getElementById('codemirror-input'),
+                    {
+                        mode: "python",
+                        version: 3,
+                        lineNumbers: true,
+                        indentUnit: 4,
+                        indentWithTabs: false,
+                        matchBrackets: true
+                    });
+            // Indent with tabs
+            editor.setOption("extraKeys", {
+                Tab: function (cm) {
+                    var spaces = new Array(cm.getOption("indentUnit") + 1).join(" ");
+                    cm.replaceSelection(spaces);
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <h1>{{ _('Add a new question') }}</h1>
+        <p>{% trans %}You can add a new question by filling up the for bellow or by importing a Markio file. {% endtrans %}</p>
+
+        {% if validated_file %}
+        {% if file_is_valid %}
+            <div class="success-banner"><i class="material-icons">done</i>{{ _('The uploaded file has errors!') }}</div>
+        {% else %}
+            <div class="error-banner"><i class="material-icons">error</i>{{ _('The uploaded file has errors!') }}</div>
+        {% endif %}
+        {% else %}
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ import_form }}
+                <input type="submit" value={{ _("Import") }}>
+            </form>
+        {% endif %}
+    </div>
+    <div>
+        <h2>{{ _('Please fill up these fields') }}</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p() }}
+            <input type="submit" value="{{ _('Add') }}">
+        </form>
+    </div>
+{% endblock %}

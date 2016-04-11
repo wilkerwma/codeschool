@@ -50,11 +50,8 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
         related_name='enrolled_courses',
         blank=True,
     )
-    current_lesson = models.ForeignKey(
-        'Lesson',
-        blank=True, null=True,
-        related_name='course_as_current'
-    )
+    current_lesson_index = models.PositiveIntegerField(default=0, blank=True)
+    current_lesson_start = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(_('is active'), default=False)
 
     # Managers
@@ -82,15 +79,6 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
 
     def __str__(self):
         return '%s (%s)' % (self.discipline.name, self.teacher.first_name)
-
-    @classmethod
-    def from_db(cls, db, field_names, values):
-        obj = super().from_db(db, field_names, values)
-        if obj.current_lesson is None and obj.lessons:
-            obj.current_lesson = obj.lessons.first()
-            obj.date = timezone.now().date()
-            obj.save(update_fields=['current_lesson', 'date'])
-        return obj
 
     def get_absolute_url(self):
         return url_reverse('course-detail', args=(self.pk,))

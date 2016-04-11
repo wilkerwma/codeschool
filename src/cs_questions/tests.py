@@ -9,20 +9,20 @@ from cs_questions import models, views
 #
 @pytest.fixture(scope='session')
 def io_question():
-    proto = models.CodeIoQuestion(
+    proto = models.CodingIoQuestion(
         title='hello',
         short_description='hello world',
         long_description='a hello world program',
     )
 
-    answer_key = models.CodeIoAnswerKey(
+    answer_key = models.CodingIoAnswerKey(
         source_code='print("hello world")',
         language='python',
     )
 
     proto.save()
     answer_key.save()
-    question = models.CodeIoQuestion(
+    question = models.CodingIoQuestion(
         prototype=proto,
         answer_key=answer_key,
     )

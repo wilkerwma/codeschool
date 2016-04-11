@@ -1,6 +1,6 @@
 import hashlib
 from iospec import parse_string as parse_iospec
-from iospec import feedback as iofeedback
+import iospec.feedback
 import ejudge
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
@@ -97,7 +97,7 @@ class StringMatchQuestion(Question):
 #
 # Programming related questions: question_types starts at 100 up to 999
 #
-class CodeIoQuestion(Question):
+class CodingIoQuestion(Question):
     """CodeIo questions evaluates code and judge them by their inputs and
     outputs."""
 
@@ -128,6 +128,50 @@ class CodeIoQuestion(Question):
     class Meta:
         verbose_name = _('input/output question')
         verbose_name_plural = _('input/output questions')
+
+    @classmethod
+    def from_markio(cls, source):
+        """Creates a CodingIoQuestion object from a Markio source file.
+
+        It saves the object into the database since it has to register foreign
+        keys."""
+
+        import markio
+
+        # Create question object from parsed markio data
+        data = markio.parse_string(source)
+        question = CodingIoQuestion.objects.create(
+            title=data.title,
+            author_name=data.author,
+            timeout=data.timeout,
+            short_description=data.short_description,
+            long_description=data.description,
+            iospec=data.tests,
+        )
+
+        # Add answer keys
+        answer_keys = {}
+        for (lang, answer_key) in data.answer_key.items():
+            language = ProgrammingLanguage.objects.get(ref=lang)
+            key = CodingIoAnswerKey(question=question,
+                                    language=language,
+                                    source=answer_key)
+            key.save()
+            answer_keys[lang] = key
+        for (lang, placeholder) in data.placeholder.items():
+            if placeholder is None:
+                continue
+            try:
+                answer_keys[lang].placeholder = placeholder
+                answer_keys[lang].save(update_fields=['placeholder'])
+            except KeyError:
+                language = ProgrammingLanguage.objects.get(lang)
+                CodingIoAnswerKey(question=question,
+                                  language=language,
+                                  placeholder=placeholder).save()
+
+        # Question is done!
+        return question
 
     @lazy
     def iospec_tree(self):
@@ -166,12 +210,53 @@ class CodeIoQuestion(Question):
 
         return tree.source()
 
+    def validate(self, lang=None, test_iospec=True):
+        """Raise ValueError if some answer key is invalid or produce
+         invalid iospec expansions.
+
+         Return a valid iospec tree expansion or None if no expansion was
+         possible (e.g., by the lack of source code in the answer key)."""
+
+        # It cannot be valid if the iospec source does not not parse
+        if test_iospec:
+            try:
+                tree = parse_iospec(self.iospec)
+            except SyntaxError as ex:
+                raise ValueError('invalid iospec syntax: %s' % ex)
+
+        # Expand to all langs if lang is not give
+        if lang is None:
+            keys = self.answer_keys.exclude(source='')
+            langs = keys.values_list('language', flat=True)
+            expansions = [self.is_valid(lang, test_iospec=False)
+                          for lang in langs]
+            if not expansions:
+                return None
+            if iospec.ioequal(expansions):
+                return expansions[0]
+
+        # Test an specific language
+        if isinstance(lang, str):
+            lang = ProgrammingLanguage.get(ref=lang)
+        try:
+            key = self.answer_keys.get(language=lang)
+        except self.DoesNotExist:
+            return None
+
+        if key.source:
+            result = ejudge.io.run(key.source, key, lang=lang.ref)
+            if result.has_errors():
+                raise result.get_error()
+            return result
+        else:
+            return None
+
 
 class IoSpecExpansion(models.Model):
     """Represents a ready-to-use IoSpec expansion."""
 
     question = models.ForeignKey(
-        CodeIoQuestion,
+        CodingIoQuestion,
         related_name='iospec_expansions'
     )
     hash = models.CharField(max_length=32)
@@ -267,7 +352,7 @@ class IoSpecExpansion(models.Model):
         return '%s (%s)' % (self.question.title, self.hash)
 
 
-class CodeIoAnswerKey(models.Model):
+class CodingIoAnswerKey(models.Model):
     """Represents an answer to some question given in some specific computer
     language plus the placeholder text that should be displayed"""
 
@@ -276,7 +361,7 @@ class CodeIoAnswerKey(models.Model):
         verbose_name_plural = _('answer keys')
         unique_together = [('question', 'language')]
 
-    question = models.ForeignKey(CodeIoQuestion, related_name='answer_keys')
+    question = models.ForeignKey(CodingIoQuestion, related_name='answer_keys')
     language = models.ForeignKey(ProgrammingLanguage)
     source = models.TextField(
             _('Answer source code'),
@@ -304,13 +389,13 @@ class CodeIoAnswerKey(models.Model):
 
     def grade(self, response):
         """Grade the given response object and return the corresponding
-        CodeIoFeedback."""
+        CodingIoFeedback."""
 
         lang = self.language
         tree = self.question.expanded_tree
         source = response.text
         feedback = ejudge.io.grade(source, tree, lang=lang.ref)
-        return CodeIoFeedback.from_feedback(feedback, response)
+        return CodingIoFeedback.from_feedback(feedback, response)
 
 
 @delegation('question', ['long_description', 'short_description'])
@@ -322,11 +407,11 @@ class QuestionActivity(Activity):
         return self.question.title
 
 
-class CodeIoActivity(QuestionActivity):
-    answer_key = models.ForeignKey(CodeIoAnswerKey)
+class CodingIoActivity(QuestionActivity):
+    answer_key = models.ForeignKey(CodingIoAnswerKey)
 
 
-class CodeIoFeedback(Feedback):
+class CodingIoFeedback(Feedback):
     case = models.TextField()
     answer_key = models.TextField()
     status = models.CharField(max_length=20)
@@ -338,7 +423,7 @@ class CodeIoFeedback(Feedback):
         case = feedback.case
         answer_key = feedback.answer_key
 
-        return CodeIoFeedback(
+        return CodingIoFeedback(
             response=response,
             grade=feedback.grade,
             case=case.source(),
@@ -352,7 +437,7 @@ class CodeIoFeedback(Feedback):
     def _feedback(self):
         case = parse_iospec(self.case)
         answer_key = parse_iospec(self.answer_key)
-        return iofeedback.Feedback(
+        return iospec.feedback.Feedback(
             case, answer_key,
             status=self.status, hint=self.hint, message=self.message
         )

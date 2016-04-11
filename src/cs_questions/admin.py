@@ -34,11 +34,11 @@ class QuestionBase(admin.ModelAdmin):
         return bool(obj.comment)
 
 
-@admin.register(models.CodeIoQuestion)
-class CodeIoQuestionAdmin(QuestionBase):
+@admin.register(models.CodingIoQuestion)
+class CodingIoQuestionAdmin(QuestionBase):
     # Inline models
     class AnswerKeyInline(admin.StackedInline):
-        model = models.CodeIoAnswerKey
+        model = models.CodingIoAnswerKey
         fields = ('language', 'source', 'placeholder')
         extra = 0
 
@@ -78,5 +78,5 @@ class IoSpecExpansionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.QuestionActivity)
-admin.site.register(models.CodeIoActivity)
-admin.site.register(models.CodeIoFeedback)
+admin.site.register(models.CodingIoActivity)
+admin.site.register(models.CodingIoFeedback)

@@ -1,0 +1,55 @@
+{% extends "base.jinja2" %}
+{% set username=user.username %}
+
+{% block title %}Perfil: {{ username }}{% endblock %}
+
+{% block content %}
+  <div class="white-box">
+    {% block profile_navigation %}
+      {% if user.username == profile.user.username %}
+        <ul id="box-nav">
+          {% block profile_navigation_items %}
+            <li><a href="{% url 'userena_profile_detail' username %}">{{ _("View profile") }}</a></li>
+            <li><a href="{% url 'userena_profile_edit' username %}">{{ _("Edit details") }}</a></li>
+            <li><a href="{% url 'userena_password_change' username %}">{{ _("Change password") }}</a></li>
+            <li><a href="{% url 'userena_email_change' username %}">{{ _("Change email") }}</a></li>
+          {% endblock %}
+        </ul>
+      {% endif %}
+    {% endblock %}
+
+    <div id="details">
+      {% block profile_details %}
+        <img class="mugshot" src="{{ profile.get_mugshot_url }}" alt="{{ _("Your mugshot") }}" />
+        <dl>
+          {% block profile_definition_list %}
+            {% if profile.user.get_full_name %}
+              <dt>{{ _("Name") }}</dt>
+              <dd>{{ profile.user.get_full_name() }}</dd>
+            {% endif %}
+            {% if profile.user.email and not hide_email %}
+              <dt>{{ _("Email") }}</dt>
+              <dd>{{ profile.user.email }}</dd>
+            {% endif %}
+            {% if profile.age %}
+              <dt>{{ _("Age") }}</dt>
+              <dd>{{ profile.age }}</dd>
+            {% endif %}
+            {% if profile.website %}
+              <dt>{{ _("Website") }}</dt>
+              <dd>{{ profile.website|urlize }}</dd>
+            {% endif %}
+            {% if profile.location %}
+              <dt>{{ _("Location") }}</dt>
+              <dd>{{ profile.location }}</dd>
+            {% endif %}
+            {% if profile.about_me %}
+              <dt>{{ _("About me") }}</dt>
+              <dd>{{ profile.about_me }}</dd>
+            {% endif %}
+          {% endblock %}
+        </dl>
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}

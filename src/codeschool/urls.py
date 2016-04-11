@@ -20,13 +20,13 @@ urlpatterns = [
     #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Authentication
-    url(r'^auth/', include('cs_auth.urls')),
+    url(r'^accounts/login/$', 'cs_auth.views.login', name='login-page'),
+    url(r'^accounts/', include('userena.urls')),
     url(r'^login/$', RedirectView.as_view(url='/auth/', permanent=False)),
 
     # Local apps and functionality
     url(r'^courses/', include('cs_courses.urls')),
     url(r'^questions/', include('cs_questions.urls')),
-    url(r'^linktables/', include('cs_linktable.urls')),
 ]
 
 
