@@ -66,7 +66,8 @@ setup(
                       'pytz',
                       'django-userna',
                       'ejudge>=0.3.6',
-                      'iospec>=0.2.1'],
+                      'iospec>=0.2.2',
+                      'markio>=0.1.2'],
     extras_require={
         'testing': ['pytest'],
     },
