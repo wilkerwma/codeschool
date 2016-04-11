@@ -56,6 +56,7 @@ setup(
                       'wagtail',
                       'frozendict',
                       'markdown',
+                      'djinga',
                       'djangorestframework',
                       'django-annoying',
                       'django-autoslug',
