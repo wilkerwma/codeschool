@@ -1,0 +1,21 @@
+{% extends "base.jinja2" %}
+
+{% block content %}
+    <section>
+        <h1>Lista de links</h1>
+        <ul>
+        {% for row in table.rows.all() %}
+            <li><a href="{{ row.url }}">{{ row.name }}</a></li>
+        {% endfor %}
+        </ul>
+    </section>
+    <section>
+        <form method="POST">
+            {% csrf_token %}
+            <h2>Envie sua contribuição</h2>
+            <input type="text" placeholder="Nome" name="name">
+            <input type="url" placeholder="url" name="url">
+            <input type="submit" name="ok-button" value="OK">
+        </form>
+    </section>
+{% endblock %}
