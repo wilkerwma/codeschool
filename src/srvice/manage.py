@@ -1,0 +1,1 @@
+../../codeschool/src/manage.py

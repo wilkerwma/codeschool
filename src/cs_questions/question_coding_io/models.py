@@ -1,8 +1,9 @@
 import hashlib
 from iospec import parse_string as parse_iospec, IoTestCase
 import iospec.feedback
-import ejudge
+from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from ejudge.graders.io import grade as grade_code, run as run_code
 from model_utils import FieldTracker
 from codeschool import models
 from codeschool.shortcuts import lazy
@@ -239,7 +240,7 @@ class CodingIoQuestion(Question, models.StatusModel):
             return None
 
         if key.source:
-            result = ejudge.io.run(key.source, key, lang=lang.ref)
+            result = run_code(key.source, key, lang=lang.ref)
             if result.has_errors():
                 raise result.get_error()
             return result
@@ -290,7 +291,7 @@ class CodingIoQuestion(Question, models.StatusModel):
         # Construct ejudge feedback object
         lang = response.language.ref
         source = response.source
-        feedback = ejudge.io.grade(source, iospec, lang=lang)
+        feedback = grade_code(source, iospec, lang=lang)
 
         # Create a codeschool feedback and save it to the database
         feedback = CodingIoFeedback.from_feedback(feedback, response)
@@ -390,7 +391,7 @@ class CodingIoAnswerKey(models.Model):
             iospec.expand_inputs(self.question.iospec_size)
             source = self.source
             lang = self.language.ref
-            self.iospec = ejudge.io.run(source, iospec, lang=lang)
+            self.iospec = run_code(source, iospec, lang=lang)
             self.is_valid = not self.iospec.has_errors()
         else:
             self.iospec_source = ''
@@ -467,3 +468,14 @@ def md5hash(st):
     Returns a string of 32 ascii characters."""
 
     return hashlib.md5(st.encode('utf8')).hexdigest()
+
+# Picks up the correct runner and grader functions
+if not settings.CODESCHOOL_USE_SANDBOX:
+    _run_code, _grade_code = run_code, grade_code
+
+    def run_code(*args, **kwds):
+        return _run_code(*args, sandbox=False, **kwds)
+
+    def grade_code(*args, **kwds):
+        return _grade_code(*args, sandbox=False, **kwds)
+
