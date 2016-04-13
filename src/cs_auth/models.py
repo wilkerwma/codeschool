@@ -44,17 +44,16 @@ class Profile(UserenaBaseProfile):
 
     @property
     def contact_classes(self):
-        try:
-            user = super().__getattribute__('user')
-        except AttributeError:
-            return [[], [], []]
+        user = self.user
 
-        lists = [
-            user.friends.order_by('first_name'),
-            user.staff_contacts.order_by('first_name'),
-            user.colleagues.order_by('first_name')
-        ]
-        return lists
+        try:
+            friends = user.friends
+            colleagues = user.staff_contacts
+            staff = user.colleagues
+        except AttributeError as ex:
+            raise RuntimeError(ex)
+
+        return [friends, colleagues, staff]
 
     def custom_fields(self, flat=False):
         """Return a dictionary with all custom fields"""
@@ -93,6 +92,9 @@ class Profile(UserenaBaseProfile):
         if self.user is None:
             return __('unbound profile')
         return __('%(name)s\'s profile') % {'name': self.user.get_full_name()}
+
+    def __repr__(self):
+        return str(self.contact_classes)
 
 
 class CustomFieldCategory(models.Model):
@@ -288,7 +290,7 @@ class UserMixin:
     def _filtered(self, status):
         pks = self.associated.filter(status=status)\
             .values_list('other', flat=True)
-        return models.User.objects.filter(pk__in=pks)
+        return models.User.objects.filter(pk__in=pks).order_by('first_name', 'username')
 
     @property
     def friends(self):
@@ -315,7 +317,7 @@ class UserMixin:
         for course in tail:
             users |= getattr(course, field).all()
         users = users.exclude(pk=self.pk)
-        return users.distinct()
+        return users.order_by('first_name', 'username').distinct('username')
 
     @property
     def colleagues(self):
