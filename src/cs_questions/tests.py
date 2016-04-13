@@ -1,53 +1,82 @@
+from codeschool import setenv
 import pytest
 import pytest_django
+from pytest_django.fixtures import transactional_db
 from django.test import TestCase
+from cs_core.models import cs_lang
 from cs_questions import models, views
 
 
 #
 # Fixtures
 #
-@pytest.fixture(scope='session')
-def io_question():
-    proto = models.CodingIoQuestion(
+@pytest.fixture
+def io_question(db):
+    question = models.CodingIoQuestion(
         title='hello',
         short_description='hello world',
         long_description='a hello world program',
-    )
-
-    answer_key = models.CodingIoAnswerKey(
-        source_code='print("hello world")',
-        language='python',
-    )
-
-    proto.save()
-    answer_key.save()
-    question = models.CodingIoQuestion(
-        prototype=proto,
-        answer_key=answer_key,
+        iospec='who <me>\nhello me',
     )
     question.save()
     return question
 
 
+def answer_key(question, src):
+    key = models.CodingIoAnswerKey(
+        question=question,
+        source=src,
+        language=cs_lang('python')
+    )
+    key.save()
+    return key
+
+
+@pytest.fixture
+def source_ok():
+    return 'print("hello", input("who "));'
+
+
+@pytest.fixture
+def source_bad():
+    return 'print("hello", input());'
+
+
+@pytest.fixture
+def source_error():
+    return 'print(hello, input());'
+
+
+@pytest.fixture
+def answer_key_ok(transactional_db, question_io, source_ok):
+    return answer_key(question_io, source_ok)
+
+
+@pytest.fixture
+def answer_key_bad(transactional_db, question_io, source_bad):
+    return answer_key(question_io, source_bad)
+
+
+@pytest.fixture
+def answer_key_error(transactional_db, question_io, source_error):
+    return answer_key(question_io, source_error)
+
+
 #
 # Simple functionality
 #
-@pytest.mark.django_db
-def test_question_exposes_prototype_attributes(io_question):
-    io_proto = io_question.prototype
+def test_question_creates_expansion_ok(io_question, source_ok):
+    Q = io_question
 
-    for attr in ['title', 'short_description', 'long_description']:
-        proto = getattr(io_proto, attr)
-        question = getattr(io_question, attr)
-        assert proto == question
+    Q.answer_keys.add(answer_key_ok)
+    assert Q.iospec_expansions.size() == 1
+    assert Q.iospec == Q.current_iospec_expansion.iospec
 
+    exp = Q.current_iospec_expansion
+    assert exp.validated_languages.size() == 1
+    assert exp.invalid_languages.size() == 0
 
-@pytest.mark.django_db
-def test_grading_io_question(io_question):
-    answer = 'print("hello world")'
-    response = models.Response(question=io_question, data=answer)
-    feedback = io_question.grade(response)
-
-    assert feedback.grade == 1.0
-    assert not feedback.data
+if __name__ == '__main__':
+    import os
+    os.chdir('../')
+    os.system('')

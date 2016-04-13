@@ -1,9 +1,9 @@
 from collections import namedtuple
 from django import http
-from django.views.decorators.csrf import csrf_protect, csrf_exempt
 from srvice import srvice, Client
-from codeschool.decorators import login_required, teacher_login_required
-from codeschool.shortcuts import render_context, redirect, get_object_or_404
+from codeschool.decorators import login_required
+from codeschool.models import User
+from codeschool.shortcuts import render_context, render, get_object_or_404
 from cs_courses import models
 from cs_activities.models import Activity
 
@@ -12,9 +12,14 @@ from cs_activities.models import Activity
 def course_index(request):
     courses = request.user.enrolled_courses.all()
     return render_context(
-        request, 'cs_courses/courses-index.jinja2',
+        request, 'cs_courses/course-index.jinja2',
         courses=courses
     )
+
+
+@login_required
+def discipline_detail(request, id):
+    raise NotImplementedError
 
 
 @login_required
@@ -30,7 +35,68 @@ def course_detail(request, pk):
 
 
 @login_required
-def course_add_activities(request, pk):
+def course_subscribe(request):
+    context = dict(
+        user=request.user,
+        courses=models.Course.objects
+            .filter(is_active=True)
+            .exclude(pk__in=request.user.enrolled_courses.all())
+    )
+    return render(request, 'cs_courses/course-subscribe.jinja2', context)
+
+
+@srvice
+def do_subscribe(request, ref, selected=()):
+    js = Client()
+
+    if selected:
+        if request.user.username != ref:
+            raise PermissionError
+        course = get_object_or_404(models.Course, pk=selected[0])
+        course.students.add(request.user)
+        js.refresh()
+    else:
+        js.dialog('close')
+    return js
+
+
+@srvice
+def leave_course(request, user, course):
+    js = Client()
+    if request.user.username != user:
+        raise PermissionError
+    course = models.Course.objects.get(pk=course)
+    course.students.remove(request.user)
+    js.redirect('/courses/')
+    return js
+
+
+@srvice
+def enable_activity(request, ref, when='now', selected=()):
+    js = Client()
+
+    if selected:
+        js.refresh()
+
+        course = get_object_or_404(models.Course, pk=ref)
+        duration = course.activity_duration()
+
+        if course.teacher != request.user:
+            raise PermissionError
+
+        for pk in selected:
+            activity = Activity.objects.get_subclass(pk=pk)
+            activity.reschedule_now(duration, update=True)
+    return js
+
+
+@login_required
+def activity_detail(request, pk):
+    raise NotImplementedError
+
+
+@login_required
+def add_activities(request, pk):
     course = get_object_or_404(models.Course, pk=pk)
 
     if request.user != course.teacher:
@@ -47,71 +113,4 @@ def course_add_activities(request, pk):
         past_activities = course.past_activities,
         pending_activities = course.pending_activities,
         activity_types=activity_types,
-    )
-
-
-@srvice
-def enable_activity(request, ref, when='now', selected=()):
-    js = Client()
-
-    if selected:
-        js.refresh()
-
-        course = get_object_or_404(models.Course, pk=ref)
-        duration = course.activity_duration()
-
-        for pk in selected:
-            activity = Activity.objects.get_subclass(pk=pk)
-            activity.reschedule_now(duration, update=True)
-    return js
-
-
-@csrf_protect
-@teacher_login_required
-def teacher_add_activities(request, pk):
-    course = get_object_or_404(models.Course, pk=pk)
-
-    if request.method != 'POST' or course.teacher != request.user:
-        return http.HttpResponseForbidden()
-
-    post = dict(request.POST)
-    checked = [int(key[6:]) for key in post if key.startswith('check-')]
-    activities = [get_object_or_404(Activity, pk=pk) for pk in checked]
-    duration = course.activity_duration()
-    start, end = course.next_time_slot()
-
-    if 'add-now' in post:
-        for activity in activities:
-            activity.reschedule_now(duration)
-            activity.save()
-    elif 'add-next' in post:
-        for activity in activities:
-            activity.reschedule(start, end)
-            activity.save()
-    elif 'edit' in post:
-        pass
-
-    return redirect(course.get_absolute_url())
-
-
-@login_required
-def discipline_detail(request, id):
-    raise NotImplementedError
-
-
-@login_required
-def activity_detail(request, pk):
-    raise NotImplementedError
-
-
-@login_required
-def course_lessons(request, course_pk):
-    """Shows a list of lessons for the given course"""
-
-    course = get_object_or_404(models.Course, pk=course_pk)
-    return render_context(
-        request, 'cs_courses/lessons.jinja2',
-        course=course,
-        lessons=course.lessons,
-        can_edit=request.user == course.teacher,
     )

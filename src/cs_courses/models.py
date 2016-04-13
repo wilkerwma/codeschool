@@ -50,6 +50,11 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
         related_name='enrolled_courses',
         blank=True,
     )
+    staff = models.ManyToManyField(
+        models.User,
+        related_name='courses_as_staff',
+        blank=True,
+    )
     current_lesson_index = models.PositiveIntegerField(default=0, blank=True)
     current_lesson_start = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(_('is active'), default=False)
@@ -149,4 +154,11 @@ class Lesson(models.ListItemModel):
         return self.title
 
 
+# Patch models
 Course.lessons = Lesson.get_descriptor()
+models.User.related_courses = property(
+        lambda self:
+            (self.enrolled_courses.all() |
+             self.owned_courses.all() |
+             self.courses_as_staff.all()).distinct()
+)

@@ -1,4 +1,30 @@
-{% extends "base.jinja2" %}
+{% extends "cs_courses/base.jinja2" %}
+
+{% block nav_sections %}
+    <li>
+        <p>{{ course.name }}</p>
+        <ul>
+            <li onclick="srvice.dialog({sourceId: 'confirmation-dialog', action: 'open'})">Cancelar inscrição</li>
+        </ul>
+    </li>
+    {{ super() }}
+{% endblock %}
+
+{% block hidden_content %}
+    {{ super() }}
+    <div id="confirmation-dialog" class="hidden">
+        <h1>{{ _('Confirmation') }}</h1>
+        <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)')|format(course=course.name, name=user.get_full_name()) }}</p>
+        <p>{{ _('All your activities and progress will be deleted.') }}</p>
+        <button onclick="srvice(
+                'cs-courses.leave-course',
+                {
+                    user: '{{ user.username }}',
+                    course: {{ course.pk }}
+                })">{{ _('Ok') }}</button>
+        <button onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+    </div>
+{% endblock %}
 
 {% block content %}
     <section class="content-cards">
@@ -34,39 +60,42 @@
 
     <section class="content-cards">
         <aside>
-            <h1>Material adicional</h1>
-            <p>Lista com os materiais disponíveis para o curso.</p>
+            <h1>Aulas</h1>
+            <p>Cronograma de aulas.</p>
         </aside>
 
         <article>
-            Em construção!
+            {% if course.lessons %}
+                <sortable-js id="course-lessons" {% if can_edit %}sync-api="cs_courses.sort-lessons" sync-id="{{ course.pk }}"{% else %}disabled{% endif %}>
+                {% for lesson in course.lessons %}
+                    <div data-id="{{ lesson.pk }}">
+                        <p><span class="index">{{ loop.index }}.</span> {{ lesson.title }} {% if can_edit %}<i class="sortable-remove">✖</i>{% endif %}</p>
+                        {% if lesson.description %}<div>{{ lesson.description }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+                </sortable-js>
+            {% else %}
+                <p>{{ _('No lessons available!') }}</p>
+            {% endif %}
         </article>
 
     </section>
 
     <section class="content-cards">
         <aside>
-            <h1>Alunos inscritos</h1>
+            <h1>Colegas</h1>
             <p>Acesse a lista de todos alunos inscritos no curso.</p>
         </aside>
 
         <article>
             <div>
-                <h2>Amigos</h2>
+                <h2>Alunos inscritos</h2>
                 <ul>
-                {% for student in course.students.all() %}
-
-                    <li><a href="/user/{{ student.pk }}">{{ user.full_name }}</a></li>
+                {% for student in course.students.all().exclude(pk=user.pk).order_by('first_name') %}
+                    <li><a href="/accounts/{{ student.username}}">{{ student.get_full_name() or student.username }}</a></li>
                 {% endfor %}
                 </ul>
-                <h2>Outros</h2>
-                <ul>
-                {% for student in course.students.all() %}
-                    <li><a href="/user/{{ student.pk }}">{{ user.full_name }}</a></li>
-                </ul>
-                {% endfor %}
             </div>
         </article>
     </section>
-
 {% endblock %}

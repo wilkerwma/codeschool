@@ -1,82 +1,74 @@
-"""
-Control authentication and new users registrations.
-"""
-
 from django.contrib.auth.models import User
 from django import http
-from codeschool.shortcuts import render_context, get_object_or_404
-from cs_activities import models as activity_models
-from cs_auth import models as auth_models
+from codeschool.shortcuts import render_context
+from codeschool.decorators import login_required
 from cs_questions import models
-from cs_questions import forms
 
 users = User.objects
+type_map = {}
+
+
+def register_question_type(tt, name, cls=None, *, detail=None, new=None, **kwds):
+    """
+    Register question type.
+    """
+
+    def make_action(name):
+        def action_func(request, obj, *args, **kwds):
+            manager = cls()
+            method = login_required(getattr(manager, name))
+            return method(request, obj, *args, **kwds)
+        return action_func
+
+    if cls:
+        for action in dir(cls):
+            if action.startswith('_'):
+                continue
+            elif action == 'new' and not new:
+                new = lambda r: login_required(cls().new)(r)
+            elif action == 'detail' and not detail:
+                detail = lambda r, o: login_required(cls().detail)(r, o)
+            else:
+                kwds[action.replace('_', '-')] = make_action(action)
+
+    kwds.update(new=new, view=detail)
+    kwds = {k: v for (k, v) in kwds.items() if v is not None}
+    type_map[tt] = kwds
+    type_map[name] = kwds
 
 
 def index(request):
     return render_context(
-            request, 'base.jinja2',
-            content='<p>Em construção</p>')
-
-
-#
-# CodingIo Questions
-#
-def question_io(request, id):
-    grade = None
-    activity = get_object_or_404(models.CodingIoActivity, pk=id)
-    answer_key = activity.answer_key
-    question = activity.question.codeioquestion
-    feedback = None
-
-    if request.method == 'POST':
-        source_code = request.POST['source']
-        response = activity_models.TextualResponse(
-                group=auth_models.SingleUserGroup.from_user(request.user),
-                activity=activity,
-                text=source_code)
-        response.save()
-        feedback = answer_key.grade(response)
-        feedback.save()
-        grade = int(feedback.grade * 100)
-
-    return render_context(
-            request, 'cs_questions/detail_coding_io.jinja2',
-            feedback=feedback,
-            grade=grade,
-            question=question,
-            placeholder_text=answer_key.placeholder,
-            can_download=request.user == activity.course.teacher,
+        request,
+        'cs_questions/index.jinja2',
+        questions=models.Question.objects.all().order_by('pk')
     )
 
 
-def question_io_download(request, pk):
-    activity = get_object_or_404(models.CodingIoActivity, pk=pk)
-    question = activity.question.codeioquestion
-    if request.user != activity.course.teacher:
-        return http.HttpResponseForbidden()
-    return http.HttpResponse(question.as_markio(),
-                             content_type='text/markdown')
+def question_detail(request, pk):
+    try:
+        obj = models.Question.objects.get_subclass(pk=pk)
+    except models.Question.DoesNotExist:
+        raise http.Http404
+    return type_map[type(obj)]['view'](request, obj)
 
 
-def new_coding_io_question(request):
-    validated_file = False
-    file_is_valid = False
-    form = forms.CodeIoQuestionForm()
-    import_form = forms.ImportQuestionForm()
+def question_action(request, pk, action):
+    action, *args = action.split('/')
+    try:
+        obj = models.Question.objects.get_subclass(pk=pk)
+    except models.Question.DoesNotExist:
+        raise http.Http404('no question with pk=%s found.' % pk)
+    return type_map[type(obj)][action](request, obj, *args)
 
-    if request.FILES:
-        data = request.FILES['file'].read().decode('utf8')
-        question = models.CodingIoQuestion.from_markio(data)
-        form = forms.CodeIoQuestionForm(instance=question)
-        validated_file = True
-        file_is_valid = question.is_valid()
 
-    return render_context(
-            request, 'cs_questions/new_coding_io.jinja2',
-            form=form,
-            import_form=import_form,
-            validated_file=validated_file,
-            file_is_valid=file_is_valid,
-    )
+def question_new(request, type_name):
+    return type_map[type_name]['new'](request)
 
+
+# Register default question types
+def register_default():
+    from cs_questions.question_coding_io.views import QuestionViews
+    register_question_type(models.io.CodingIoQuestion, 'io', QuestionViews)
+
+register_default()

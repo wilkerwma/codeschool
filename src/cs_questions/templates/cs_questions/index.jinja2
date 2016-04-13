@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <ul>
+        {% for question in questions %}
+            <li><a href="./{{ question.pk }}/">{{ question.title }}: {{ question.short_description }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

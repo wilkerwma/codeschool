@@ -338,6 +338,7 @@ var srvice = (function($) {
             text: '',
             dialogId: 'dialog',
             dialogContentId: 'dialog-content',
+            sourceId: null,
             url: null
         }, options);
 
@@ -378,6 +379,11 @@ var srvice = (function($) {
             } else {
                 dialog.hidden = false;
             }
+        }
+
+        // Add content from html element, if given
+        if (!conf.text && conf.sourceId) {
+            conf.text = byId(conf.sourceId).innerHTML;
         }
 
         // Add content from url, if given

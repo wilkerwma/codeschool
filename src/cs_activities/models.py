@@ -15,7 +15,7 @@ class Activity(models.InheritableModel, models.TimeFramedStatusModel):
     group = models.ForeignKey(
             models.Group,
             verbose_name=_('Group of students'),
-            help_text=_('Group of students that this activity is assigned to. '
+            help_text=_('Group of students that can view this activity. '
                         'Leave blank to assign to the whole classroom.'),
             null=True,
             blank=True,
@@ -72,10 +72,13 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
     different responses with different students.
     """
 
-    STATUS = models.Choices('pending', 'graded')
-
-    activity = models.ForeignKey(Activity)
-    group = models.ForeignKey(models.Group)
+    STATUS = models.Choices(
+            ('pending', _('pending')),
+            ('graded', _('graded')),
+    )
+    activity = models.ForeignKey(Activity, blank=True, null=True)
+    group = models.ForeignKey(models.Group, blank=True, null=True)
+    user = models.ForeignKey(models.User, blank=True, null=True)
 
 
 class TextualResponse(Response):
@@ -84,13 +87,21 @@ class TextualResponse(Response):
     text = models.TextField()
 
 
-class Feedback(models.InheritableModel, models.TimeStampedModel):
+class Feedback(models.InheritableModel, models.TimeStampedModel, models.StatusModel):
     """
     A graded feedback to a response.
 
     Subclasses may add extra fields for specialized feedbacks. The grade is
     between 0 and 1.
     """
+    STATUS_OK = 'ok'
+    STATUS_PENDING = 'pending'
+    STATUS_INVALID = 'invalid'
+    STATUS = models.Choices(
+            (STATUS_OK, _('ok')),
+            (STATUS_PENDING, _('not graded yet')),
+            (STATUS_INVALID, _('needs to be re-graded')),
+    )
 
     response = models.ForeignKey(Response)
     grade = models.DecimalField(

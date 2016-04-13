@@ -7,6 +7,7 @@
 @import 'dialogs.css';
 @import 'config.css';
 @import 'admin.css';
+@import 'userena.css';
 
 paper-item > a {
     display: block;

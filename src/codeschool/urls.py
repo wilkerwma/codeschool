@@ -7,7 +7,7 @@ from cs_search import views as search_views
 
 urlpatterns = [
     # Basic wagtail/django functionality
-    url(r'^$', RedirectView.as_view(url='/auth/', permanent=False)),
+    url(r'^$', RedirectView.as_view(url='/accounts/login/', permanent=False)),
     url(r'^django-admin/', include(admin.site.urls)),
     url(r'^admin/', include('wagtail.wagtailadmin.urls')),
     url(r'^documents/', include('wagtail.wagtaildocs.urls')),

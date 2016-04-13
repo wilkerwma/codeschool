@@ -1,4 +1,4 @@
-{% extends 'userena/base_userena.html' %}
+{% extends 'base.html' %}
 {% load i18n %}
 
 {% block title %}{% blocktrans with profile.user.username as username %}{{ username }}'s profile.{% endblocktrans %}{% endblock %}
@@ -9,14 +9,14 @@
     {% block profile_navigation %}
       {% comment %}Dirty hack. Will use django-guardian in the future.{% endcomment %}
       {% if user.username == profile.user.username %}
-        <ul id="box-nav">
+        <div id="box-nav">
           {% block profile_navigation_items %}
-            <li><a href="{% url 'userena_profile_detail' user.username %}">{% trans "View profile" %}</a></li>
-            <li><a href="{% url 'userena_profile_edit' user.username %}">{% trans "Edit details" %}</a></li>
-            <li><a href="{% url 'userena_password_change' user.username %}">{% trans "Change password" %}</a></li>
-            <li><a href="{% url 'userena_email_change' user.username %}">{% trans "Change email" %}</a></li>
+            <a href="{% url 'userena_profile_detail' user.username %}">{% trans "View profile" %}</a>
+            <a href="{% url 'userena_profile_edit' user.username %}">{% trans "Edit details" %}</a>
+            <a href="{% url 'userena_password_change' user.username %}">{% trans "Change password" %}</a>
+            <a href="{% url 'userena_email_change' user.username %}">{% trans "Change email" %}</a>
           {% endblock %}
-        </ul>
+        </div>
       {% endif %}
     {% endblock %}
 
@@ -54,4 +54,35 @@
       {% endblock %}
     </div>
   </div>
+
+<div>
+  <h2>{{ _('Contacts') }}</h2>
+  <template is="dom-bind">
+    <paper-tabs selected="{{ '{{ selected }' }}}" id="contact-tabs">
+      <paper-tab>{{ _('Friends') }}</paper-tab>
+      <paper-tab>{{ _('Staff') }}</paper-tab>
+      <paper-tab>{{ _('Colleagues') }}</paper-tab>
+    </paper-tabs>
+
+    <iron-pages selected="{{ '{{ selected }' }}}" id="contact-pages">
+      {% for list in profile.contact_classes %}
+        <div>
+          <ul class="contact-list">
+            {% for user in list %}
+              <li><a href="/accounts/{{ user.username }}">{{ user.get_full_name|default:user.username }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </iron-pages>
+  </template>
+
+  <script>
+    document.addEventListener('WebComponentsReady', function () {
+      var template = document.querySelector('template[is="dom-bind"]');
+      template.selected = 0; // selected is an index by default
+    });
+  </script>
+
+</div>
 {% endblock %}

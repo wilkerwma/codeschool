@@ -1,4 +1,4 @@
-{% extends "base.jinja2" %}
+{% extends "cs_courses/base.jinja2" %}
 
 {% block content %}
     <section class="content-cards">
@@ -16,7 +16,7 @@
             </a>
             {%- endfor %}
 
-            <a onclick="alert('Em construção')" class="card-faded">
+            <a onclick="srvice.dialog({url: 'add-course'})" class="card-faded" >
                 <i class="material-icons">add_circle</i>
                 <h1>Adicionar</h1>
                 <p>Cadastre-se em outros cursos.</p>

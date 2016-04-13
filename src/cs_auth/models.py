@@ -1,9 +1,7 @@
 import datetime
 from codeschool import models
-from django.contrib.auth.models import Group, AbstractUser
-from django.utils.translation import ugettext_lazy as _
-from django.contrib.auth.models import AbstractUser
-from model_utils.managers import QueryManagerMixin
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _, ugettext as __
 from address.models import AddressField
 from userena.models import UserenaBaseProfile
 
@@ -21,11 +19,10 @@ class Profile(UserenaBaseProfile):
         models.User,
         unique=True,
         verbose_name=_('user'),
-        related_name=_('profile'),
+        related_name='profile',
     )
     nickname = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    address = AddressField(blank=True, null=True)
     gender = models.SmallIntegerField(
         _('gender'),
         choices=[(0, _('male')), (1, _('female'))],
@@ -42,8 +39,17 @@ class Profile(UserenaBaseProfile):
 
     @property
     def age(self):
-        today = datetime.now().date()
+        today = timezone.now().date()
         return int(round((today - self.date_of_birth).days / 365.25))
+
+    @property
+    def contact_classes(self):
+        lists = [
+            self.user.friends.order_by('first_name'),
+            self.staff_contacts.order_by('first_name'),
+            self.colleagues.order_by('first_name')
+        ]
+        return lists
 
     def custom_fields(self, flat=False):
         """Return a dictionary with all custom fields"""
@@ -62,33 +68,48 @@ class Profile(UserenaBaseProfile):
         return D
 
     class Meta:
-        permissions = (
-            ('student', _('Can access/modify data visible to student\'s')),
-            ('teacher', _('Can access/modify data visible only to Teacher\'s')),
-        )
+       permissions = (
+           ('student', _('Can access/modify data visible to student\'s')),
+           ('teacher', _('Can access/modify data visible only to Teacher\'s')),
+       )
 
     def __getattr__(self, attr):
-        return getattr(self.user, attr)
+        if attr == 'user':
+            return None
+
+        user = super().__getattribute__('user')
+
+        if user is None:
+            raise AttributeError(attr)
+        else:
+            return getattr(user, attr)
+
+    def __str__(self):
+        if self.user is None:
+            return __('unbound profile')
+        return __('%(name)s\'s profile') % {'name': self.user.get_full_name()}
 
 
 class CustomFieldCategory(models.Model):
     """
     A category for custom site-wide fields.
     """
-    ref = models.CharField(max_length=10, primary_key=True)
-    name = models.CharField(max_length=140)
-    description = models.TextField()
+    name = models.CharField(max_length=40)
+    description = models.CharField(max_length=140)
 
 
 class CustomFieldDefinition(models.Model):
     """
     Define a custom site-specific field for the user profile.
     """
-    name = models.CharField(max_length=140)
-    description = models.TextField()
+    name = models.CharField(max_length=40)
+    description = models.CharField(max_length=140)
     category = models.ForeignKey(CustomFieldCategory)
-    required = models.BooleanField(default=False)
-    required_permissions = models.ManyToManyField(models.Permission)
+    enabled = models.BooleanField(
+        _('enabled'),
+        help_text=_('Enable or disable a custom field'),
+        default=True,
+    )
     type = models.CharField(
         default='text',
         blank=True,
@@ -221,25 +242,25 @@ class FriendshipStatus(models.StatusModel):
     STATUS = models.Choices(
         ('pending', _('pending')),
         ('friend', _('friend')),
-        ('colleague', _('colleague')),
+        ('acquaintance', _('acquaintance')),
         ('unfriend', _('unfriend'))
     )
 
-    self = models.ForeignKey(models.User, related_name='associated')
+    owner = models.ForeignKey(models.User, related_name='associated')
     other = models.ForeignKey(models.User, related_name='associated_as_other')
 
     class Meta:
-        unique_together = ('self', 'other'),
+        unique_together = ('owner', 'other'),
 
     def save(self, *args, **kwds):
         super().save(*args, **kwds)
 
         try:
-            FriendshipStatus.objects.get(self=self.other, other=self.self)
+            FriendshipStatus.objects.get(owner=self.other, other=self.owner)
         except FriendshipStatus.DoesNotExist:
             FriendshipStatus(
-                    self=self.other,
-                    other=self.self,
+                    owner=self.other,
+                    other=self.owner,
                     status='pending').save()
 
 
@@ -259,20 +280,50 @@ class UserMixin:
     def is_person(self):
         return hasattr(self, 'person')
 
+    def _filtered(self, status):
+        pks = self.associated.filter(status=status)\
+            .values_list('other', flat=True)
+        return models.User.objects.filter(pk__in=pks)
+
     @property
     def friends(self):
-        return self.associated.filter(status='friend')
+        return self._filtered('friend')
 
     @property
     def unfriends(self):
-        return self.associated.filter(status='unfriend')
+        return self._filtered('unfriend')
 
     @property
-    def colleagues(self):
-        return self.associated.filter(status='colleague')
+    def acquaintances(self):
+        return self._filtered('acquaintance')
 
     @property
     def friends_pending(self):
-        return self.associated_as_other.filter(status='pending')
+        return self._filtered('pending')
+
+    def _multi_select(self, field):
+        courses = self.enrolled_courses
+        if not courses:
+            return []
+        first, *tail = courses.all()
+        users = getattr(first, field).all()
+        for course in tail:
+            users |= getattr(course, field).all()
+        users = users.exclude(pk=self.pk)
+        return users.distinct()
+
+    @property
+    def colleagues(self):
+        return self._multi_select('students')
+
+    @property
+    def staff_contacts(self):
+        return self._multi_select('staff')
+
+    @property
+    def teacher_contacts(self):
+        pks = self.enrolled_courses.values_list('teacher', flat=True)
+        return models.User.objects.filter(pk__in=pks).distinct()
+
 
 models.User.__bases__ = (UserMixin,) + models.User.__bases__

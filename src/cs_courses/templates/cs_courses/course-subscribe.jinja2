@@ -1,0 +1,20 @@
+<h2>{{ _('Available courses') }}</h2>
+
+<selectable-actions data-id="{{ user.username }}">
+    <paper-menu>
+    {% for course in courses %}
+        <paper-item data-id="{{ course.pk }}">
+            <div>
+                <p><h4>{{ course.name }}</h4></p>
+                <p>{{ course.short_description }} ({{ gettext('Prof. %(name)s')|format(name=course.teacher.get_full_name()) }})</p>
+            </div>
+        </paper-item>
+    {% endfor %}
+    </paper-menu>
+
+    <nav>
+        <paper-button requires-single action="cs-courses.do-subscribe">
+            {{ _('Subscribe') }}
+        </paper-button>
+    </nav>
+</selectable-actions>

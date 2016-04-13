@@ -114,13 +114,13 @@ AUTH_PROFILE_MODULE = 'cs_auth.Profile'
 USERENA_SIGNIN_REDIRECT_URL = '/accounts/%(username)s/'
 USERENA_ACTIVATION_REQUIRED = False
 USERENA_SIGNIN_AFTER_SIGNUP = True
-USERENA_PROFILE_DETAIL_TEMPLATE = 'cs_auth/profile_detail.jinja2'
 USERENA_DISABLE_PROFILE_LIST = True
 USERENA_ACTIVATION_DAYS = 7
 USERENA_FORBIDDEN_USERNAMES = (
     'signup', 'signout', 'signin', 'activate', 'me', 'password', 'login',
     'codeschool')
 USERENA_USE_HTTPS = False
+USERENA_REGISTER_PROFILE = False
 
 LOGIN_URL = '/accounts/signin/'
 LOGOUT_URL = '/accounts/signout/'
@@ -148,7 +148,7 @@ ROOT_URLCONF = 'codeschool.urls'
 # Templates
 # we have to import filters explicitly until a bug is fixed in djinga.
 
-from codeschool.jinja.filters import markdown
+from codeschool.jinja.filters import markdown, icon
 from codeschool.jinja.compat import django_compat_finalizer
 import codeschool.jinja.ext
 
@@ -203,6 +203,7 @@ TEMPLATES = [
             ],
             "filters": {
                 'markdown': markdown,
+                'icon': icon,
             }
         }
     },

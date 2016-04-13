@@ -34,49 +34,31 @@ class QuestionBase(admin.ModelAdmin):
         return bool(obj.comment)
 
 
-@admin.register(models.CodingIoQuestion)
+@admin.register(models.io.CodingIoQuestion)
 class CodingIoQuestionAdmin(QuestionBase):
     # Inline models
     class AnswerKeyInline(admin.StackedInline):
-        model = models.CodingIoAnswerKey
-        fields = ('language', 'source', 'placeholder')
+        model = models.io.CodingIoAnswerKey
+        fields = ('language', 'source', 'placeholder', 'is_valid')
+        readonly_fields = ('is_valid',)
         extra = 0
 
     inlines = [AnswerKeyInline]
 
     # Actions
-    def remove_computed_answers(self, modeladmin, request, queryset):
-        queryset.update(response_computed_template='')
-    remove_computed_answers.short_description = 'Remove computed responses'
+    def update_answers(self, request, questions):
+        for question in questions:
+            question.update()
+    update_answers.short_description = _('Update answer keys')
 
-    actions = ['remove_computed_answers']
+    actions = ['update_answers']
 
     # Overrides and other configurations
-    list_display = QuestionBase.list_display + ('timeout',)
+    list_display = QuestionBase.list_display + ('timeout', 'status')
     fieldsets = copy.deepcopy(QuestionBase.fieldsets)
-    fieldsets[0][1]['fields'] += ('iospec', 'iospec_size')
+    fieldsets[0][1]['fields'] += ('iospec_source', 'iospec_size')
     fieldsets[1][1]['fields'] += ('timeout',)
 
-
-@admin.register(models.IoSpecExpansion)
-class IoSpecExpansionAdmin(admin.ModelAdmin):
-    list_display = ['__str__', 'valid_count', 'invalid_count', 'needs_expansion']
-    filter_horizontal = ['validated_languages', 'invalid_languages']
-
-    def valid_count(self, obj):
-        return obj.validated_languages.count()
-
-    def invalid_count(self, obj):
-        return obj.invalid_languages.count()
-
-    def incomplete_count(self, obj):
-        return len(obj.get_new_languages())
-
-    valid_count.verbose_name = _('# validated')
-    invalid_count.verbose_name = _('# invalid')
-    incomplete_count.verbose_name = _('# not analyzed')
-
-
 admin.site.register(models.QuestionActivity)
-admin.site.register(models.CodingIoActivity)
-admin.site.register(models.CodingIoFeedback)
+admin.site.register(models.io.CodingIoActivity)
+admin.site.register(models.io.CodingIoFeedback)

@@ -70,7 +70,7 @@
             <li><a href="#" class="disabled-link">Opções</a></li>
             <li><a href="#" class="disabled-link">Avisos</a></li>
             <li><a href="/courses/">Cursos</a></li>
-            <li><a href="/login/">Login</a></li>
+            <li><a href="/accounts/login/">Login</a></li>
             {%  if user.first_name %}
                 {% set first_letter=user.first_name[0] %}
             {% else %}
@@ -83,35 +83,28 @@
     <div id="content-area">
         <nav>
             <ul>
-            {% for section in nav_sections %}
-                <li>
-                    <p>{{ section.title }}</p>
-                    <ul>
-                    {% for item in section.items %}
-                        <li><a href="{{ item.url }}">{{ item.name }}</a></li>
-                    </ul>
-                    {% endfor %}
-                </li>
-            {% endfor %}
-                <li>
-                    <p>Curso</p>
-                    <ul>
-                        <li class="disabled-link">Atividades</li>
-                        <li class="disabled-link">Material de apoio</li>
-                        <li class="disabled-link">Fórum de mensagens</li>
-                        <li class="disabled-link">Notas</li>
-                        <li class="disabled-link">Opções</li>
-                    </ul>
-                </li>
-
-                <li>
-                    <p>Perfil</p>
-                    <ul>
-                        <li><a href="/courses/">Página inicial</a></li>
-                        <li class="disabled-link">Amigos</li>
-                        <li class="disabled-link">Configurações</li>
-                    </ul>
-                </li>
+            {% block nav_sections %}
+                {% if not disable_courses_section %}
+                    <li>
+                        <p>{{ _('Courses') }}</p>
+                        <ul>
+                            {% for course in user.related_courses %}
+                                <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endif %}
+                {% if not disable_profile_section %}
+                    <li>
+                        <p>{{ _('Profile') }}</p>
+                        <ul>
+                            <li><a href="/accounts/{{ user.username }}/edit">{{ _('Edit') }}</a></li>
+                            <li class="disabled-link">Amigos</li>
+                            <li class="disabled-link">Configurações</li>
+                        </ul>
+                    </li>
+                {% endif %}
+            {% endblock %}
             </ul>
             <img src="{% static 'img/dingbat.svg' %}">
         </nav>
@@ -124,7 +117,7 @@
 
     <footer id="nav-footer">
         <div class="flex">
-            <p>Amigos</p>
+            <p>Amigos (em construção)</p>
             <ul>
                 <li>Fulano fez isso</li>
                 <li>Cicrano fez aquilo</li>
@@ -133,7 +126,7 @@
         </div>
 
         <div class="flex">
-            <p>Agenda</p>
+            <p>Agenda (em construção)</p>
             <ul>
                 <li>Prova dia X</li>
                 <li>Trabalho para dia Y</li>
@@ -142,7 +135,7 @@
         </div>
 
         <div class="flex">
-            <p>Notícias</p>
+            <p>Notícias (em construção)</p>
             <ul>
                 <li>Adicionou notas</li>
                 <li>Mensagem do prof. CB</li>

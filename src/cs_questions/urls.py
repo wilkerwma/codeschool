@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     url('^$', views.index),
-    url('^(\d+)/$', views.question_io, name='view-io-question'),
-    url('^(\d+)/download/$', views.question_io_download, name='download-io-question'),
-    url('^io/new/$', views.new_coding_io_question, name='new-coding-io-question'),
+    url('^(\d+)/$', views.question_detail, name='question-detail'),
+    url('^(\d+)/([a-z0-9-/]+)/$', views.question_action, name='question-action'),
+    url('^new/([a-z0-9-]+)/$', views.question_new, name='question-new'),
 ]

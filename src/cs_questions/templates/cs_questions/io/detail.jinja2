@@ -1,20 +1,42 @@
-{% extends "base.jinja2" %}
+{% extends "cs_questions/base.jinja2" %}
 
 {% block extra_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'bower_components/codemirror/lib/codemirror.css' %}">
 {% endblock %}
 
 {% block style %}
+    {{ super() }}
     <style>
-    .iospec-testcase {
-        padding-left: 30px;
-    }
-    .iospec-testcase h4 {
-        margin-left: -20px;
-    }
-    .iospec-input {
-        color: darkred;
-    }
+        .iospec-testcase {
+            padding-left: 30px;
+        }
+        .iospec-testcase h4 {
+            margin-left: -20px;
+        }
+        .iospec-input {
+            color: darkred;
+        }
+        .input-button {
+            text-align: right;
+            margin: 20px;
+            margin-right: 40px;
+        }
+        .code-area {
+            background: #f3f3f3;
+            padding: 20px 40px;
+            margin: 20px 0;
+            margin-bottom: 0;
+        }
+        .question-input {
+            margin: 0;
+            padding: 0 !important;
+        }
+        .question-description {
+            padding: 20px 40px;
+        }
+        .question-input > h2 {
+            margin-left: 20px;
+        }
     </style>
 {% endblock %}
 
@@ -55,22 +77,48 @@
           <a id href="{{ download_url }}" title="Baixar questão">&crarr;</a>
           {% endif %}
         </h1>
+        <p>{{ question.short_description }}</p>
+        <div class="rules-box">
+            <h3>{{ _('Rules') }}</h3>
+            <dl>
+                <dt>{{ _('Maximum runtime') }}</dt>
+                <dd>{{ gettext('%(time)s seconds')|format(time=question.timeout) }}</dd>
+            </dl>
+        </div>
 
-        <article class="question-description">
-        {{ question.long_description|markdown }}
-        </article>
     </section>
 
     <div class="question-input">
-        <h2>Resposta</h2>
+        <article class="question-description">
+        {{ question.long_description|markdown }}
+        </article>
+
         <form action="{{ form_action|default('') }}" method="post">
             {% csrf_token %}
-            <textarea id="codemirror-input" name="source">{{ placeholder_text }}</textarea>
-            {% if not hide_button -%}
-            <br>
-            <input class="question-input-button" type="submit" name="send" value="Enviar"/>
+            <div class="code-area">
+                <h2>{{ _('Response') }}</h2>
+                {% if not lang %}
+                    <div>
+                        Programming language:
+                        <select name="lang">
+                            {% for plang in languages %}
+                                <option value="{{ plang.ref }}" {% if plang.ref == selected_lang %}selected{% endif %}>{{ plang.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                {% else %}
+                    <input type="hidden" name="lang" value="{{ plang.ref }}">
+                {% endif %}
+                {% if activity %}
+                    <input type="hidden" name="activity" value="{{ activity }}">
+                {% endif %}
+
+                <textarea id="codemirror-input" name="source">{{ source_code or question.get_placehoder(lang) }}</textarea>
+                <div class="input-button">
+                    <input class="question-input-button" type="submit" name="send" value="Enviar"/>
+                </div>
+            </div>
         </form>
-        {%- endif %}
     </div>
 
     {# Input area #}

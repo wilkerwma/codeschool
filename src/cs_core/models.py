@@ -20,6 +20,12 @@ class ProgrammingLanguage(models.Model):
     __populated = False
 
     @classmethod
+    def from_ref(cls, ref):
+        """Return the programming language object from the given ref."""
+
+        return cls.objects.get(ref=ref)
+
+    @classmethod
     def populate(cls):
         if not cls.__populated:
             for line in supported_languages.strip().splitlines():
@@ -45,3 +51,10 @@ try:
     ProgrammingLanguage.populate()
 except OperationalError:
     pass
+
+
+def cs_lang(ref):
+    """Return the ProgrammingLanguage object associated with the given language
+    reference"""
+
+    return ProgrammingLanguage.from_ref(ref)

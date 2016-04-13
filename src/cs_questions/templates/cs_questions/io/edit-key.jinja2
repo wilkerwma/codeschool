@@ -1,0 +1,11 @@
+<h1>{{ question.title }}: {{ language.name }} ({{ _('answer key') }})</h1>
+
+<form method="POST" action="{{ question.get_absolute_url() }}edit-key/{{ key.pk }}/">
+    {% csrf_token %}
+    <paper-dialog-scrollable style="min-height: 50vh; min-width: 50vw">
+        <table>
+            {{ form.as_table() }}
+        </table>
+    </paper-dialog-scrollable>
+<input type="submit" name="input" value="{{ _('Submit') }}">
+</form>
