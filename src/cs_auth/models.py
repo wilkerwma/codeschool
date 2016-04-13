@@ -317,7 +317,7 @@ class UserMixin:
         for course in tail:
             users |= getattr(course, field).all()
         users = users.exclude(pk=self.pk)
-        return users.order_by('first_name', 'username').distinct('username')
+        return users.order_by('first_name', 'username').distinct()
 
     @property
     def colleagues(self):
