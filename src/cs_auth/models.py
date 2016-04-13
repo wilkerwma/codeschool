@@ -44,7 +44,11 @@ class Profile(UserenaBaseProfile):
 
     @property
     def contact_classes(self):
-        user  = self.user
+        try:
+            user = super().__getattribute__('user')
+        except AttributeError:
+            return [[], [], []]
+
         lists = [
             user.friends.order_by('first_name'),
             user.staff_contacts.order_by('first_name'),
