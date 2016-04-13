@@ -302,10 +302,10 @@ class UserMixin:
         return self._filtered('pending')
 
     def _multi_select(self, field):
-        courses = self.enrolled_courses
+        courses = list(self.enrolled_courses.all())
         if not courses:
             return []
-        first, *tail = courses.all()
+        first, *tail = courses
         users = getattr(first, field).all()
         for course in tail:
             users |= getattr(course, field).all()
