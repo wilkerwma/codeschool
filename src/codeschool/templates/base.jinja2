@@ -86,8 +86,9 @@
             {% block nav_sections %}
                 {% if not disable_courses_section %}
                     <li>
-                        <p>{{ _('Courses') }}</p>
+                        <p><a href="/courses/">{{ _('Courses') }}</a></p>
                         <ul>
+                            <li><a href="/questions/">{{ _('List of quesions') }}</a></li>
                             {% for course in user.related_courses %}
                                 <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
                             {% endfor %}
@@ -96,7 +97,7 @@
                 {% endif %}
                 {% if not disable_profile_section %}
                     <li>
-                        <p>{{ _('Profile') }}</p>
+                        <p><a href="/accounts/{{ user.username }}/">{{ _('Profile') }}</a></p>
                         <ul>
                             <li><a href="/accounts/{{ user.username }}/edit">{{ _('Edit') }}</a></li>
                             <li class="disabled-link">Amigos</li>

@@ -113,7 +113,7 @@
                     <input type="hidden" name="activity" value="{{ activity }}">
                 {% endif %}
 
-                <textarea id="codemirror-input" name="source">{{ source_code or question.get_placehoder(lang) }}</textarea>
+                <textarea id="codemirror-input" name="source">{{ source_code or question.get_placeholder(lang) }}</textarea>
                 <div class="input-button">
                     <input class="question-input-button" type="submit" name="send" value="Enviar"/>
                 </div>

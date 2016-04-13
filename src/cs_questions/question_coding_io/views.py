@@ -19,9 +19,11 @@ from cs_questions.question_coding_io.models import (
 
 class QuestionViews:
     def new(self, request):
+        #TODO: redirect to edit form ASAP
         context = {}
-        form = QuestionEditForm(request.POST)
         import_form = ImportQuestionForm()
+        form = QuestionEditForm(request.POST)
+        question = None
 
         if request.FILES:
             data = request.FILES['file'].read().decode('utf8')
@@ -37,11 +39,16 @@ class QuestionViews:
                 context['import_error'] = question.status
                 question.delete()
 
-        if request.method == 'POST':
+        elif request.method == 'POST':
             if form.is_valid():
+                question = form.save(commit=False)
                 question.owner = request.user
+                for f in ['iospec_size', 'timeout']:
+                    if getattr(question, f) is None:
+                        data = question._meta.get_field(f).default
+                        setattr(question, f, data)
                 question = form.save()
-                return redirect('../../%s/edit_keys' % question.pk)
+                return redirect('../../%s/edit' % question.pk)
 
         context.update(form=form, import_form=import_form)
         return render(request, 'cs_questions/io/new.jinja2', context)

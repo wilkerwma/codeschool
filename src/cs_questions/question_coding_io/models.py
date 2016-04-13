@@ -33,7 +33,7 @@ class CodingIoQuestion(Question, models.StatusModel):
     )
     iospec_size = models.PositiveIntegerField(
         _('number of iospec template expansions'),
-        default=10,
+        default=0,
         blank=True,
         help_text=_('The desired number of test cases that will be computed'
                     'after comparing the iospec template with the answer key.'
@@ -50,6 +50,7 @@ class CodingIoQuestion(Question, models.StatusModel):
     )
     timeout = models.FloatField(
             _('timeout in seconds'),
+            blank=True,
             default=5.0,
             help_text=_('Defines the maximum runtime the grader will spend '
                         'evaluating each test case.'),
@@ -247,16 +248,16 @@ class CodingIoQuestion(Question, models.StatusModel):
         else:
             return None
 
-    def get_placeholder(self, lang):
+    def get_placeholder(self, language):
         """Return the placeholder text for the given language."""
 
-        if isinstance(lang, str):
+        if isinstance(language, str):
             try:
-                lang = ProgrammingLanguage.get(ref=lang)
+                language = ProgrammingLanguage.objects.get(ref=language)
             except ProgrammingLanguage.DoesNotExist:
                 return ''
         try:
-            key = self.answer_keys.get(lang=lang)
+            key = self.answer_keys.get(language=language)
             return key.placeholder
         except CodingIoAnswerKey.DoesNotExist:
             return ''

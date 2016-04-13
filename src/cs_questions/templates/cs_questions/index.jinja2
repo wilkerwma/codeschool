@@ -1,9 +1,30 @@
 {% extends "base.html" %}
 
+{% block style %}
+    <style>
+        main > div > ul > li {
+            padding: 10px;
+        }
+
+        main > div > ul > li  a {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <ul>
-        {% for question in questions %}
-            <li><a href="./{{ question.pk }}/">{{ question.title }}: {{ question.short_description }}</a></li>
-        {% endfor %}
-    </ul>
+    <div>
+        <h1>{{ _('List of questions') }}</h1>
+    </div>
+    <div>
+        <ul>
+            {% for question in questions %}
+                <li>
+                    <p><a href="./{{ question.pk }}/">{{ question.title }}</a></p>
+                    <p>{{ question.short_description }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}
