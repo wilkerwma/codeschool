@@ -9,7 +9,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('ranking', '0002_auto_20160330_1755'),
+        ('cs_ranking', '0002_auto_20160330_1755'),
     ]
 
     operations = [
@@ -24,6 +24,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='battle',
             name='battle_result',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='battles', to='ranking.BattleResult'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='battles', to='cs_ranking.BattleResult'),
         ),
     ]
