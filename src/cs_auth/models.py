@@ -44,10 +44,11 @@ class Profile(UserenaBaseProfile):
 
     @property
     def contact_classes(self):
+        user  = self.user
         lists = [
-            self.user.friends.order_by('first_name'),
-            self.staff_contacts.order_by('first_name'),
-            self.colleagues.order_by('first_name')
+            user.friends.order_by('first_name'),
+            user.staff_contacts.order_by('first_name'),
+            user.colleagues.order_by('first_name')
         ]
         return lists
 
