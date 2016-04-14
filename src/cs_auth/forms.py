@@ -1,52 +1,52 @@
 from django import forms
+from django.utils.translation import ugettext_lazy as _
+from userena.forms import SignupForm as _SignupForm
+from userena.forms import (USERNAME_RE, attrs_dict)
+from cs_auth.models import Profile
 
 
-class LoginForm(forms.Form):
-    username = forms.CharField(
-        label='Matrícula',
-        max_length=20,
-        required=True,
-    )
-    password = forms.CharField(
-        label='Senha',
+class SignupForm(forms.Form):
+    first_name = forms.CharField(
+        label=_('First name'),
         max_length=100,
-        widget=forms.PasswordInput,
     )
-
-
-class RegisterForm(forms.Form):
-    username = forms.CharField(
-        label='Matrícula',
-        max_length=20,
-        required=True,
+    last_name = forms.CharField(
+        label=_('Last name'),
+        max_length=100,
     )
-
+    username = forms.RegexField(
+        regex=USERNAME_RE,
+        max_length=30,
+        widget=forms.TextInput(attrs=attrs_dict),
+        label=_("Username"),
+        error_messages={
+            'invalid': _('Username must contain only letters, numbers, dots '
+                         'and underscores.')
+        }
+    )
     email = forms.EmailField(
-        required=True,
+        widget=forms.TextInput(attrs=dict(attrs_dict, maxlength=75)),
+        label=_("Email")
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs=attrs_dict,
+        render_value=False),
+        label=_("Create password")
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs=attrs_dict,
+        render_value=False),
+        label=_("Repeat password")
     )
 
-    name = forms.CharField(
-        label='Nome',
-        max_length=200,
-        required=True,
-    )
+    # Patch methods from SignupForm
+    clean_username = _SignupForm.clean_username
+    clean_email = _SignupForm.clean_email
+    clean = _SignupForm.clean
+    save = _SignupForm.save
 
-    surname = forms.CharField(
-        label='Sobrenome',
-        max_length=200,
-        required=True,
-    )
 
-    password = forms.CharField(
-        label='Senha',
-        max_length=100,
-        widget=forms.PasswordInput,
-        required=True,
-    )
-
-    password_confirmation = forms.CharField(
-        label='Confirme a senha',
-        max_length=100,
-        widget=forms.PasswordInput,
-        required=True,
-    )
+class SignupOptionalForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['gender', 'date_of_birth', 'about_me']

@@ -1,0 +1,53 @@
+{% extends "base-tabbed.jinja2" %}
+
+{% block content_title %}{{ _('Welcome to Codeschool!') }}{% endblock %}
+
+{% block tab_titles %}
+    <paper-tab>{{ _('Login') }}</paper-tab>
+    <paper-tab>{{ _('New users') }}</paper-tab>
+{% endblock %}
+
+{% block tab_pages %}
+    <section>
+        <form id="signin-form" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action-type" value="signin">
+            <table class="form">
+                {% if action == 'signin' %}
+                    {{ form.as_table() }}
+                {% else %}
+                    {{ signin.as_table() }}
+                {% endif %}
+            </table>
+        </form>
+    </section>
+
+    <section>
+        <form id="signup-form" method="POST">
+            <input type="hidden" name="action-type" value="signup">
+            {% csrf_token %}
+            <h3>{{ _('Required fields') }}</h3>
+            <table class="form">
+                {% if action == 'signup' %}
+                    {{ form.as_table() }}
+                {% else %}
+                    {{ signup.as_table() }}
+                {% endif %}
+            </table>
+            <h3>{{ _('Optional fields') }}</h3>
+            <table class="form">{{ signup_opt.as_table() }}</table>
+        </form>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        function submit() {
+            if ($('#ternary-tabs')[0].selected === 0) {
+                $('#signin-form')[0].submit();
+            } else {
+                $('#signup-form')[0].submit();
+            }
+        }
+    </script>
+{% endblock %}

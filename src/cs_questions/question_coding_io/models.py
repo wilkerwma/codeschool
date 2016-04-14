@@ -248,16 +248,16 @@ class CodingIoQuestion(Question, models.StatusModel):
         else:
             return None
 
-    def get_placeholder(self, language):
+    def get_placeholder(self, lang):
         """Return the placeholder text for the given language."""
 
-        if isinstance(language, str):
+        if isinstance(lang, str):
             try:
-                language = ProgrammingLanguage.objects.get(ref=language)
+                lang = ProgrammingLanguage.objects.get(ref=lang)
             except ProgrammingLanguage.DoesNotExist:
                 return ''
         try:
-            key = self.answer_keys.get(language=language)
+            key = self.answer_keys.get(language=lang)
             return key.placeholder
         except CodingIoAnswerKey.DoesNotExist:
             return ''

@@ -50,7 +50,7 @@
     {% endblock %}
 </head>
 
-<body class="fullbleed layout vertical{% block body_class %}{% if body_class %} {{ body_class }}{% endif %}{% endblock %}">
+<body class="{% block body_class %}fullbleed layout vertical{% if body_class %} {{ body_class }}{% endif %}{% endblock %}">
     <!--[if lt IE 8]>
         <p class="browserupgrade">
             You are using an <strong>outdated</strong> browser. Please

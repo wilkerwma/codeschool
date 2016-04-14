@@ -1,0 +1,203 @@
+.form td, th {
+    font-size: 13px;
+    line-height: 16px;
+    vertical-align: top;
+    padding: 8px;
+    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif;
+}
+
+.form th {
+    font-weight: 600;
+    text-align: left;
+}
+
+.form thead th,
+.form tfoot td {
+    color: #666;
+    padding: 5px 10px;
+    font-size: 11px;
+    background: #fff;
+}
+
+.form tr.alt {
+    background: #f6f6f6;
+}
+
+.row1 {
+    background: #fff;
+}
+
+.row2 {
+    background: #f9f9f9;
+}
+
+/* SORTABLE TABLES */
+
+.form thead th {
+    padding: 5px 10px;
+    line-height: normal;
+    text-transform: uppercase;
+    background: #f6f6f6;
+}
+
+.form thead th a:link, thead th a:visited {
+    color: #666;
+}
+
+.form thead th.sorted {
+    background: #eee;
+}
+
+.form thead th.sorted .text {
+    padding-right: 42px;
+}
+
+table.form thead th .text span {
+    padding: 8px 10px;
+    display: block;
+}
+
+table.form thead th .text a {
+    display: block;
+    cursor: pointer;
+    padding: 8px 10px;
+}
+
+table.form thead th .text a:focus, table.form thead th .text a:hover {
+    background: #eee;
+}
+
+.form thead th.sorted a.sortremove {
+    visibility: hidden;
+}
+
+table.form thead th.sorted:hover a.sortremove {
+    visibility: visible;
+}
+
+table.form thead th.sorted .sortoptions {
+    display: block;
+    padding: 9px 5px 0 5px;
+    float: right;
+    text-align: right;
+}
+
+table.form thead th.sorted .sortpriority {
+    font-size: .8em;
+    min-width: 12px;
+    text-align: center;
+    vertical-align: 3px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+table.form thead th.sorted .sortoptions a {
+    position: relative;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    background: url(../img/sorting-icons.svg) 0 0 no-repeat;
+    background-size: 14px auto;
+}
+
+table.form thead th.sorted .sortoptions a.sortremove {
+    background-position: 0 0;
+}
+
+table.form thead th.sorted .sortoptions a.sortremove:after {
+    position: absolute;
+    top: -6px;
+    left: 3px;
+    font-weight: 200;
+    font-size: 18px;
+    color: #999;
+}
+
+table.form thead th.sorted .sortoptions a.sortremove:focus:after,
+table.form thead th.sorted .sortoptions a.sortremove:hover:after {
+    color: #447e9b;
+}
+
+table.form thead th.sorted .sortoptions a.sortremove:focus,
+table.form thead th.sorted .sortoptions a.sortremove:hover {
+    background-position: 0 -14px;
+}
+
+table.form thead th.sorted .sortoptions a.ascending {
+    background-position: 0 -28px;
+}
+
+table.form thead th.sorted .sortoptions a.ascending:focus,
+table.form thead th.sorted .sortoptions a.ascending:hover {
+    background-position: 0 -42px;
+}
+
+table.form thead th.sorted .sortoptions a.descending {
+    top: 1px;
+    background-position: 0 -56px;
+}
+
+table.form thead th.sorted .sortoptions a.descending:focus,
+table.form thead th.sorted .sortoptions a.descending:hover {
+    background-position: 0 -70px;
+}
+
+
+.form .button,
+.form input[type=submit],
+.form input[type=button],
+.form .submit-row input,
+.form a.button {
+    background: #79aec8;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.form a.button {
+    padding: 4px 5px;
+}
+
+.form .button:active,
+.form input[type=submit]:active,
+.form input[type=button]:active,
+.form .button:focus,
+.form input[type=submit]:focus,
+.form input[type=button]:focus,
+.form .button:hover,
+.form input[type=submit]:hover,
+.form input[type=button]:hover {
+    background: #609ab6;
+}
+
+.form .button[disabled],
+.form input[type=submit][disabled],
+.form input[type=button][disabled] {
+    opacity: 0.4;
+}
+
+.form .button.default,
+.form input[type=submit].default,
+.form .submit-row input.default {
+    float: right;
+    border: none;
+    font-weight: 400;
+    background: #417690;
+}
+
+.form .button.default:active,
+.form input[type=submit].default:active,
+.form .button.default:focus,
+.form input[type=submit].default:focus,
+.form .button.default:hover,
+.form input[type=submit].default:hover {
+    background: #205067;
+}
+
+.form .button[disabled].default,
+.form input[type=submit][disabled].default,
+.form input[type=button][disabled].default {
+    opacity: 0.4;
+}

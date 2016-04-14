@@ -6,8 +6,9 @@
 @import 'footer.css';
 @import 'dialogs.css';
 @import 'config.css';
-@import 'admin.css';
 @import 'userena.css';
+@import 'ternary.css';
+@import 'forms.css';
 
 paper-item > a {
     display: block;

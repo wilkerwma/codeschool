@@ -1,13 +1,13 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib import admin
-from django.views.generic.base import RedirectView
+from cs_auth import views as auth_views
 from cs_search import views as search_views
 
 
 urlpatterns = [
     # Basic wagtail/django functionality
-    url(r'^$', RedirectView.as_view(url='/accounts/login/', permanent=False)),
+    url(r'^$', auth_views.index, name='index'),
     url(r'^django-admin/', include(admin.site.urls)),
     url(r'^admin/', include('wagtail.wagtailadmin.urls')),
     url(r'^documents/', include('wagtail.wagtaildocs.urls')),
@@ -16,13 +16,9 @@ urlpatterns = [
 
     # RPC and api
     url(r'^srvice/', include('srvice.urls')),
-    #url(r'^api/', include(core_urls.router.urls)),
-    #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 
     # Authentication
-    url(r'^accounts/login/$', 'cs_auth.views.login', name='login-page'),
-    url(r'^accounts/', include('userena.urls')),
-    url(r'^login/$', RedirectView.as_view(url='/auth/', permanent=False)),
+    url(r'^accounts/', include('cs_auth.urls')),
 
     # Local apps and functionality
     url(r'^courses/', include('cs_courses.urls')),

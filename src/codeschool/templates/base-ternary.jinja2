@@ -1,0 +1,27 @@
+{% extends "base.jinja2" %}
+
+{% block body_class %}ternary {{ super() }}{% endblock %}
+
+{% block body %}
+    {% block opening_content_tag %}
+        {% if is_dom_bind|default(True) %}<template is="dom-bind">{% endif %}
+    {% endblock %}
+    <header>
+        {% block header %}
+            <h1>{% block content_title %}{% endblock %}</h1>
+        {% endblock %}
+    </header>
+
+    <main>
+        {% block main %}{% endblock %}
+    </main>
+
+    <footer>
+        {% block footer %}
+            <paper-button raised onclick="submit()">Avançar</paper-button>
+        {% endblock %}
+    </footer>
+    {% block closing_content_tag %}
+        {% if is_dom_bind|default(True) %}</template>{% endif %}
+    {% endblock %}
+{% endblock %}
