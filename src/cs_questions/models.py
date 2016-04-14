@@ -1,11 +1,10 @@
 from django.utils.translation import ugettext_lazy as _
 from django.core.urlresolvers import reverse as url_reverse
 from model_utils.managers import InheritanceManager
-from wagtail.wagtailcore.fields import RichTextField
 from codeschool import models
 from codeschool.shortcuts import delegation
 from cs_courses.models import Discipline
-from cs_activities.models import Activity
+from cs_activities.models import Activity, Feedback, Response
 
 
 class Question(models.TimeStampedModel):
@@ -49,6 +48,9 @@ class Question(models.TimeStampedModel):
         help_text=_('User who created or uploaded this question.')
     )
     objects = InheritanceManager()
+    feedback_cls = Feedback
+    response_cls = Response
+    default_extension = '.md'
 
     class Meta:
         permissions = (("download_question", "Can download question files"),)
@@ -66,6 +68,27 @@ class Question(models.TimeStampedModel):
             return False
         return self.owner.pk == user.pk
 
+    def update(self):
+        """Tells question object to validate and update any fields necessary
+        to fulfill the validation.
+
+        The default implementation is empty. Subclasses may need to implement
+        some special logic here.
+        """
+
+    def export(self, type=None):
+        """Export question to the given data type.
+
+        This method can return NotImplemented to tell that the designated data
+        type is not supported."""
+
+        return NotImplemented
+
+    def grade(self, response):
+        """Return a Feedback object to the given response."""
+
+        return self.feedback_cls(response, self.answer == response.value)
+
 
 @delegation('question', ['long_description', 'short_description'])
 class QuestionActivity(Activity):
@@ -80,23 +103,81 @@ class QuestionActivity(Activity):
 # Derived question types
 #
 class FreeAnswerQuestion(Question):
-    pass
+    DATA_FILE = 'file'
+    DATA_IMAGE = 'image'
+    DATA_PDF = 'pdf'
+    DATA_PLAIN = 'plain'
+    DATA_RICHTEXT = 'richtext'
+    DATA_CHOICES = (
+        (DATA_FILE, _('Arbitary file')),
+        (DATA_IMAGE, _('Image file')),
+        (DATA_PDF, _('PDF file')),
+        (DATA_RICHTEXT, _('Rich text input')),
+        (DATA_RICHTEXT, _('Plain text input')),
+    )
+    metadata = models.TextField()
+    data_type = models.CharField(choices=DATA_CHOICES, max_length=10)
+    data_file = models.FileField(blank=True, null=True)
+
+
+class NumericResponse(Response):
+    value = models.FloatField(
+        _('Value'),
+        help_text=_('Your result (it must be a number)')
+    )
 
 
 class NumericQuestion(Question):
-    answer_start = models.FloatField()
-    answer_end = models.FloatField(blank=True, null=True)
-    is_exact = models.BooleanField(default=True)
+    answer = models.FloatField(
+        _('Answer'),
+        help_text=_('The numeric value for the correct answer')
+    )
+    tolerance = models.FloatField(
+        _('Tolerance'),
+        help_text=_('If given, defines the tolerance within responses are '
+                    'still considered to be correct'),
+        default=0,
+        blank=True,
+    )
+
+    response_cls = NumericResponse
+
+    @property
+    def is_exact(self):
+        return self.tolerance == 0
+
+    @property
+    def start(self):
+        return self.answer - abs(self.tolerance)
+
+    @property
+    def end(self):
+        return self.answer + abs(self.tolerance)
+
+    @property
+    def range(self):
+        return self.start, self.end
+
+    def grade(self, response):
+        x, y = self.range
+        grade = (1 if x <= response.value <= y else 0)
+        return Feedback(response=response, grade=grade)
 
 
 class BooleanQuestion(Question):
-    answer_key = models.BooleanField()
+    answer = models.BooleanField()
 
 
 class StringMatchQuestion(Question):
-    template = models.TextField()
+    answer = models.TextField()
     is_regex = models.BooleanField(default=True)
 
+    def grade(self, response):
+        if self.is_regex:
+            value = response.value
+
+        else:
+            return super().grade(response)
 
 # Import other default question types
 from cs_questions.question_coding_io import models as io

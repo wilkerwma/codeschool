@@ -1,6 +1,7 @@
 import datetime
 from codeschool import models
 from django.utils.translation import ugettext_lazy as _
+from codeschool.jinja.filters import markdown
 
 
 class Activity(models.InheritableModel, models.TimeFramedStatusModel):
@@ -86,6 +87,10 @@ class TextualResponse(Response):
 
     text = models.TextField()
 
+    @property
+    def value(self):
+        return self.text
+
 
 class Feedback(models.InheritableModel, models.TimeStampedModel, models.StatusModel):
     """
@@ -111,3 +116,19 @@ class Feedback(models.InheritableModel, models.TimeStampedModel, models.StatusMo
         blank=True,
         null=True,
     )
+
+    ok_message = '*Contratulations!* Your response is correct!'
+    wrong_message = 'I\'m sorry, your response is wrong.'
+    partial_message = 'Your answer is partially correct: you made %(grade)d%% of the total grade.'
+
+    def as_html(self):
+        data = {'grade': self.grade * 100}
+        if self.grade == 1:
+            return markdown(self.ok_message)
+        elif self.grade == 0:
+            return markdown(self.wrong_message)
+        else:
+            return markdown(self.partial_message % data)
+
+    def __str__(self):
+        return 'Feedback(%s, grade=%s)' % (self.response, self.grade)

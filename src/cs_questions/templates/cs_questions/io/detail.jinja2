@@ -1,4 +1,35 @@
-{% extends "cs_questions/base.jinja2" %}
+{% extends "cs_questions/base-detail.jinja2" %}
+
+{% block header_content %}
+    <div class="rules-box">
+        <h3>{{ _('Rules') }}</h3>
+        <dl>
+            <dt>{{ _('Maximum runtime') }}</dt>
+            <dd>{{ gettext('%(time)s seconds')|format(time=question.timeout) }}</dd>
+        </dl>
+    </div>
+{% endblock %}
+
+{% block question_input %}
+    <div class="code-area">
+        <h2>{{ _('Response') }}</h2>
+        {% if not lang %}
+            <div>
+                <p>Programming language:
+                    <select name="{{ form['language'].name }}">
+                        {% for plang in languages %}
+                            <option value="{{ plang.ref }}" {% if plang.ref == form['language'].value %}selected{% endif %}>{{ plang.name }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+            </div>
+        {% else %}
+            <input type="hidden" name="{{ form['language'].name }}" value="{{ form['language'].value }}">
+        {% endif %}
+
+        <table>{{ form['source'] }}</table>
+    </div>
+{% endblock %}
 
 {% block extra_css %}
     <link rel="stylesheet" type="text/css" href="{% static 'bower_components/codemirror/lib/codemirror.css' %}">
@@ -16,27 +47,6 @@
         .iospec-input {
             color: darkred;
         }
-        .input-button {
-            text-align: right;
-            margin: 20px;
-            margin-right: 40px;
-        }
-        .code-area {
-            background: #f3f3f3;
-            padding: 20px 40px;
-            margin: 20px 0;
-            margin-bottom: 0;
-        }
-        .question-input {
-            margin: 0;
-            padding: 0 !important;
-        }
-        .question-description {
-            padding: 20px 40px;
-        }
-        .question-input > h2 {
-            margin-left: 20px;
-        }
     </style>
 {% endblock %}
 
@@ -47,7 +57,7 @@
     <script>
         $(function () {
             var editor = CodeMirror.fromTextArea(
-                    document.getElementById('codemirror-input'),
+                    document.getElementById('id_source'),
                     {
                         mode: "python",
                         version: 3,
@@ -65,75 +75,4 @@
             });
         });
     </script>
-{% endblock %}
-
-{% block content %}
-    <section>
-    {% if can_download %}
-        <a href="./download"><i class="material-icons config-handle">file_download</i></a>
-    {% endif %}
-        <h1>{{ question.title }}
-          {% if can_download_question and download_url %}
-          <a id href="{{ download_url }}" title="Baixar questão">&crarr;</a>
-          {% endif %}
-        </h1>
-        <p>{{ question.short_description }}</p>
-        <div class="rules-box">
-            <h3>{{ _('Rules') }}</h3>
-            <dl>
-                <dt>{{ _('Maximum runtime') }}</dt>
-                <dd>{{ gettext('%(time)s seconds')|format(time=question.timeout) }}</dd>
-            </dl>
-        </div>
-
-    </section>
-
-    <div class="question-input">
-        <article class="question-description">
-        {{ question.long_description|markdown }}
-        </article>
-
-        <form action="{{ form_action|default('') }}" method="post">
-            {% csrf_token %}
-            <div class="code-area">
-                <h2>{{ _('Response') }}</h2>
-                {% if not lang %}
-                    <div>
-                        Programming language:
-                        <select name="lang">
-                            {% for plang in languages %}
-                                <option value="{{ plang.ref }}" {% if plang.ref == selected_lang %}selected{% endif %}>{{ plang.name }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                {% else %}
-                    <input type="hidden" name="lang" value="{{ plang.ref }}">
-                {% endif %}
-                {% if activity %}
-                    <input type="hidden" name="activity" value="{{ activity }}">
-                {% endif %}
-
-                <textarea id="codemirror-input" name="source">{{ source_code or question.get_placeholder(lang) }}</textarea>
-                <div class="input-button">
-                    <input class="question-input-button" type="submit" name="send" value="Enviar"/>
-                </div>
-            </div>
-        </form>
-    </div>
-
-    {# Input area #}
-    {% if feedback or grade %}
-        <article class="question-feedback">
-        <h2>Feedback</h2>
-        {% if grade == 100 %}
-        <p>
-          <strong>Parabéns!</strong>
-          Sua resposta está correta e foi registrada.
-        </p>
-        {% else %}
-        {{ feedback.as_html() }}
-        <p><strong>Aproveitamento: </strong> {{ grade }}%</p>
-        {% endif %}
-        </article>
-    {% endif %}
 {% endblock %}

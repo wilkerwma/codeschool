@@ -36,6 +36,7 @@
         font-weight: bold;
         flex-grow: 1;
         min-width: 180px;
+        max-width: 250px;
         width: 25%;
         color: #222;
     }
@@ -48,13 +49,17 @@
     }
 
     #content-area > nav p {
-        margin: 10px 0px;
+        margin: 10px 0 0;
     }
 
     #content-area > nav ul {
         list-style-type: none;
-        padding: 5px;
-        margin: 0px;
+        padding: 15px;
+        margin: 0;
+    }
+
+    #content-area > nav > ul ul {
+        margin-top: -10px;
     }
 
     #content-area a {

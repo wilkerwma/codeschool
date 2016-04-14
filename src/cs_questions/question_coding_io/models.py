@@ -12,9 +12,58 @@ from cs_core.models import ProgrammingLanguage
 from cs_questions.models import Question, QuestionActivity
 
 
-#
-# Programming related questions: question_types starts at 100 up to 999
-#
+class CodingIoResponse(Response):
+    source = models.TextField(
+        _('source code'),
+    )
+    language = models.ForeignKey(ProgrammingLanguage)
+
+
+class CodingIoFeedback(Feedback):
+    case = models.TextField()
+    answer_key = models.TextField()
+    version = models.CharField(max_length=32)
+    hint = models.TextField(blank=True)
+    message = models.TextField(blank=True)
+
+    @classmethod
+    def from_feedback(cls, feedback, response):
+        case = feedback.case
+        answer_key = feedback.answer_key
+
+        return CodingIoFeedback(
+            response=response,
+            grade=feedback.grade,
+            case=case.source(),
+            answer_key=answer_key.source(),
+            status=feedback.status or '',
+            hint=feedback.hint or '',
+            message=feedback.message or '',
+        )
+
+    @lazy
+    def _feedback(self):
+        case = parse_iospec(self.case)
+        answer_key = parse_iospec(self.answer_key)
+        return iospec.feedback.Feedback(
+            case, answer_key,
+            status=self.status, hint=self.hint, message=self.message
+        )
+
+    @property
+    def title(self):
+        return self._feedback.title
+
+    def as_html(self, *args, **kwds):
+        return self._feedback.as_html(*args, **kwds)
+
+    def as_text(self, *args, **kwds):
+        return self._feedback.as_text(*args, **kwds)
+
+    class Meta:
+        app_label = 'cs_questions'
+
+
 class CodingIoQuestion(Question, models.StatusModel):
     """CodeIo questions evaluates code and judge them by their inputs and
     outputs."""
@@ -56,6 +105,8 @@ class CodingIoQuestion(Question, models.StatusModel):
                         'evaluating each test case.'),
     )
     tracker = FieldTracker()
+    response_cls = CodingIoResponse
+    feedback_cls = CodingIoFeedback
 
     @lazy
     def iospec(self):
@@ -187,8 +238,11 @@ class CodingIoQuestion(Question, models.StatusModel):
         for key in self.answer_keys.exclude(iospec_hash=self.hash):
             key.update(validate=False)
 
-    def as_markio(self):
+    def export(self, type=None):
         """Render question as a Markio source"""
+
+        if type not in (None, 'markio'):
+            return NotImplemented
 
         import markio
 
@@ -407,56 +461,6 @@ class CodingIoAnswerKey(models.Model):
 
 class CodingIoActivity(QuestionActivity):
     answer_key = models.ForeignKey(CodingIoAnswerKey)
-
-    class Meta:
-        app_label = 'cs_questions'
-
-
-class CodingIoResponse(Response):
-    source = models.TextField()
-    language = models.ForeignKey(ProgrammingLanguage)
-
-
-class CodingIoFeedback(Feedback):
-    case = models.TextField()
-    answer_key = models.TextField()
-    version = models.CharField(max_length=32)
-    hint = models.TextField(blank=True)
-    message = models.TextField(blank=True)
-
-    @classmethod
-    def from_feedback(cls, feedback, response):
-        case = feedback.case
-        answer_key = feedback.answer_key
-
-        return CodingIoFeedback(
-            response=response,
-            grade=feedback.grade,
-            case=case.source(),
-            answer_key=answer_key.source(),
-            status=feedback.status or '',
-            hint=feedback.hint or '',
-            message=feedback.message or '',
-        )
-
-    @lazy
-    def _feedback(self):
-        case = parse_iospec(self.case)
-        answer_key = parse_iospec(self.answer_key)
-        return iospec.feedback.Feedback(
-            case, answer_key,
-            status=self.status, hint=self.hint, message=self.message
-        )
-
-    @property
-    def title(self):
-        return self._feedback.title
-
-    def as_html(self, *args, **kwds):
-        return self._feedback.as_html(*args, **kwds)
-
-    def as_text(self, *args, **kwds):
-        return self._feedback.as_text(*args, **kwds)
 
     class Meta:
         app_label = 'cs_questions'

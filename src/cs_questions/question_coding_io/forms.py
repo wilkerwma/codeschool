@@ -1,10 +1,6 @@
 from django.forms import ModelForm
-from django import forms
 from cs_questions.question_coding_io.models import CodingIoQuestion, CodingIoAnswerKey
-
-
-class ImportQuestionForm(forms.Form):
-    file = forms.FileField()
+from cs_questions.forms import *
 
 
 class QuestionEditForm(ModelForm):

@@ -133,13 +133,16 @@ paper-item > a {
 
 .box {
     padding: 20px;
-    border: 1px solid white;
-    border-radius: 5px;
+    border: 2px solid white;
+    background: rgba(0, 0, 0, 0.1);
     margin: 30px auto;
     max-width: 450px;
 }
-.box.file {
-    background: rgba(255, 255, 255, 0.2);
+.box.error {
+    background: rgba(172, 16, 16, 0.75);
+}
+.box.success {
+    background: rgba(78, 154, 6, 0.75);
 }
 
 #answer-keys {
@@ -171,4 +174,22 @@ paper-item > a {
 
 .dangerous {
     background-color: darkred !important;
+}
+
+.mugshot {
+    float: right;
+}
+
+
+.code-area {
+    background: #f3f3f3;
+    padding: 20px 40px;
+    margin: 20px -20px;
+    margin-bottom: 0;
+}
+
+@media screen and (min-width: 1000px) {
+    .code-area {
+        margin-left: -40px;
+    }
 }

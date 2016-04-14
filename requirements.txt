@@ -1,3 +1,4 @@
+ejudge
 wagtail
 django
 -e .
