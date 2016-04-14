@@ -1,3 +1,16 @@
+$.fn.submitWith = function(data) {
+    var select;
+    form = this[0];
+
+    for (var k in data) {
+        select = $(form).find('[name=%s]'.replace('%s', k))[0];
+        select.value = data[k];
+    }
+
+    return $(form).submit();
+};
+
+
 $(function() {
     // Make sortable-js understand the sync-api and sync-id attributes when
     // sorting

@@ -6,12 +6,13 @@ from cs_questions import models
 
 class QuestionBase(admin.ModelAdmin):
     date_hierarchy = 'created'
-    list_display = ('title', 'short_description', 'author_name', '_has_comment')
-    list_filter = ('author_name', 'created', 'modified')
+    list_display = ('title', 'short_description', 'owner', 'discipline')
+    list_filter = ('discipline', 'owner', 'created', 'modified')
     fieldsets = [
         (None, {
             'fields': (('title', 'author_name'),
                        'discipline',
+                       'owner',
                        'short_description', 'long_description',),
         }),
         ('Advanced', {
@@ -54,10 +55,14 @@ class CodingIoQuestionAdmin(QuestionBase):
     actions = ['update_answers']
 
     # Overrides and other configurations
-    list_display = QuestionBase.list_display + ('timeout', 'status')
+    list_display = QuestionBase.list_display + ('answer_keys', 'timeout', 'status')
     fieldsets = copy.deepcopy(QuestionBase.fieldsets)
     fieldsets[0][1]['fields'] += ('iospec_source', 'iospec_size')
     fieldsets[1][1]['fields'] += ('timeout',)
+
+    def answer_keys(self, obj):
+        return obj.answer_keys.count()
+    answer_keys.short_description = '# keys'
 
 admin.site.register(models.QuestionActivity)
 admin.site.register(models.io.CodingIoActivity)

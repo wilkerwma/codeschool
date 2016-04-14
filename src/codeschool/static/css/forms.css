@@ -1,3 +1,8 @@
+.form tr {
+    display: flex;
+    flex-flow: column;
+}
+
 .form td, th {
     font-size: 13px;
     line-height: 16px;
@@ -142,6 +147,15 @@ table.form thead th.sorted .sortoptions a.descending:hover {
     background-position: 0 -70px;
 }
 
+@media all and (min-width: 600px) {
+    .form tr {
+        display: table-row;
+    }
+}
+
+
+
+/* Input elements */
 
 .form .button,
 .form input[type=submit],
@@ -201,3 +215,43 @@ table.form thead th.sorted .sortoptions a.descending:hover {
 .form input[type=button][disabled].default {
     opacity: 0.4;
 }
+
+
+/* Errors */
+.form ul.errorlist {
+    margin: 0 0 4px;
+    padding: 0;
+    color: #ba2121;
+    background: #fff;
+}
+
+.form ul.errorlist li {
+    font-size: 13px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form ul.errorlist li:first-child {
+    margin-top: 0;
+}
+
+.form ul.errorlist li a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.form td ul.errorlist {
+    margin: 0;
+    padding: 0;
+}
+
+.form td ul.errorlist li {
+    margin: 0;
+}
+
+.form span.helptext {
+    display: block;
+    font-size: 90%;
+    color: darkgrey;
+}
+

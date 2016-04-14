@@ -1,11 +1,14 @@
 <h1>{{ question.title }}: {{ language.name }} ({{ _('answer key') }})</h1>
 
-<form method="POST" action="{{ question.get_absolute_url() }}edit-key/{{ key.pk }}/">
+<form method="POST" action="{{ question.get_absolute_url() }}edit-key/{{ key.pk }}/" class="dialog-wide">
     {% csrf_token %}
-    <paper-dialog-scrollable style="min-height: 50vh; min-width: 50vw">
-        <table>
+    <paper-dialog-scrollable>
+        <table class="form">
             {{ form.as_table() }}
         </table>
     </paper-dialog-scrollable>
-<input type="submit" name="input" value="{{ _('Submit') }}">
+
+    <div class="toolbar highlight">
+        <input class="primary" type="submit" name="input" value="{{ _('Submit') }}">
+    </div>
 </form>

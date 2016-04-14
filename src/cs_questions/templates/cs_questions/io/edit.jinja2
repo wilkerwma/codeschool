@@ -1,92 +1,133 @@
 {% extends "cs_questions/base.jinja2" %}
 
-{% block style %}
-<style>
-    #answer-keys {
-        min-width: 75%;
-        margin: 20px auto;
-        border: 2px solid darkgrey;
-        boder-radius: 2px;
-    }
-    #answer-keys .first-col {
-        padding-right: 35%;
-    }
-    #answer-keys th {
-        background: darkgray;
-        color: white;
-    }
-    #answer-keys tr:nth-child(even) {
-        background: #eee;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
     <section>
-    <h1>{{ question.title }}</h1>
-    <h3>{{ _('Edit question ') }}</h3>
-      {% if can_download_question and download_url %}
-      <a id href="download/" title="{{ _('Download Markio file') }}">&crarr;</a>
-      {% endif %}
-    </h1>
+        {% if question %}
+            <h1>
+                {{ question.title }}
+                [ <a id href="{% url 'question-action' question.pk 'download' %}" title="{{ _('Download Markio file') }}">&crarr;</a> ]
+            </h1>
+        {% else %}
+            <h1>{{ _('Add a new question') }}</h1>
+            <p>{% trans %}You can add a new question by filling up the for bellow or by importing a Markio file. {% endtrans %}</p>
+
+            {% if import_ok %}
+                <div class="box success alert-message">
+                    <i class="material-icons alert">done</i>
+                    <p>{{ _('Import was successfull') }}</p>
+                </div>
+            {% elif import_error %}
+                <div class="box error alert-message">
+                    <i class="material-icons alert">error</i>
+                    <p>{{ import_error }}</p>
+                </div>
+            {% else %}
+                <div class="box file">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="alert-message">
+                            <i class="material-icons alert">file_upload</i>
+                            <p>
+                                <strong>{{ _('Import question') }}</strong><br>
+                                {{ import_form }}
+                            </p>
+                        </div>
+                        {% csrf_token %}
+                        <div class="toolbar">
+                            <input type="submit" value={{ _("Import") }}>
+                        </div>
+                    </form>
+                </div>
+            {% endif %}
+        {% endif %}
+        {% if question %}<div class="toolbar highlight" id="secondary-toolbar"></div>{% endif %}
     </section>
 
     <div class="question-input">
-        <form method="POST" id="edit-form">
-            {% csrf_token %}
-            <table>{{ form.as_table() }}</table>
-        </form>
-
-        <div>
-            <h2>{{ _('Edit Answer Keys') }}</h2>
-            <table id="answer-keys">
-                <thead>
-                    <tr>
-                        <th class="first-col">{{ _('Language') }}</th>
-                        <th>{{ _('Is valid') }}</th>
-                        <th>{{ _('Source?') }}</th>
-                        <th>{{ _('Placeholder?') }}</th>
-                        <th>{{ _('Edit') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for key in question.answer_keys.all() %}
+        {% if show_answer_keys %}
+            <div>
+                <h2>{{ _('Edit Answer Keys') }}</h2>
+                <table id="answer-keys">
+                    <thead>
                         <tr>
-                            <td>{{ key.language }}</td>
-                            <td>{{ key.is_valid|icon }}</td>
-                            <td>{{ (key.source != '')|icon }}</td>
-                            <td>{{ (key.placeholder != '')|icon }}</td>
-                            <td>
-                                <i class="material-icons"
-                                   onclick="srvice.dialog({
-                                           url: '../edit-key/' + {{ key.pk}}
-                                       })">edit</i>
-                            </td>
+                            <th class="first-col">{{ _('Language') }}</th>
+                            <th>{{ _('Is valid') }}</th>
+                            <th>{{ _('Source?') }}</th>
+                            <th>{{ _('Placeholder?') }}</th>
+                            <th>{{ _('Edit') }}</th>
                         </tr>
-                    {% endfor %}
-                    {% if add_button %}
-                        <tr>
-                            <td>{{ _('Add new') }}</td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>
-                                <i class="material-icons"
+                    </thead>
+                    <tbody>
+                        {% for key in question.answer_keys.all() %}
+                            <tr>
+                                <td>{{ key.language }}</td>
+                                <td>{{ key.is_valid|icon }}</td>
+                                <td>{{ (key.source != '')|icon }}</td>
+                                <td>{{ (key.placeholder != '')|icon }}</td>
+                                <td>
+                                    <i class="material-icons"
                                        onclick="srvice.dialog({
-                                               url: '../add-key/'
-                                           })">add</i>
-                            </td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
-        </div>
+                                               url: '../edit-key/' + {{ key.pk}}
+                                           })">edit</i>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% if add_button %}
+                            <tr>
+                                <td>{{ _('Add new') }}</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <i class="material-icons"
+                                           onclick="srvice.dialog({
+                                                   url: '../add-key/'
+                                               })">add</i>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <form method="POST" id="question-form">
+            {% csrf_token %}
+            <input type="hidden" name="question_pk" value="{{ question.pk|default('null') }}">
+            <input type="hidden" name="action" value="none">
+            <table class="form">{{ form.as_table() }}</table>
+        </form>
     </div>
 
-    <div class="button-banner">
+
+    <div class="toolbar" id="main-toolbar">
+        {% if question %}
+            <input  type="submit"
+                    class="dangerous separated"
+                    value="{{ _('Delete') }}"
+                    onclick="$('#question-form').submitWith({action: 'delete'})">
+            <input  type="submit"
+                    class="secondary"
+                    value="{{ _('Copy') }}"
+                    onclick="$('#question-form').submitWith({action: 'copy'})">
+        {% endif %}
         <input  type="submit"
-                name="send"
-                value="{{ _('Send') }}"
-                onclick="$('#question-input')[0].submit()">
+                class="secondary"
+                value="{{ _('View') }}"
+                onclick="$('#question-form').submitWith({action: 'view'})">
+        <input  type="submit"
+                class="primary"
+                value="{{ _('Save') }}"
+                onclick="$('#question-form').submitWith({action: 'save'})">
     </div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ super() }}
+    <script>
+        $(function () {
+            // Duplicate toolbar
+            var el = $('#secondary-toolbar')[0];
+            el.innerHTML = $('#main-toolbar')[0].innerHTML;
+        });
+    </script>
 {% endblock %}

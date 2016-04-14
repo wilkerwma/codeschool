@@ -69,17 +69,106 @@ paper-item > a {
 }
 
 .material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-feature-settings: 'liga';
-  -webkit-font-smoothing: antialiased;
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}
+
+.material-icons.alert {
+    font-size: 300%;
+    border-radius: 50%;
+    background-color: darkgrey;
+    color: white;
+    padding: 5px;
+    margin-right: 30px;
+}
+
+.alert-message .material-icons.alert {
+    display: block;
+}
+
+.alert-message {
+    display: flex;
+    align-items: center;
+}
+
+.success .material-icons.alert {
+    background-color: #74aa3d;
+    border: 6px solid white;
+}
+
+.error .material-icons.alert {
+    background-color: darkred;
+    border: 6px solid white;
+}
+
+.toolbar.highlight {
+    background: #ddd;
+    margin-bottom: -20px;
+    margin-left: -20px;
+    margin-right: -20px;
+}
+
+.toolbar {
+    text-align: right;
+    padding: 15px;
+}
+
+@media only screen and (min-width: 1000px) {
+    .toolbar.highlight {
+        margin-left: -40px;
+        padding-left: 40px !important;
+    }
+}
+
+.box {
+    padding: 20px;
+    border: 1px solid white;
+    border-radius: 5px;
+    margin: 30px auto;
+    max-width: 450px;
+}
+.box.file {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#answer-keys {
+    min-width: 75%;
+    margin: 20px auto;
+    border: 2px solid darkgrey;
+    border-radius: 2px;
+}
+#answer-keys .first-col {
+    padding-right: 35%;
+}
+#answer-keys th {
+    background: darkgray;
+    color: white;
+}
+#answer-keys tr:nth-child(even) {
+    background: #eee;
+}
+
+.toolbar .separated {
+    float: left;
+}
+
+.primary {
+    font-weight: bold;
+    margin: auto 10px;
+    background-color: #4e9a06 !important;
+}
+
+.dangerous {
+    background-color: darkred !important;
 }

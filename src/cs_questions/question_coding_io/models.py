@@ -198,12 +198,12 @@ class CodingIoQuestion(Question, models.StatusModel):
             timeout=self.timeout,
             short_description=self.short_description,
             description=self.long_description,
-            tests=self.iospec,
+            tests=self.iospec_source,
         )
 
         for key in self.answer_keys.all():
-            tree.add_answer_key(key.source, key.ref)
-            tree.add_placeholder(key.placeholder, key.ref)
+            tree.add_answer_key(key.source, key.language.ref)
+            tree.add_placeholder(key.placeholder, key.language.ref)
 
         return tree.source()
 

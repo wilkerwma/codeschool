@@ -17,9 +17,20 @@
     text-align: center;
 }
 
+#dialog paper-dialog-scrollable {
+    min-height: 60vh;
+}
+
 #new-activity > div {
     justify-content: space-between;
     align-items: center;
     display: flex;
     padding: 10px;
+}
+
+.dialog-wide {
+    min-width: 50vw;
+    max-width: 90vw;
+    width: 700px;
+    min-height: 70vh;
 }

@@ -18,14 +18,11 @@ class Question(models.TimeStampedModel):
     short_description = models.CharField(
         _('short description'),
         max_length=140,
-        help_text=_('The short description is used in listings and should '
-                    'present a brief one phrase description of the question.'),
+        help_text=_('A very brief one-phrase description used in listings.'),
     )
-    long_description = RichTextField(
+    long_description = models.TextField(
         _('long description'),
-        help_text=_('The long and detailed description of the question that is'
-                    'shown in the question submission form. This field '
-                    'expects markdown markup.')
+        help_text=_('A detailed explanation.')
     )
     author_name = models.CharField(
         _('Author\'s name'),
@@ -35,9 +32,8 @@ class Question(models.TimeStampedModel):
     comment = models.TextField(
         _('Comments'),
         blank=True,
-        help_text=_('The comments field is for any private information that '
-                    'you should want to associate to the object. This field is '
-                    'private and its contents are never revealed publicly.')
+        help_text=_('(Optional) Any private information that you want to '
+                    'associate to the object.')
     )
     discipline = models.ForeignKey(
         Discipline,
@@ -62,6 +58,13 @@ class Question(models.TimeStampedModel):
 
     def get_absolute_url(self):
         return url_reverse('question-detail', args=(self.pk,))
+
+    def can_edit(self, user):
+        """Return True if user can edit question."""
+
+        if user is None or self.owner is None:
+            return False
+        return self.owner.pk == user.pk
 
 
 @delegation('question', ['long_description', 'short_description'])

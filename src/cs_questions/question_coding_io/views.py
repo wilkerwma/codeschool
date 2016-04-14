@@ -1,7 +1,6 @@
+import copy
 from django import http
 from codeschool.shortcuts import redirect, render
-from cs_activities.models import TextualResponse
-from cs_auth.models import SingleUserGroup
 from cs_core.models import ProgrammingLanguage
 from cs_questions.question_coding_io.forms import (
     QuestionEditForm,
@@ -11,7 +10,6 @@ from cs_questions.question_coding_io.forms import (
 )
 from cs_questions.question_coding_io.models import (
     CodingIoQuestion,
-    CodingIoAnswerKey,
     CodingIoActivity,
     CodingIoResponse
 )
@@ -30,9 +28,10 @@ class QuestionViews:
             try:
                 question = CodingIoQuestion.from_markio(data)
                 question.update(validate=True)
-            except ValueError as ex:
+            except Exception as ex:
+                ex = ex if isinstance(ex, SyntaxError) else ''
                 context['import_ok'] = False
-                context['import_error'] = 'This is not a valid Markio: ' + ex
+                context['import_error'] = 'This is not a valid Markio. ' + ex
             else:
                 form = QuestionEditForm(instance=question)
                 context['import_ok'] = question.status == question.STATUS_VALID
@@ -51,7 +50,7 @@ class QuestionViews:
                 return redirect('../../%s/edit' % question.pk)
 
         context.update(form=form, import_form=import_form)
-        return render(request, 'cs_questions/io/new.jinja2', context)
+        return render(request, 'cs_questions/io/edit.jinja2', context)
 
     def detail(self, request, question):
         context = dict(grade=None, lang=None, feedback=None, question=question)
@@ -94,19 +93,47 @@ class QuestionViews:
 
         return render(request, 'cs_questions/io/detail.jinja2', context)
 
-    def edit(self, request, question):
+    def edit(self, request, question, extra_context=None):
+        if not question.can_edit(request.user):
+            raise http.Http404
         used_langs = question.answer_keys.select_related('language')
         languages = ProgrammingLanguage.objects.exclude(pk__in=used_langs)
-        context = {'question': question, 'add_button': bool(languages)}
+        context = {
+            'question': question,
+            'add_button': bool(languages),
+            'show_answer_keys': True,
+        }
 
         if request.method == 'POST':
-            form = QuestionEditForm(request.POST)
+            form = QuestionEditForm(request.POST, instance=question)
+
             if form.is_valid():
-                form.save()
+                action = request.POST.get('action', None)
+
+                if action == 'delete':
+                    question.delete()
+                    return redirect('/questions/')
+                elif action == 'copy':
+                    form = QuestionEditForm(request.POST)
+                    new = form.save()
+                    for key in question.answer_keys.all():
+                        key = copy.copy(key)
+                        key.pk = None
+                        key.question = new
+                        key.save()
+                        new.answer_keys.add(key)
+                    new.owner = request.user
+                    new.update()
+                    return redirect('../../%s' % new.pk)
+                elif action == 'view':
+                    form.save().update()
+                    return redirect('../')
+                else:
+                    form.save().update()
         else:
             form = QuestionEditForm(instance=question)
 
-        context.update(form=form)
+        context.update(extra_context or {}, form=form)
         return render(request, 'cs_questions/io/edit.jinja2', context)
 
     def edit_key(self, request, question, key):
@@ -147,7 +174,7 @@ class QuestionViews:
                     language=form.cleaned_data['language'],
                 )
                 key.update()
-                return redirect('../../edit')
+                return redirect('../edit')
         else:
             form = AnswerKeyAddForm()
 

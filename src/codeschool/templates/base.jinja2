@@ -88,7 +88,7 @@
                     <li>
                         <p><a href="/courses/">{{ _('Courses') }}</a></p>
                         <ul>
-                            <li><a href="/questions/">{{ _('List of quesions') }}</a></li>
+                            <li><a href="/questions/">{{ _('List of questions') }}</a></li>
                             {% for course in user.related_courses %}
                                 <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
                             {% endfor %}
