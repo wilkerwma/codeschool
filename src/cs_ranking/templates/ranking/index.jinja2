@@ -1,0 +1,21 @@
+{% extends "base.jinja2" %}
+{% block title %}Code winner{% endblock %}
+{% block content %}
+    This is the battles, participe too
+<table id="battles">
+    <thead><tr><th>ID</th><th>Data</th><th>Vencedor</th></tr></thead>
+    <tbody>
+    {% for battle in battles %}
+        <tr>
+            <td> {{battle.id }}</td>
+            <td> {{battle.date}}</td>
+            <td> {{battle.battle_winner}} </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<script src="../../static/cs_ranking/js/battle_table.js"></script>
+{% endblock %}

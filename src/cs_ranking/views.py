@@ -4,7 +4,8 @@ from .models import Battle,BattleResult
 
 # Create your views here.
 def index(request):
-    return render(request, 'ranking/index.html')
+    all_battles =  BattleResult.objects.all()
+    return render(request, 'ranking/index.jinja2',{"battles": all_battles})
 
 # 'Controller' to view result of a battle
 def battle_result(request,id_battle):

@@ -1,0 +1,26 @@
+{% block title %}
+    Battle winners
+{% endblock %}
+{% block content %} 
+<h1>Resultado da Batalha</h1>
+<div>
+    <h2>Winner</h2>
+    User: {{ battle_winner.user }} <br>
+    Ranking position: "number" <br>
+    Time: {{ time_winner  }}<br>
+    Code winner: {{ battle_winner.code_winner }} <br>
+    Characters count: {{ len_winner  }}<br>
+    Time execution code: "in seconds"<br>
+    Number of submitions: "a lot!"<br>
+</div>
+<div>
+    <h2>Looser</h2>
+    User: {{ battle_loser.user }} <br>
+    Ranking position: "number" <br>
+    Time: {{ time_loser  }}<br>
+    Code winner: {{ battle_loser.code_winner }} <br>
+    Characters count: {{ len_loser  }}<br>
+    Time execution code: "in seconds"<br>
+    Number of submitions: "a lot!"<br>
+</div>
+{% endblock %}
