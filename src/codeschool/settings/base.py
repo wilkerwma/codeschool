@@ -267,10 +267,13 @@ MEDIA_URL = '/media/'
 BOWER_COMPONENTS_ROOT = os.path.join(CODESCHOOL_APP_DIR, 'bower/')
 BOWER_INSTALLED_APPS = [
     'jquery',
+    # 'modernizr',
     'mustache',
     'normalize.css',
     'codemirror',
     'highlight',
+    'ace-builds',
+    'material-design-lite',
 
     # Styling
     #'font-roboto#^1.0.1',

@@ -27,3 +27,7 @@ margin: 30px;
     padding: 20px;
     display: inline;
 }
+
+.mugshot {
+    float: right;
+}

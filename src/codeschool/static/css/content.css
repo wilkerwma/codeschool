@@ -1,14 +1,9 @@
-
-/*============================================================================*
- *                           Nav bar and main content
- *============================================================================*/
-
 #content-area nav { display: none; }
 
 #content-area main > * {
     background-color: white;
     color: black;
-    padding: 5px;
+    padding: 10px;
 }
 
 #content-area main > *:nth-child(odd) {
@@ -18,6 +13,10 @@
 
 
 @media only screen and (min-width: 600px) {
+    #content-area main > * {
+        padding: 20px 20px 20px 30px;
+    }
+
     #content-area {
         display: flex;
         flex-direction: row-reverse;
@@ -32,13 +31,17 @@
         display: block;
         background: #eee;
         padding: 10px;
-        font: 1.4em 'Amatic SC', cursive;
-        font-weight: bold;
         flex-grow: 1;
         min-width: 180px;
         max-width: 250px;
         width: 25%;
         color: #222;
+    }
+
+    #content-area > nav ul,
+    #content-area > nav p {
+        font: 1.25em 'Amatic SC', cursive !important;
+        font-weight: bold !important;
     }
 
     #content-area > nav img {
@@ -69,26 +72,14 @@
     #content-area *.disabled-link {
         color: darkgray;
     }
-
-    #content-area main > * {
-        padding: 20px;
-    }
-
-
 }
 
 @media only screen and (min-width: 1000px) {
     #content-area main > * {padding-left: 40px;}
-
-    #content-area > nav {
-        font-size: 1.6em;
-    }
 }
 
 
-/*============================================================================*
- *                              Content cards
- *============================================================================*/
+/* Content cards */
 .content-cards > aside > p {display: none}
 
 .card,

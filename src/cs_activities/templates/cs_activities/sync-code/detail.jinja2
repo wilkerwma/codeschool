@@ -25,23 +25,14 @@
             margin-bottom: 15px;
         }
 
-        #code-box .toolbar button {
-            padding: 2px 5px;
-        }
-
-        #code-box .toolbar button.primary{
-            padding: 2px 20px;
-        }
-
         .code-editor {
             min-height: 300px;
         }
 
         #code-box .box-title {
-            padding: 20px 20px 20px 40px;
-            margin: 0;
-            margin-top: -15px;
-            background: rgba(232, 174, 24, 0.62);
+            padding: 10px 20px 10px 40px;
+            margin: -15px 0 0;
+            background: rgba(78,154,6,0.5);
         }
 
         #edit-message {
@@ -58,7 +49,7 @@
 
 {% block extra_js %}
     {{ super() }}
-     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" charset="utf-8"></script>
+    <script src="{% static 'bower_components/ace-builds/src-min/ace.js' %}" charset="utf-8"></script>
     <script>
         var item_pk = {{ activity.last.pk|default('null') }};
         var can_edit = {{ can_edit|lower }};
@@ -165,12 +156,12 @@
     <div id="code-box">
         <div class="toolbar highlight">
             <h1 class="separated">{{ _('Follow the code') }}</h1>
-            <button onclick="jump('prev')"><i class="material-icons">keyboard_arrow_left</i></button>
-            <button onclick="jump('next')"><i class="material-icons">keyboard_arrow_right</i></button>
+            <button onclick="jump('prev')" class="flat"><i class="material-icons">keyboard_arrow_left</i></button>
+            <button onclick="jump('next')" class="flat"><i class="material-icons">keyboard_arrow_right</i></button>
             {% if can_edit %}
-                <button onclick="remove_code_item()" class="danger"><i class="material-icons">delete</i></button>
+                <button onclick="remove_code_item()" class="danger flat"><i class="material-icons">delete</i></button>
             {% endif %}
-            <button onclick="update()" class="primary"><i class="material-icons">refresh</i></button>
+            <button onclick="update()" class="primary flat"><i class="material-icons">refresh</i></button>
         </div>
 
         <div id="display-area">
