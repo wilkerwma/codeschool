@@ -1,3 +1,2 @@
-{% extends "cs_questions/base-edit.jinja2" %}
-
-{% block add_question_title %}{{ _('Add new numeric question') }}{% endblock %}
+{% from "cs_questions/globals.jinja2" import globals %}
+{% extends "multi-views/edit.jinja2" %}

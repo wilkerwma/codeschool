@@ -1,0 +1,39 @@
+{% from "cs_questions/globals.jinja2" import globals %}
+{% extends "multi-views/detail.jinja2" %}
+
+{% block header_content %}
+    {{ super() }}
+    <p>{{ question.short_description }}</p>
+{% endblock %}
+
+{% if not form_name %}{% set form_name = 'response-form' %}{% endif %}
+
+{% block object_detail %}
+    <article class="long_description">
+        {{ question.long_description|markdown }}
+    </article>
+
+    <form method="POST" id="{{ form_name }}">
+        {% csrf_token %}
+        {% block response_form %}
+            <h3>{{ _('Response') }}</h3>
+            <table class="form">{{ form.as_table() }}</table>
+        {% endblock %}
+    </form>
+    <div class="toolbar highlight">
+        <button type="input" form="{{ form_name }}">{{ _('Send') }}</button>
+    </div>
+{% endblock %}
+
+{% block dialog_content %}
+    {% if feedback %}
+        {{ super() }}
+        <div class="feedback">{{ feedback.as_html() }}</div>
+        <script>
+            $(function() {
+                $('#dialog')[0].open();
+            });
+        </script>
+    {% endif %}
+{% endblock %}
+

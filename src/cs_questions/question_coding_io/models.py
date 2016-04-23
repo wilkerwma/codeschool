@@ -7,61 +7,59 @@ from ejudge.graders.io import grade as grade_code, run as run_code
 from model_utils import FieldTracker
 from codeschool import models
 from codeschool.shortcuts import lazy
-from cs_activities.models import Feedback, Response
+from cs_activities.models import Response
 from cs_core.models import ProgrammingLanguage
 from cs_questions.models import Question, QuestionActivity
 
 
 class CodingIoResponse(Response):
-    source = models.TextField(
-        _('source code'),
-    )
-    language = models.ForeignKey(ProgrammingLanguage)
+    class Meta:
+        proxy = True
+        app_label = 'cs_questions'
 
+    @property
+    def __data(self):
+        if self.data is None:
+            return ('', None, None)
+        else:
+            return self.data
 
-class CodingIoFeedback(Feedback):
-    case = models.TextField()
-    answer_key = models.TextField()
-    version = models.CharField(max_length=32)
-    hint = models.TextField(blank=True)
-    message = models.TextField(blank=True)
+    @property
+    def source(self):
+        return self.__data[0]
 
-    @classmethod
-    def from_feedback(cls, feedback, response):
-        case = feedback.case
-        answer_key = feedback.answer_key
+    @source.setter
+    def source(self, value):
+        src, lang, feedback = self.__data
+        self.data = (value, lang, feedback)
 
-        return CodingIoFeedback(
-            response=response,
-            grade=feedback.grade,
-            case=case.source(),
-            answer_key=answer_key.source(),
-            status=feedback.status or '',
-            hint=feedback.hint or '',
-            message=feedback.message or '',
-        )
+    @property
+    def language(self):
+        return ProgrammingLanguage.get(ref=self.__data[1])
 
-    @lazy
-    def _feedback(self):
-        case = parse_iospec(self.case)
-        answer_key = parse_iospec(self.answer_key)
-        return iospec.feedback.Feedback(
-            case, answer_key,
-            status=self.status, hint=self.hint, message=self.message
-        )
+    @language.setter
+    def language(self, value):
+        src, lang, feedback = self.__data
+        self.data = (value, lang and lang.ref, feedback)
+
+    @property
+    def feedback(self):
+        return self.__data[2]
+
+    @feedback.setter
+    def feedback(self, value):
+        src, lang, feedback = self.__data
+        self.data = (value, lang, value)
 
     @property
     def title(self):
-        return self._feedback.title
+        return self.feedback.title
 
     def as_html(self, *args, **kwds):
-        return self._feedback.as_html(*args, **kwds)
+        return self.feedback.as_html(*args, **kwds)
 
     def as_text(self, *args, **kwds):
-        return self._feedback.as_text(*args, **kwds)
-
-    class Meta:
-        app_label = 'cs_questions'
+        return self.feedback.as_text(*args, **kwds)
 
 
 class CodingIoQuestion(Question, models.StatusModel):
@@ -106,7 +104,6 @@ class CodingIoQuestion(Question, models.StatusModel):
     )
     tracker = FieldTracker()
     response_cls = CodingIoResponse
-    feedback_cls = CodingIoFeedback
 
     @lazy
     def iospec(self):
@@ -349,10 +346,10 @@ class CodingIoQuestion(Question, models.StatusModel):
         feedback = grade_code(source, iospec, lang=lang)
 
         # Create a codeschool feedback and save it to the database
-        feedback = CodingIoFeedback.from_feedback(feedback, response)
-        feedback.save()
         response.status = 'graded'
-        response.save(update_fields=['status'])
+        response.feedback = feedback
+        response.grade = feedback.grade * 100
+        response.save()
         return feedback
 
 

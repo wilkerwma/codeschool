@@ -32,24 +32,37 @@ class lazy:
 
     def __init__(self, method):
         self.method = method
-        self._attr = None
+        self.__name__ = getattr(method, '__name__', None)
 
-    def __get__(self, obj, cls=None):
-        if obj is not None:
-            result = self.method(obj)
-            setattr(obj, self.attr(obj), result)
-            return result
+    def __get__(self, obj, cls):
+        if obj is None:
+            return self
 
-    def attr(self, obj):
-        if self._attr is not None:
-            return self._attr
+        result = self.method(obj)
+        try:
+            attr_name = self._attr
+        except AttributeError:
+            attr_name = self.get_attribute_name(cls)
 
-        for attr, method in vars(type(obj)).items():
+        setattr(obj, attr_name, result)
+        return result
+
+    def get_attribute_name(self, cls):
+        """Inspect live object for some attributes."""
+
+        try:
+            if getattr(cls, self.__name__) is self:
+                return self.__name__
+        except AttributeError:
+            pass
+
+        for attr in dir(cls):
+            method = getattr(cls, attr, None)
             if method is self:
                 self._attr = attr
                 return attr
 
-        raise TypeError('lazy accessor not found in %s' % type(obj).__name__)
+        raise TypeError('lazy accessor not found in %s' % cls.__name__)
 
 
 def delegation(delegate_attr, fields):

@@ -4,7 +4,7 @@ from model_utils.managers import InheritanceManager
 from codeschool import models
 from codeschool.shortcuts import delegation
 from cs_courses.models import Discipline
-from cs_activities.models import Activity, Feedback, Response
+from cs_activities.models import Activity, Response
 
 
 class Question(models.TimeStampedModel):
@@ -48,7 +48,6 @@ class Question(models.TimeStampedModel):
         help_text=_('User who created or uploaded this question.')
     )
     objects = InheritanceManager()
-    feedback_cls = Feedback
     response_cls = Response
     default_extension = '.md'
 
@@ -123,7 +122,7 @@ class FreeAnswerQuestion(Question):
 class NumericResponse(Response):
     value = models.FloatField(
         _('Value'),
-        help_text=_('Your result (it must be a number)')
+        help_text=_('Result (it must be a number)')
     )
 
 
@@ -160,8 +159,8 @@ class NumericQuestion(Question):
 
     def grade(self, response):
         x, y = self.range
-        grade = (1 if x <= response.value <= y else 0)
-        return Feedback(response=response, grade=grade)
+        response.grade = (100 if x <= response.value <= y else 0)
+        response.save()
 
 
 class BooleanQuestion(Question):

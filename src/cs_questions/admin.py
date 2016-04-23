@@ -66,4 +66,3 @@ class CodingIoQuestionAdmin(QuestionBase):
 
 admin.site.register(models.QuestionActivity)
 admin.site.register(models.io.CodingIoActivity)
-admin.site.register(models.io.CodingIoFeedback)

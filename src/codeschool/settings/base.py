@@ -149,6 +149,7 @@ ROOT_URLCONF = 'codeschool.urls'
 # we have to import filters explicitly until a bug is fixed in djinga.
 
 from codeschool.jinja.filters import markdown, icon
+from codeschool.jinja.globals import template_vars
 from codeschool.jinja.compat import django_compat_finalizer
 import codeschool.jinja.ext
 
@@ -160,12 +161,14 @@ TEMPLATES = [
             os.path.join(CODESCHOOL_APP_DIR, 'templates'),
         ],
         'OPTIONS': {
+            # These have no effects since we are overloading "condition"
             "jj_exts": ('jinja2', 'jinja'),
             "dj_exts": ('html', 'htm'),
-            #"load_from": ("codeschool.filters",),
-            "condition": lambda x: (x.endswith('.jinja2') or
-                                    x.endswith('jinja') or
-                                    x in FORCE_JINJA_TEMPLATES),
+            #"load_from": ("codeschool.filters",),  # wait until djinga fixes problems with python 3
+            "i18n_new_style": True,
+            "condition": lambda x: (
+                x.endswith('.jinja2') or x.endswith('jinja') or
+                x in FORCE_JINJA_TEMPLATES),
             "trim_blocks": True,
             "lstrip_blocks": True,
             "finalize": django_compat_finalizer,
@@ -204,8 +207,11 @@ TEMPLATES = [
             "filters": {
                 'markdown': markdown,
                 'icon': icon,
-            }
-        }
+            },
+            'globals': {
+                'template_vars': template_vars,
+            },
+        },
     },
 ]
 

@@ -2,7 +2,6 @@ import datetime
 from codeschool import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext as __
-from address.models import AddressField
 from userena.models import UserenaBaseProfile
 
 
@@ -76,17 +75,6 @@ class Profile(UserenaBaseProfile):
            ('student', _('Can access/modify data visible to student\'s')),
            ('teacher', _('Can access/modify data visible only to Teacher\'s')),
        )
-
-    def __getattr__(self, attr):
-        if attr == 'user':
-            return None
-
-        user = super().__getattribute__('user')
-
-        if user is None:
-            raise AttributeError(attr)
-        else:
-            return getattr(user, attr)
 
     def __str__(self):
         if self.user is None:

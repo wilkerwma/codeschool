@@ -91,16 +91,7 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     def user_activities(self, user):
         """Return a list of all activities that are valid for the given user"""
 
-        result = []
-        activities = self.activities.filter(end__gt=timezone.now())
-        for activity in activities.select_subclasses():
-            if activity.group is None:
-                result.append(activity)
-            elif user in activities.group.users:
-                result.append(activity)
-
-        # Return a QuerySet?
-        return result
+        return self.activities.select_subclasses()
 
     def activity_duration(self):
         """Return the default duration for an activity starting from now."""

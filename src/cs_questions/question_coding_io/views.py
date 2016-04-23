@@ -1,31 +1,29 @@
 import copy
 from codeschool.shortcuts import redirect, render
+from codeschool.urlsubclassmapper import ViewMapper
 from cs_core.models import ProgrammingLanguage
-from cs_questions.question_coding_io.forms import (
+from cs_questions.question_coding_io.forms import \
     QuestionEditForm, AnswerKeyEditForm, AnswerKeyAddForm
-)
-from cs_questions.question_coding_io.models import CodingIoQuestion
-from cs_questions.views import QuestionViews
+from cs_activities.views import mapper as activities_mapper
+from cs_questions.question_coding_io.models import CodingIoQuestion, CodingIoActivity
+from cs_questions.views import QuestionViews, mapper
 
 
+@mapper.register(name='io', model=CodingIoQuestion)
 class CodingIoQuestionViews(QuestionViews):
-    name = 'io'
-    model = CodingIoQuestion
-    form_model = QuestionEditForm
-    exclude_fields = QuestionViews.exclude_fields + ('status', 'status_changed')
+    model_form = QuestionEditForm
 
-    def import_question(self, data, context):
+    def read_model(self, data):
         question = None
         try:
             question = CodingIoQuestion.from_markio(data)
             question.update(validate=True)
         except Exception as ex:
             ex = ex if isinstance(ex, SyntaxError) else ''
-            context['import_ok'] = False
-            context['import_error'] = 'This is not a valid Markio source. ' + ex
+            self['import_ok'] = False
+            self['import_error'] = 'This is not a valid Markio source. ' + ex
         else:
-            context['import_ok'] = question.status == question.STATUS_VALID
-            context['import_error'] = question.status
+            self['import_ok'] = True
             question.delete()
         return question
 
@@ -37,36 +35,32 @@ class CodingIoQuestionViews(QuestionViews):
             key.save()
             new.answer_keys.add(key)
 
-    def view_edit(self, request, question, extra_context=None, **kwds):
-        used_langs = question.answer_keys.select_related('language')
+    def view_edit(self, obj):
+        used_langs = obj.answer_keys.select_related('language')
         languages = ProgrammingLanguage.objects.exclude(pk__in=used_langs)
-        context = {
+        self.context.update({
             'add_button': bool(languages),
             'show_answer_keys': True,
-        }
-        context.update(extra_context or {})
+        })
+        return super().view_edit(obj)
 
-        return super().view_edit(request, question, context, **kwds)
-
-    def view_detail(self, request, question, extra_context=None, **kwds):
-        context = {
+    def view_detail(self, obj):
+        self.context.update({
             'lang': None,
             'languages': ProgrammingLanguage.objects.all(),
-        }
-        context.update(extra_context or {})
+        })
+        return super().view_detail(obj)
 
-        return super().view_detail(request, question, context, **kwds)
-
-    def view_edit_key(self, request, question, key, extra_context=None):
+    def view_edit_key(self, question, key):
         key = question.answer_keys.get(pk=key)
-        context = {
+        self.context.update({
             'question': question,
             'language': key.language,
             'key': key,
-        }
+        })
 
-        if request.method == 'POST':
-            form = AnswerKeyEditForm(request.POST, instance=key)
+        if self.request.method == 'POST':
+            form = AnswerKeyEditForm(self.request.POST, instance=key)
             if form.is_valid():
                 key = form.save()
                 key.update()
@@ -74,22 +68,18 @@ class CodingIoQuestionViews(QuestionViews):
         else:
             form = AnswerKeyEditForm(instance=key)
 
-        context['form'] = form
-        context.update(extra_context or {})
+        self.context['form'] = form
 
-        return render(request, 'cs_questions/io/edit-key.jinja2', context)
+        return render(self.request, 'cs_questions/io/edit-key.jinja2', self.context)
 
-    def view_add_key(self, request, question, extra_context=None):
+    def view_add_key(self, question):
         used_langs = question.answer_keys.select_related('language')
         languages = ProgrammingLanguage.objects.exclude(pk__in=used_langs)
 
-        context = {
-            'question': question,
-            'languages': languages,
-        }
+        self.context.update(question=question, languages=languages)
 
-        if request.method == 'POST':
-            form = AnswerKeyAddForm(request.POST)
+        if self.request.method == 'POST':
+            form = AnswerKeyAddForm(self.request.POST)
             if form.is_valid():
                 key = question.answer_keys.create(
                         source=form.cleaned_data['source'],
@@ -101,8 +91,11 @@ class CodingIoQuestionViews(QuestionViews):
         else:
             form = AnswerKeyAddForm()
 
-        context['form'] = form
-        context.update(extra_context or {})
+        self.context['form'] = form
 
-        return render(request, 'cs_questions/io/add-key.jinja2', context)
+        return render(self.request, 'cs_questions/io/add-key.jinja2', self.context)
 
+
+@activities_mapper.register(model=CodingIoActivity, name='io')
+class CodingIoActivityViews(ViewMapper):
+    pass

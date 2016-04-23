@@ -1,0 +1,33 @@
+{% macro edit(object, form="new-object-form") %}
+    {% if object %}
+        <button type="submit"
+                class="dangerous separated"
+                name="action"
+                value="delete"
+                form="{{ form }}">
+            {{ _('Delete') }}
+        </button>
+        </input>
+        <button type="submit"
+                class="secondary"
+                name="action"
+                value="copy"
+                form="{{ form }}">
+            {{ _('Copy') }}
+        </button>
+    {% endif %}
+    <button type="submit"
+            class="secondary"
+            name="action"
+            value="view"
+            form="{{ form }}">
+        {{ _('View') }}
+    </button>
+    <button type="submit"
+            class="primary"
+            name="action"
+            value="save"
+            form="{{ form }}">
+        {{ _('Save') }}
+    </button>
+{% endmacro %}

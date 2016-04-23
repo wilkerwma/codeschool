@@ -1,6 +1,5 @@
 from django.forms import ModelForm
 from cs_questions.question_coding_io.models import CodingIoQuestion, CodingIoAnswerKey
-from cs_questions.forms import *
 
 
 class QuestionEditForm(ModelForm):

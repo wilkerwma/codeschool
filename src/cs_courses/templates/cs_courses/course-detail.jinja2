@@ -14,15 +14,17 @@
     {{ super() }}
     <div id="confirmation-dialog" class="hidden">
         <h1>{{ _('Confirmation') }}</h1>
-        <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)')|format(course=course.name, name=user.get_full_name()) }}</p>
+        <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
         <p>{{ _('All your activities and progress will be deleted.') }}</p>
-        <button onclick="srvice(
-                'cs-courses.leave-course',
-                {
-                    user: '{{ user.username }}',
-                    course: {{ course.pk }}
-                })">{{ _('Ok') }}</button>
-        <button onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+        <div class="toolbar highlight">
+            <button onclick="srvice(
+                    'cs-courses.leave-course',
+                    {
+                        user: '{{ user.username }}',
+                        course: {{ course.pk }}
+                    })">{{ _('Ok') }}</button>
+            <button onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+        </div>
     </div>
 {% endblock %}
 
@@ -35,25 +37,25 @@
 
         <article>
             {% for activity in user_activities -%}
-            <a href="../../../questions/{{ activity.pk }}" class="card">
-                <i class="material-icons">help_outline</i>
-                <h1>{{ activity.name }}</h1>
-                <p>{{ activity.short_description }}</p>
-            </a>
+                <a href="{{ activity.get_absolute_url() }}" class="card">
+                    <i class="material-icons">{{ activity.material_icon|default('help_outline') }}</i>
+                    <h1>{{ activity.name }}</h1>
+                    <p>{{ activity.short_description }}</p>
+                </a>
             {%- endfor %}
 
             {% if course.teacher != user %}
-            <a onclick="alert('em construção')" class="card-faded">
-                <i class="material-icons">add_circle</i>
-                <h1>Aprofunde-se</h1>
-                <p>Atividades e desafios adicionais selecionados para você :)</p>
-            </a>
+                <a onclick="alert('em construção')" class="card-faded">
+                    <i class="material-icons">add_circle</i>
+                    <h1>Aprofunde-se</h1>
+                    <p>Atividades e desafios adicionais selecionados para você :)</p>
+                </a>
             {% else %}
-            <a onclick="srvice.dialog({url: 'add-activities'})" class="card-faded" >
-                <i class="material-icons">add_circle</i>
-                <h1>Adicione conteúdo</h1>
-                <p>Clique aqui para adicionar novas atividades em seu curso.</p>
-            </a>
+                <a onclick="srvice.dialog({url: 'add-activities'})" class="card-faded" >
+                    <i class="material-icons">add_circle</i>
+                    <h1>Adicione conteúdo</h1>
+                    <p>Clique aqui para adicionar novas atividades em seu curso.</p>
+                </a>
             {% endif %}
         </article>
     </section>
@@ -67,12 +69,12 @@
         <article>
             {% if course.lessons %}
                 <sortable-js id="course-lessons" {% if can_edit %}sync-api="cs_courses.sort-lessons" sync-id="{{ course.pk }}"{% else %}disabled{% endif %}>
-                {% for lesson in course.lessons %}
-                    <div data-id="{{ lesson.pk }}">
-                        <p><span class="index">{{ loop.index }}.</span> {{ lesson.title }} {% if can_edit %}<i class="sortable-remove">✖</i>{% endif %}</p>
-                        {% if lesson.description %}<div>{{ lesson.description }}</div>{% endif %}
-                    </div>
-                {% endfor %}
+                    {% for lesson in course.lessons %}
+                        <div data-id="{{ lesson.pk }}">
+                            <p><span class="index">{{ loop.index }}.</span> {{ lesson.title }} {% if can_edit %}<i class="sortable-remove">✖</i>{% endif %}</p>
+                            {% if lesson.description %}<div>{{ lesson.description }}</div>{% endif %}
+                        </div>
+                    {% endfor %}
                 </sortable-js>
             {% else %}
                 <p>{{ _('No lessons available!') }}</p>
@@ -91,9 +93,9 @@
             <div>
                 <h2>Alunos inscritos</h2>
                 <ul>
-                {% for student in course.students.all().exclude(pk=user.pk).order_by('first_name') %}
-                    <li><a href="/accounts/{{ student.username}}">{{ student.get_full_name() or student.username }}</a></li>
-                {% endfor %}
+                    {% for student in course.students.all().exclude(pk=user.pk).order_by('first_name') %}
+                        <li><a href="/accounts/{{ student.username}}">{{ student.get_full_name() or student.username }}</a></li>
+                    {% endfor %}
                 </ul>
             </div>
         </article>

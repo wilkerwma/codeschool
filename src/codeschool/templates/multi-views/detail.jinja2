@@ -1,0 +1,49 @@
+{% extends "multi-views/base.jinja2" %}
+
+{% block title %}{{ detail_object.title }}{% endblock %}
+
+{% block content %}
+    <section>
+        {% block content_header %}
+            {% if can_edit %}
+                <div class="config-handle">
+                    <a href="./{{ object.pk }}/edit"><i class="material-icons">edit</i></a>
+                    {%   if can_download %}
+                        <a href="./{{ object.pk }}/download"><i class="material-icons">file_download</i></a>
+                    {% endif %}
+                </div>
+            {% endif %}
+            <h1>{% block content_title %}{{ detail_object.title }}{% endblock %}</h1>
+            {% block short_description %}
+                {% if detail_object.short_description %}
+                    <p>{{ detail_object.short_description }}</p>
+                {% endif %}
+            {% endblock %}
+        {% endblock %}
+    </section>
+
+    <section>
+        {% block content_body %}
+            {% block details %}
+                {% if detail_object.details %}
+                    <h2>{{ _('Details') }}</h2>
+                    <dl>
+                        {% block detail_items %}
+                            {% for (name, value) in detail_object.details %}
+                                <dt>{{ name }}</dt>
+                                <dd>{{ value }}</dd>
+                            {% endfor %}
+                        {% endblock %}
+                    </dl>
+                {% endif %}
+            {% endblock %}
+
+            {% block long_description %}
+                {% if detail_object.long_description %}
+                    <h2>{{ _('Description') }}</h2>
+                    <div>{{ detail_object.long_description|markdown }}</div>
+                {% endif %}
+            {% endblock %}
+        {% endblock %}
+    </section>
+{% endblock %}

@@ -1,16 +1,17 @@
-{% extends "cs_questions/base-detail.jinja2" %}
+{% extends "cs_questions/detail.jinja2" %}
 
 {% block header_content %}
+    {{ super() }}
     <div class="rules-box">
         <h3>{{ _('Rules') }}</h3>
         <dl>
             <dt>{{ _('Maximum runtime') }}</dt>
-            <dd>{{ gettext('%(time)s seconds')|format(time=question.timeout) }}</dd>
+            <dd>{{ gettext('%(time)s seconds', time=question.timeout) }}</dd>
         </dl>
     </div>
 {% endblock %}
 
-{% block question_input %}
+{% block response_form %}
     <div class="code-area">
         <h2>{{ _('Response') }}</h2>
         {% if not lang %}
@@ -26,12 +27,12 @@
         {% else %}
             <input type="hidden" name="{{ form['language'].name }}" value="{{ form['language'].value }}">
         {% endif %}
-
-        <table>{{ form['source'] }}</table>
+        {{ form['source'] }}
     </div>
 {% endblock %}
 
 {% block extra_css %}
+    {{ super() }}
     <link rel="stylesheet" type="text/css" href="{% static 'bower_components/codemirror/lib/codemirror.css' %}">
 {% endblock %}
 

@@ -15,7 +15,7 @@
 <form action="" method="post" id="userena-form">
   {% csrf_token %}
   <h2>{% trans "Change email address" %}</h2>
-  <table>{{ form.as_table }}</table>
+  <table class="form">{{ form.as_table }}</table>
   <input type="submit" value="{% trans "Change email" %}" />
 </form>
 </div>

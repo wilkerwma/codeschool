@@ -1,3 +1,8 @@
+{%- if globals %}
+    {%- if not content_color %}{% set content_color = globals['content_color'] %}{% endif %}
+    {%- if not object_name %}{% set object_name = globals['object_name'] %}{% endif %}
+    {%- if not form_name %}{% set form_name = globals['form_name'] %}{% endif %}
+{%- endif %}
 {% if is_document|default(True) %}
 <!DOCTYPE html>
 <html lang="pt-br" class="no-js">
@@ -46,7 +51,13 @@
         {% endfor %}
     {% endblock %}
     {% block style %}
-        {# Override this in templates to add an <style> tag #}
+        {% if content_color %}
+            <style>
+                #content-area main > *:nth-child(odd) {
+                    background-color: {{ content_color }};
+                }
+            </style>
+        {% endif %}
     {% endblock %}
 </head>
 
@@ -111,8 +122,10 @@
         </nav>
 
         <main>
-        {% block content_title %}{% endblock %}
-        {% block content %}{% if content %}{{ content }}{% endif %}{% endblock %}
+            {% block content %}
+                {% block content_title %}{% endblock %}
+                {% if content %}{{ content }}{% endif %}
+            {% endblock %}
         </main>
     </div>
 
@@ -155,7 +168,7 @@
 {% block hidden_content %}
     <paper-dialog id="dialog" class="dialog" modal exit-animation="fade-out-animation">
         <i id="dialog-close" onclick="this.parentNode.close()" class="material-icons">close</i>
-        <div id="dialog-content"></div>
+        <div id="dialog-content">{% block dialog_content %}{% endblock %}</div>
     </paper-dialog>
 {% endblock %}
 

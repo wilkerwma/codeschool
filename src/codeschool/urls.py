@@ -14,13 +14,14 @@ urlpatterns = [
     url(r'^search/$', search_views.search, name='search'),
     url(r'^cms/', include('wagtail.wagtailcore.urls')),
 
-    # RPC and api
+    # RPC and JSON api
     url(r'^srvice/', include('srvice.urls')),
 
     # Authentication
     url(r'^accounts/', include('cs_auth.urls')),
 
     # Local apps and functionality
+    url(r'^activities/', include('cs_activities.urls')),
     url(r'^courses/', include('cs_courses.urls')),
     url(r'^questions/', include('cs_questions.urls')),
 ]

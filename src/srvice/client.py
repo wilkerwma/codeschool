@@ -21,9 +21,10 @@ class JQueryWrapper:
 class Client:
     """Represents an RPC session with a client."""
 
-    def __init__(self):
+    def __init__(self, request):
         self._statements = []
         self.result = None
+        self.request = request
 
     def __call__(self, selector):
         return JQueryWrapper(self, selector)

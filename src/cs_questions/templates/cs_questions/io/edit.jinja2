@@ -1,8 +1,10 @@
-{% extends "cs_questions/base-edit.jinja2" %}
+{% from "cs_questions/globals.jinja2" import globals %}
+{% extends "multi-views/edit.jinja2" %}
+
 
 {% block add_question_title %}{{ _('Add a new I/O based coding question') }}{% endblock %}
 
-{% block question_content %}
+{% block form_area %}
     {% if show_answer_keys %}
         <div>
             <h2>{{ _('Edit Answer Keys') }}</h2>
