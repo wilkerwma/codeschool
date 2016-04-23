@@ -10,50 +10,36 @@ $.fn.submitWith = function(data) {
     return $(form).submit();
 };
 
+var $styles = $(function() {
+    var elements = $();
 
-var $styles = {
+    // Apply material style to all form elements
+    var buttons = $('button, input[type=button], input[type=reset], input[type=submit], .button');
 
-    elements: $(),
+    buttons.addClass('mdl-button mdl-js-button mdl-js-ripple-effect');
+    buttons.filter('.primary, [raised]').addClass('mdl-shadow--4dp mdl-button--raised');
+    buttons.filter(':not(.flat)').addClass('mdl-button--raised');
+    elements = elements.add(buttons);
 
-    /**
-     * Apply all styles
-     */
-    applyAll: function() {
-        this.applyFormElements();
+    //// Input text
+    //var inputs = $('input[type="text"], input[type="number"], input[type="email"]');
+    //inputs.addClass('mdl-textfield__input');
+    //this.elements = this.elements.add(inputs);
+    //
+    //var textarea = $('textarea');
+    //textarea.addClass('mdl-textfield__input');
+    //this.elements = this.elements.add(textarea);
+    //
+    //// Labels
+    //var labels = $('label[for]');
+    //labels.addClass('mdl-textfield__label');
+    //this.elements = this.elements.add(labels);
 
-        this.elements.each(function(idx, elem) {
-           componentHandler.upgradeElement(this);
-        });
-    },
+    elements.each(function(idx, elem) {
+       componentHandler.upgradeElement(this);
+    });
 
-    /**
-     * Apply material style to all form elements
-     */
-    applyFormElements: function() {
-        // Buttons
-        var buttons = $('button, input[type="button"], input[type="reset"], input[type="submit"], a.button');
-
-        buttons.addClass('mdl-button mdl-js-button mdl-js-ripple-effect');
-        buttons.filter('.primary, [raised]').addClass('mdl-shadow--4dp mdl-button--raised');
-        buttons.exclude('.flat').addClass('mdl-button--raised');
-        this.elements = this.elements.add(buttons);
-
-        //// Input text
-        //var inputs = $('input[type="text"], input[type="number"], input[type="email"]');
-        //inputs.addClass('mdl-textfield__input');
-        //this.elements = this.elements.add(inputs);
-        //
-        //var textarea = $('textarea');
-        //textarea.addClass('mdl-textfield__input');
-        //this.elements = this.elements.add(textarea);
-        //
-        //// Labels
-        //var labels = $('label[for]');
-        //labels.addClass('mdl-textfield__label');
-        //this.elements = this.elements.add(labels);
-    },
-
-};
+});
 
 
 
@@ -98,7 +84,5 @@ $(function() {
         return $.map(this.selectedItems, function(x) {
             return (x.attributes['data-id'] || {}).value;
         });
-    }
-
-    $styles.applyAll();
+    };
 });

@@ -1,14 +1,10 @@
-{% extends "base-tabbed.jinja2" %}
+{% extends "base-ternary.jinja2" %}
 
 {% block content_title %}{{ _('Welcome to Codeschool!') }}{% endblock %}
+{% set tabs = [('login', _('Login')), ('signup', _('Sign up'))] %}
 
-{% block tab_titles %}
-    <paper-tab>{{ _('Login') }}</paper-tab>
-    <paper-tab>{{ _('New users') }}</paper-tab>
-{% endblock %}
-
-{% block tab_pages %}
-    <section>
+{% block main %}
+    <section id="login" class="mdl-tabs__panel is-active">
         <form id="signin-form" method="POST">
             {% csrf_token %}
             <input type="hidden" name="action-type" value="signin">
@@ -22,11 +18,11 @@
         </form>
     </section>
 
-    <section>
+    <section id="signup" class="mdl-tabs__panel">
         <form id="signup-form" method="POST">
             <input type="hidden" name="action-type" value="signup">
             {% csrf_token %}
-            <h3>{{ _('Required fields') }}</h3>
+            <h2>{{ _('Required fields') }}</h2>
             <table class="form">
                 {% if action == 'signup' %}
                     {{ form.as_table() }}
@@ -34,16 +30,18 @@
                     {{ signup.as_table() }}
                 {% endif %}
             </table>
-            <h3>{{ _('Optional fields') }}</h3>
+            <h2>{{ _('Optional fields') }}</h2>
             <table class="form">{{ signup_opt.as_table() }}</table>
         </form>
     </section>
 {% endblock %}
 
+
 {% block extra_js %}
+    {{ super() }}
     <script>
         function submit() {
-            if ($('#ternary-tabs')[0].selected === 0) {
+            if ($('#login')[0].classList.contains('is-active')) {
                 $('#signin-form')[0].submit();
             } else {
                 $('#signup-form')[0].submit();

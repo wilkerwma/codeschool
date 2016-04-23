@@ -18,6 +18,12 @@ main, nav, div, article, section, aside {
 }
 
 
+/* MDL overrides */
+.mdl-tabs.is-upgraded .mdl-tabs__tab.is-active:after,
+.mdl-tabs__tab .mdl-tabs__ripple-container .mdl-ripple {
+    background: #ffe180;
+}
+
 /*
 @import 'dialogs.css';
 

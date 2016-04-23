@@ -6,6 +6,7 @@ input[type=button],
 input[type=submit],
 input[type=reset] {
     border-radius: 4px;
+    border: 0;
     background: #00a7a7;
     color: white;
     text-transform: none;
@@ -29,6 +30,7 @@ textarea,
 select,
 input[type=text],
 input[type=number],
+input[type=password],
 input[type=email] {
     padding: 5px;
     border: 1px solid #aaa;

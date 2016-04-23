@@ -3,25 +3,27 @@
 {% block body_class %}ternary {{ super() }}{% endblock %}
 
 {% block body %}
-    {% block opening_content_tag %}
-        {% if is_dom_bind|default(True) %}<template is="dom-bind">{% endif %}
-    {% endblock %}
-    <header>
+    <header class="dark">
         {% block header %}
             <h1>{% block content_title %}{% endblock %}</h1>
         {% endblock %}
     </header>
 
-    <main>
-        {% block main %}{% endblock %}
-    </main>
+    <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+        <div class="mdl-tabs__tab-bar dark">
+            {% for (tab, title) in tabs %}
+                <a href="#{{ tab }}" class="mdl-tabs__tab{% if loop.index == 1 %} is-active{% endif %}">{{ title }}</a>
+            {% endfor %}
+        </div>
 
-    <footer>
+        <main>
+            {% block main %}{% endblock %}
+        </main>
+    </div>
+
+    <footer class="dark">
         {% block footer %}
-            <paper-button raised onclick="submit()">Avançar</paper-button>
+            <button class="primary" onclick="submit()">{{ _('Next') }}</button>
         {% endblock %}
     </footer>
-    {% block closing_content_tag %}
-        {% if is_dom_bind|default(True) %}</template>{% endif %}
-    {% endblock %}
 {% endblock %}
