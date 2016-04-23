@@ -21,6 +21,11 @@ var $styles = $(function() {
     buttons.filter(':not(.flat)').addClass('mdl-button--raised');
     elements = elements.add(buttons);
 
+    // Make open=False for main dialog
+    $('#dialog, dialog').each(function(i, el) {
+        el.open = false;
+    });
+
     //// Input text
     //var inputs = $('input[type="text"], input[type="number"], input[type="email"]');
     //inputs.addClass('mdl-textfield__input');

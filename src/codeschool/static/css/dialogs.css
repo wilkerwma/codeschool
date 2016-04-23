@@ -3,15 +3,29 @@
     color: white;
     position: absolute;
     right: -10px;
-    top: -10px;
+    top: 10px;
     padding: 2px;
     border: 2px solid white;
 }
 
-#dialog {
+#dialog,
+dialog {
     min-width: 50%;
-    padding: 0 -24px;
-    margin-bottom: 0;
+    padding: 10px;
+}
+
+@media only screen and (min-width: 600px) {
+    #dialog,
+    dialog {
+        padding: 20px 20px 20px 30px;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    #dialog,
+    dialog {
+        padding-left: 40px;
+    }
 }
 
 #dialog .no-content {
@@ -30,6 +44,7 @@
     padding: 10px;
 }
 
+dialog.wide,
 .dialog-wide {
     min-width: 50vw;
     max-width: 90vw;

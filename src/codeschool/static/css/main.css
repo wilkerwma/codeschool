@@ -6,6 +6,7 @@
 @import 'content.css';
 @import 'footer.css';
 @import 'ternary.css';
+@import 'dialogs.css';
 @import 'userena.css'; /* Maybe we should personalize views and add our own styles */
 
 main, nav, div, article, section, aside {
@@ -25,8 +26,6 @@ main, nav, div, article, section, aside {
 }
 
 /*
-@import 'dialogs.css';
-
 paper-item > a {
     display: block;
 }
@@ -34,8 +33,6 @@ paper-item > a {
 .disabled {
     background-color: grey !important;
 }
-
-
 
 
 #answer-keys {
@@ -54,22 +51,4 @@ paper-item > a {
 #answer-keys tr:nth-child(even) {
     background: #eee;
 }
-
-
-
-
-
-.code-area {
-    background: #f3f3f3;
-    padding: 20px 40px;
-    margin: 20px -20px;
-    margin-bottom: 0;
-}
-
-@media screen and (min-width: 1000px) {
-    .code-area {
-        margin-left: -40px;
-    }
-}
-
 */

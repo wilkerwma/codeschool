@@ -28,6 +28,8 @@
     <script src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}"></script>
     <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
     <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'bower_components/dialog-polyfill/dialog-polyfill.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'bower_components/dialog-polyfill/dialog-polyfill.css' %}">
     <link rel="stylesheet" href="{% static 'bower_components/material-design-lite/material.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="import" href="{% static 'components/main.html' %}">
@@ -164,18 +166,18 @@
     {% endblock %}
 
 {% block hidden_content %}
-    <paper-dialog id="dialog" class="dialog" modal exit-animation="fade-out-animation">
+    <dialog id="dialog" class="dialog mdl-dialog">
         <i id="dialog-close" onclick="this.parentNode.close()" class="material-icons">close</i>
         <div id="dialog-content">{% block dialog_content %}{% endblock %}</div>
-    </paper-dialog>
+    </dialog>
 {% endblock %}
 
     <!-- Global javascript -->
+    <script src="{% static 'bower_components/material-design-lite/material.min.js' %}"></script>
     <script src="{% static 'js/srvice.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/plugins.js' %}"></script>
 {% block extra_js %}
-    <script src="{% static 'bower_components/material-design-lite/material.min.js' %}"></script>
 {% endblock %}
 
 {% if google_analytics|default(False) %}

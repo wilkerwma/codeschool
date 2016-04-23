@@ -274,6 +274,7 @@ BOWER_INSTALLED_APPS = [
     'highlight',
     'ace-builds',
     'material-design-lite',
+    'dialog-polyfill',
 
     # Styling
     #'font-roboto#^1.0.1',

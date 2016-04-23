@@ -17,13 +17,14 @@
         <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
         <p>{{ _('All your activities and progress will be deleted.') }}</p>
         <div class="toolbar highlight">
-            <button onclick="srvice(
-                    'cs-courses.leave-course',
-                    {
-                        user: '{{ user.username }}',
-                        course: {{ course.pk }}
-                    })">{{ _('Ok') }}</button>
-            <button onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+            <button class="separated raised" onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+            <button class="danger"
+                    onclick="srvice('cs-courses.leave-course', {
+                            user: '{{ user.username }}',
+                            course: {{ course.pk }}
+                        })">
+                {{ _('Yes, leave course') }}
+            </button>
         </div>
     </div>
 {% endblock %}

@@ -673,34 +673,19 @@ var srvice = (function($) {
             if (dialog === undefined) {
                 conf.action = 'open';
             } else {
-                var opened = (dialog.opened === undefined)? !dialog.hidden: dialog.opened;
-                conf.action = opened? 'close': 'open';
+                conf.action = dialog.open? 'close': 'open';
             }
         }
 
         // Close dialog
-        if (conf.action === 'close') {
-            if (dialog.close) {
-                dialog.close()
-            } else {
-                dialog.hidden = true;
-            }
-            return;
+        if (conf.action === 'close' && dialog.open) {
+            return dialog.close();
         }
 
         // Create dialog if it does not exist
         if (!dialog || !content) {
             alert('not implemented: cannot create main dialog from scratch');
-            throw 'not implemented';
-        }
-
-        // Normalize dialog opening
-        function open_dialog() {
-            if (dialog.open) {
-                dialog.open();
-            } else {
-                dialog.hidden = false;
-            }
+            throw Error('not implemented');
         }
 
         // Add content from html element, if given
@@ -715,12 +700,12 @@ var srvice = (function($) {
                 dataType: 'text',
                 complete: function(data) {
                     $(content).html(conf.text + data.responseText);
-                    open_dialog();
+                    dialog.showModal();
                 }
             });
         } else {
             $(content).html(conf.text);
-            open_dialog();
+            dialog.showModal();
         }
     };
 

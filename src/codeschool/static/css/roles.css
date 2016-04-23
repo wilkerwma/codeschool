@@ -129,7 +129,19 @@ button > i.material-icons.alert {
     background: rgba(0, 0, 0, 0.1);
 }
 
-.dangerous,
-.danger {
-    color: darkred !important;
+.button.danger,
+button.danger,
+input[type=button].danger,
+input[type=submit].danger,
+input[type=reset].danger {
+    background: #ff2626;
+    color: white;
+}
+
+.button.danger.flat,
+button.danger.flat,
+input[type=button].danger.flat,
+input[type=submit].danger.flat,
+input[type=reset].danger.flat {
+    color: darkred;
 }
