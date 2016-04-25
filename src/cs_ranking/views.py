@@ -7,6 +7,7 @@ def index(request):
     all_battles =  BattleResult.objects.all()
     return render(request, 'ranking/index.jinja2',{"battles": all_battles})
 
+
 # 'Controller' to view result of a battle
 def battle_result(request,id_battle):
     print(id_battle)
@@ -29,7 +30,7 @@ def battle_result(request,id_battle):
         print("Not found battle"+str(e))
         raise Http404("Battle not found")
 
-    return render(request,'ranking/battle_result.html',response_dict)
+    return render(request,'ranking/battle_result.jinja2',response_dict)
 
 
 def determine_winner(code_one="",code_two=""):
