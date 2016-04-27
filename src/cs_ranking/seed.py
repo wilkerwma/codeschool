@@ -31,7 +31,7 @@ def create_users(amount):
     print("Generating the users")
     for i in range(amount):
         print("user%d" % (last_index+1))
-        users.append(User(password=PASSWORD,username="user"+str(last_index+1),first_name=NAMES[i%8],last_name=LAST_NAMES[i%8]))
+        users.append(User(password=PASSWORD,username="user"+str(last_index+1),first_name=NAMES[i%8],last_name=LAST_NAMES[i%8],email="user"+str(last_index+1)+"@m.c"))
         last_index+=1
 
 def create_battles(battles_result):
