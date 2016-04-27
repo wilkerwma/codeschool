@@ -31,6 +31,8 @@ def battle_result(request,id_battle):
 
     return render(request,'ranking/battle_result.html',response_dict)
 
+def battle(request):
+    return render(request, 'ranking/battle.jinja2')
 
 def determine_winner(code_one="",code_two=""):
 
