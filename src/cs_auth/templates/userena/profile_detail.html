@@ -1,14 +1,26 @@
 {% extends 'cs_auth/base.jinja2' %}
 
 
-{% block content_title %}Perfil: {{ username }}{% endblock %}
+{% block content_title %}
+    {{ gettext('Profile: %(name)s', name=username) }}{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        dt {
+            float: none;
+        }
+
+    </style>
+{% endblock %}
+
 
 {% block content_sessions %}
-    <session>
+    <div>
         {% block profile_details %}
             <img class="mugshot" src="{{ profile.get_mugshot_url }}"
                  alt="{{ _("Your mugshot") }}">
-            <dl>
+            <dl class="user-details">
                 {% block profile_definition_list %}
                     {% if profile.user.get_full_name %}
                         <dt>{{ _("Name") }}</dt>
@@ -32,15 +44,14 @@
                     {% endif %}
                     {% if profile.about_me %}
                         <dt>{{ _("About me") }}</dt>
-                        <dd>{{ profile.about_me }}</dd>
+                        <dd>{{ profile.about_me|markdown }}</dd>
                     {% endif %}
                 {% endblock %}
             </dl>
         {% endblock %}
-    </session>
+    </div>
 
-    {#
-    <session>
+    <div>
         <h2>{{ _('Contacts') }}</h2>
 
         <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
@@ -51,17 +62,16 @@
             </div>
 
             {% for list in profile.contact_classes %}
-                <div id="tab{{ loop.index }}" class="mdl-tabs__tab-panel{% if loop.first %} is-active{% endif %}">
+                <div id="tab{{ loop.index }}" class="mdl-tabs__panel{% if loop.first %} is-active{% endif %}">
                     <ul class="contact-list">
-                        {% for user in list %}
-                            <li><a href="/accounts/{{ user.username }}">
-                                {{ user.get_full_name|default(user.username) }}</a>
+                        {% for friend in list %}
+                            <li>
+                                <a href="/accounts/{{ friend.username }}">{{ friend.get_full_name() or friend }}</a>
                             </li>
                         {% endfor %}
                     </ul>
                 </div>
             {% endfor %}
         </div>
-    </session>
-     #}
+    </div>
 {% endblock %}

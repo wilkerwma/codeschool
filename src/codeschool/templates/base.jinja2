@@ -97,11 +97,11 @@
                         </ul>
                     </li>
                 {% endif %}
-                {% if not disable_profile_section %}
+                {% if not disable_profile_section and user is defined %}
                     <li>
                         <p><a href="/accounts/{{ user.username }}/">{{ _('Profile') }}</a></p>
                         <ul>
-                            <li><a href="/accounts/{{ user.username }}/edit">{{ _('Edit') }}</a></li>
+                            <li><a href="/accounts/{{ request.user.username }}/edit">{{ _('Edit') }}</a></li>
                             <li class="disabled-link">Amigos</li>
                             <li class="disabled-link">Configurações</li>
                         </ul>

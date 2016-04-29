@@ -1,9 +1,9 @@
-{% extends 'userena/base_userena.html' %}
-{% load i18n %}
+{% extends 'cs_auth/base.jinja2' %}
 
 {% block title %}{% trans "Signed out" %}{% endblock %}
-{% block content_title %}<h2>{% trans "You have been signed out" %}.</h2>{% endblock %}
+{% block content_title %}
+    <h2>{% trans "You have been signed out" %}.</h2>{% endblock %}
 
-{% block content %}
-<p>{% trans "You have been signed out. Till we meet again." %}</p>
+{% block content_body %}
+    <p>{% trans "You have been signed out. Till we meet again." %}</p>
 {% endblock %}

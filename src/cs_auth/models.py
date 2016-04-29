@@ -2,7 +2,7 @@ import datetime
 from codeschool import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext as __
-from userena.models import UserenaBaseProfile
+from userena.models import UserenaBaseProfile, UserenaSignup
 
 
 strptime = datetime.datetime.strptime
@@ -321,6 +321,10 @@ class UserMixin:
     def teacher_contacts(self):
         pks = self.enrolled_courses.values_list('teacher', flat=True)
         return models.User.objects.filter(pk__in=pks).distinct()
+
+    @property
+    def userena_signup(self):
+        return UserenaSignup.objects.get_or_create(user=u)[0]
 
 
 models.User.__bases__ = (UserMixin,) + models.User.__bases__

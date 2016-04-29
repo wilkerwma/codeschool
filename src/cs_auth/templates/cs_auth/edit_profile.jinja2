@@ -1,19 +1,1 @@
 {% extends "base.jinja2" %}
-
-{% block content %}
-    <iron-pages selected="{{ selected_tab|default(0) }}">
-        <section class="login">
-            <form method="POST"  action="/auth/login/" id="login-form">
-                {% csrf_token %}
-                {{ login_form.as_p() }}
-            </form>
-        </section>
-
-        <section class="register">
-            <form method="POST" action="/auth/register/" id="register-form">
-                {% csrf_token %}
-                {{ register_form.as_p() }}
-            </form>
-        </section>
-    </iron-pages>
-{% endblock %}

@@ -1,29 +1,18 @@
-{% extends 'base.jinja2' %}
-{% load i18n %}
+{% extends 'cs_auth/base.jinja2' %}
 
-{% block title %}{% trans "Account setup" %}{% endblock %}
+{% block title %}{{ _("Account setup") }}{% endblock %}
+{% block content_title %}<h2>
+    {{ gettext('Account &raquo; %(username)s', username=profile.user.username) }}</h2>{% endblock %}
 
-{% block content_title %}<h2>{{ gettext('Account &raquo; %(username)s', username=profile.user.username) }}</h2>{% endblock %}
+{% block content_body %}
+    <form method="post" id="form">
+        {% csrf_token %}
+        <h3>{{ _("Edit Profile") }}</h3>
+        <table class="form">{{ form.as_table }}</table>
+    </form>
 
-{% block content %}
-    <div>
-        <ul id="box-nav">
-            <li class="first"><a href="{% url 'userena_profile_detail' user.username %}"><span>{% trans 'View profile' %}</span></a></li>
-            <li class="selected"><a href="{% url 'userena_profile_edit' user.username %}">{% trans "Edit profile" %}</a></li>
-            <li><a href="{% url 'userena_password_change' user.username %}">{% trans "Change password" %}</a></li>
-            <li class="last"><a href="{% url 'userena_email_change' user.username %}">{% trans "Change email" %}</a></li>
-        </ul>
-
-        <form action="" enctype="multipart/form-data" method="post" id="userena-form">
-            {% csrf_token %}
-            <fieldset>
-                <h3>{% trans "Edit Profile" %}</h3>
-                <table class="form">{{ form.as_table }}</table>
-            </fieldset>
-        </form>
-
-        <div class="toolbar highlight">
-            <input type="submit" form="userena-form" value="{% trans "Save changes" %}" />
-        </div>
+    <div class="toolbar highlight">
+        <input type="submit" form="form" value="{% trans "Save changes" %}"/>
+    </div>
     </div>
 {% endblock %}
