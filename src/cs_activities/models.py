@@ -58,7 +58,7 @@ class Activity(models.InheritableModel):
         return self.name
 
     def get_absolute_url(self):
-        return reverse('activity', args=(self.pk,))
+        return reverse('activity:detail', kwargs={'pk': self.pk})
 
     def can_edit(self, user):
         """Return True if user has permissions to edit activity."""

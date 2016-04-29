@@ -1,0 +1,19 @@
+{% extends "base.jinja2" %}
+
+{% if object is defined %}
+    {% if short_description is not defined %}
+        {% if object.short_description is defined  %}
+            {% set short_description = object.short_description %}
+        {% elif object.description is defined  %}
+            {% set short_description = object.description %}
+        {% else %}
+            {% set short_description = str(object) %}
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+{% block content_head %}
+    <h1>{{ self.content_title() }}</h1>
+
+    {% if short_description %}<p>{{ short_description|markdown }}</p>{% endif %}
+{% endblock %}

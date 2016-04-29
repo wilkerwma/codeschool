@@ -1,7 +1,31 @@
-{% from "cs_activities/base.jinja2" import globals %}
-{% extends "multi-views/detail.jinja2" %}
+{% extends "viewgroups/crud/detail.jinja2" %}
 
 {% block content_title %}{{ _('Coding Activity:') }} {{ super() }}{% endblock %}
+
+{% block object_description %}
+    <div id="code-box">
+        <div class="toolbar highlight">
+            <h1 class="separated">{{ _('Follow the code') }}</h1>
+            <button onclick="jump('prev')" class="flat"><i class="material-icons">keyboard_arrow_left</i></button>
+            <button onclick="jump('next')" class="flat"><i class="material-icons">keyboard_arrow_right</i></button>
+            {% if can_edit %}
+                <button onclick="remove_code_item()" class="danger flat"><i class="material-icons">delete</i></button>
+            {% endif %}
+            <button onclick="update()" class="primary flat"><i class="material-icons">refresh</i></button>
+        </div>
+
+        <div id="display-area">
+            <p class="box-title"><span>{{ _('Press the "update" button to refresh') }}</span></p>
+            <div id="display-code" class="code-editor">{{ activity.last.text|default('') }}</div>
+        </div>
+
+        <div id="edit-area">
+            <p class="box-title"><span>{{ _('Edit code and press "update" to send code to the students') }}</span> <span id="edit-message">{{ _('successful update') }}</span></p>
+            <div id="code-textarea" class="code-editor">{{ activity.last.text|default('') }}</div>
+        </div>
+    </div>
+{% endblock %}
+
 
 {% block style %}
     {{ super() }}
@@ -32,7 +56,9 @@
         #code-box .box-title {
             padding: 10px 20px 10px 40px;
             margin: -15px 0 0;
-            background: rgba(78,154,6,0.5);
+            background: #666;
+            color: white;
+            font-weight: 300;
         }
 
         #edit-message {
@@ -42,17 +68,17 @@
             padding: 5px 20px;
             border-radius: 5px;
             float: right;
-            font-size: 0.7em;
+            font-size: 0.8em;
         }
     </style>
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
     {{ super() }}
     <script src="{% static 'bower_components/ace-builds/src-min/ace.js' %}" charset="utf-8"></script>
     <script>
         var item_pk = {{ activity.last.pk|default('null') }};
-        var can_edit = {{ can_edit|lower }};
+        var can_edit = {{ can_edit|default(false)|lower }};
         var display_area = $('#display-area')[0];
         var edit_area = $('#edit-area')[0];
 
@@ -146,33 +172,6 @@
         code_div.getSession().setMode("ace/mode/{{ activity.language.ref }}");
         code_div.setReadOnly(true);
     </script>
-
 {% endblock %}
 
-{% block content_body %}
-    {% block details %}{% endblock %}
-    {{ super() }}
-
-    <div id="code-box">
-        <div class="toolbar highlight">
-            <h1 class="separated">{{ _('Follow the code') }}</h1>
-            <button onclick="jump('prev')" class="flat"><i class="material-icons">keyboard_arrow_left</i></button>
-            <button onclick="jump('next')" class="flat"><i class="material-icons">keyboard_arrow_right</i></button>
-            {% if can_edit %}
-                <button onclick="remove_code_item()" class="danger flat"><i class="material-icons">delete</i></button>
-            {% endif %}
-            <button onclick="update()" class="primary flat"><i class="material-icons">refresh</i></button>
-        </div>
-
-        <div id="display-area">
-            <p class="box-title"><strong>{{ _('Press the "update" button to refresh') }}</strong></p>
-            <div id="display-code" class="code-editor">{{ activity.last.text|default('') }}</div>
-        </div>
-
-        <div id="edit-area">
-            <p class="box-title"><strong>{{ _('Edit code and press "update" to send code to the students') }}</strong> <span id="edit-message">{{ _('successful update') }}</span></p>
-            <div id="code-textarea" class="code-editor">{{ activity.last.text|default('') }}</div>
-        </div>
-    </div>
-{% endblock %}
 

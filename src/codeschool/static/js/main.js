@@ -26,20 +26,6 @@ var $styles = $(function() {
         el.open = false;
     });
 
-    //// Input text
-    //var inputs = $('input[type="text"], input[type="number"], input[type="email"]');
-    //inputs.addClass('mdl-textfield__input');
-    //this.elements = this.elements.add(inputs);
-    //
-    //var textarea = $('textarea');
-    //textarea.addClass('mdl-textfield__input');
-    //this.elements = this.elements.add(textarea);
-    //
-    //// Labels
-    //var labels = $('label[for]');
-    //labels.addClass('mdl-textfield__label');
-    //this.elements = this.elements.add(labels);
-
     elements.each(function(idx, elem) {
        componentHandler.upgradeElement(this);
     });

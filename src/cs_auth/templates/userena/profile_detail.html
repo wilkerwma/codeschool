@@ -1,88 +1,67 @@
-{% extends 'base.html' %}
-{% load i18n %}
+{% extends 'cs_auth/base.jinja2' %}
 
-{% block title %}{% blocktrans with profile.user.username as username %}{{ username }}'s profile.{% endblocktrans %}{% endblock %}
-{% block content_title %}<h2>{{ profile.user.username }} {% if profile.user.get_full_name %}({{ profile.user.get_full_name }}){% endif %}</h2>{% endblock %}
 
-{% block content %}
-  <div class="white-box">
-    {% block profile_navigation %}
-      {% comment %}Dirty hack. Will use django-guardian in the future.{% endcomment %}
-      {% if user.username == profile.user.username %}
-        <div id="box-nav">
-          {% block profile_navigation_items %}
-            <a href="{% url 'userena_profile_detail' user.username %}">{% trans "View profile" %}</a>
-            <a href="{% url 'userena_profile_edit' user.username %}">{% trans "Edit details" %}</a>
-            <a href="{% url 'userena_password_change' user.username %}">{% trans "Change password" %}</a>
-            <a href="{% url 'userena_email_change' user.username %}">{% trans "Change email" %}</a>
-          {% endblock %}
-        </div>
-      {% endif %}
-    {% endblock %}
+{% block content_title %}Perfil: {{ username }}{% endblock %}
 
-    <div id="details">
-      {% block profile_details %}
-        <img class="mugshot" src="{{ profile.get_mugshot_url }}" alt="{% trans "Your mugshot" %}" />
-        <dl>
-          {% block profile_definition_list %}
-            {% if profile.user.get_full_name %}
-              <dt>{% trans "Name" %}</dt>
-              <dd>{{ profile.user.get_full_name }}</dd>
-            {% endif %}
-            {% if profile.user.email and not hide_email %}
-              <dt>{% trans "Email" %}</dt>
-              <dd>{{ profile.user.email }}</dd>
-            {% endif %}
-            {% if profile.age %}
-              <dt>{% trans "Age" %}</dt>
-              <dd>{{ profile.age }}</dd>
-            {% endif %}
-            {% if profile.website %}
-              <dt>{% trans "Website" %}</dt>
-              <dd>{{ profile.website|urlize }}</dd>
-            {% endif %}
-            {% if profile.location %}
-              <dt>{% trans "Location" %}</dt>
-              <dd>{{ profile.location }}</dd>
-            {% endif %}
-            {% if profile.about_me %}
-              <dt>{% trans "About me" %}</dt>
-              <dd>{{ profile.about_me }}</dd>
-            {% endif %}
-          {% endblock %}
-        </dl>
-      {% endblock %}
-    </div>
-  </div>
+{% block content_sessions %}
+    <session>
+        {% block profile_details %}
+            <img class="mugshot" src="{{ profile.get_mugshot_url }}"
+                 alt="{{ _("Your mugshot") }}">
+            <dl>
+                {% block profile_definition_list %}
+                    {% if profile.user.get_full_name %}
+                        <dt>{{ _("Name") }}</dt>
+                        <dd>{{ profile.user.get_full_name() }}</dd>
+                    {% endif %}
+                    {% if profile.user.email and not hide_email %}
+                        <dt>{{ _("Email") }}</dt>
+                        <dd>{{ profile.user.email }}</dd>
+                    {% endif %}
+                    {% if profile.age %}
+                        <dt>{{ _("Age") }}</dt>
+                        <dd>{{ profile.age }}</dd>
+                    {% endif %}
+                    {% if profile.website %}
+                        <dt>{{ _("Website") }}</dt>
+                        <dd>{{ profile.website|urlize }}</dd>
+                    {% endif %}
+                    {% if profile.location %}
+                        <dt>{{ _("Location") }}</dt>
+                        <dd>{{ profile.location }}</dd>
+                    {% endif %}
+                    {% if profile.about_me %}
+                        <dt>{{ _("About me") }}</dt>
+                        <dd>{{ profile.about_me }}</dd>
+                    {% endif %}
+                {% endblock %}
+            </dl>
+        {% endblock %}
+    </session>
 
-<div>
-  <h2>{{ _('Contacts') }}</h2>
-  <template is="dom-bind">
-    <paper-tabs selected="{{ '{{ selected }' }}}" id="contact-tabs">
-      <paper-tab>{{ _('Friends') }}</paper-tab>
-      <paper-tab>{{ _('Staff') }}</paper-tab>
-      <paper-tab>{{ _('Colleagues') }}</paper-tab>
-    </paper-tabs>
+    {#
+    <session>
+        <h2>{{ _('Contacts') }}</h2>
 
-    <iron-pages selected="{{ '{{ selected }' }}}" id="contact-pages">
-      {% for list in profile.contact_classes %}
-        <div>
-          <ul class="contact-list">
-            {% for user in list %}
-              <li><a href="/accounts/{{ user.username }}">{{ user.get_full_name|default:user.username }}</a></li>
+        <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+            <div class="mdl-tabs__tab-bar">
+                <a href="#tab1" class="mdl-tabs__tab is-active">{{ _('Friends') }}</a>
+                <a href="#tab2" class="mdl-tabs__tab">{{ _('Staff') }}</a>
+                <a href="#tab3" class="mdl-tabs__tab">{{ _('Colleagues') }}</a>
+            </div>
+
+            {% for list in profile.contact_classes %}
+                <div id="tab{{ loop.index }}" class="mdl-tabs__tab-panel{% if loop.first %} is-active{% endif %}">
+                    <ul class="contact-list">
+                        {% for user in list %}
+                            <li><a href="/accounts/{{ user.username }}">
+                                {{ user.get_full_name|default(user.username) }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endfor %}
-          </ul>
         </div>
-      {% endfor %}
-    </iron-pages>
-  </template>
-
-  <script>
-    document.addEventListener('WebComponentsReady', function () {
-      var template = document.querySelector('template[is="dom-bind"]');
-      template.selected = 0; // selected is an index by default
-    });
-  </script>
-
-</div>
+    </session>
+     #}
 {% endblock %}

@@ -13,47 +13,13 @@ from cs_questions.models import Question, QuestionActivity
 
 
 class CodingIoResponse(Response):
-    class Meta:
-        proxy = True
-        app_label = 'cs_questions'
-
-    @property
-    def __data(self):
-        if self.data is None:
-            return ('', None, None)
-        else:
-            return self.data
-
-    @property
-    def source(self):
-        return self.__data[0]
-
-    @source.setter
-    def source(self, value):
-        src, lang, feedback = self.__data
-        self.data = (value, lang, feedback)
-
-    @property
-    def language(self):
-        return ProgrammingLanguage.get(ref=self.__data[1])
-
-    @language.setter
-    def language(self, value):
-        src, lang, feedback = self.__data
-        self.data = (value, lang and lang.ref, feedback)
-
-    @property
-    def feedback(self):
-        return self.__data[2]
-
-    @feedback.setter
-    def feedback(self, value):
-        src, lang, feedback = self.__data
-        self.data = (value, lang, value)
+    source = models.TextField(blank=True)
+    language = models.ForeignKey(ProgrammingLanguage)
+    feedback = models.PickledObjectField(blank=True, null=True)
 
     @property
     def title(self):
-        return self.feedback.title
+        return self.feedback.title if self.feedback else None
 
     def as_html(self, *args, **kwds):
         return self.feedback.as_html(*args, **kwds)

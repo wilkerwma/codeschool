@@ -1,12 +1,11 @@
 from django.forms import ModelForm
-from cs_questions.question_coding_io.models import CodingIoQuestion, CodingIoAnswerKey
+from cs_questions.question_coding_io.models import CodingIoQuestion, CodingIoAnswerKey, CodingIoResponse
 
 
-class QuestionEditForm(ModelForm):
+class CodingIoResponseForm(ModelForm):
     class Meta:
-        model = CodingIoQuestion
-        fields = ['title', 'short_description', 'long_description',
-                  'discipline', 'iospec_source', 'iospec_size', 'timeout']
+        model = CodingIoResponse
+        fields = ['language', 'source']
 
 
 class AnswerKeyEditForm(ModelForm):

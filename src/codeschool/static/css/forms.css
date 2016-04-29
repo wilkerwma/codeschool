@@ -41,58 +41,87 @@ select {
     background: #eee;
 }
 
+textarea {
+    resize: both;
+}
 
 /* Form table layout */
-.form tr {
+.form tr,
+form tr{
     display: flex;
     flex-flow: column;
 }
 
-.form td, th {
+.form td,
+.form th,
+form td,
+form th {
     padding: 8px;
     vertical-align: top;
 }
 
-.form th {
+.form th,
+form th {
     font-weight: 500;
     color: #444;
     text-align: left;
     padding-bottom: 0;
+    min-width: 150px;
 }
 
-.form td {
+.form td,
+form td {
     padding-top: 0;
+    width: 100%;
+}
+
+.form textarea,
+form table textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 600px;
 }
 
 @media all and (min-width: 600px) {
-    .form tr {
+    .form tr,
+    form tr {
         display: table-row;
     }
 
-    .form th {
+    .form th,
+    form th {
         text-align: right;
         padding-bottom: 8px;
     }
 
-    .form td {
+    .form td,
+    form td {
         padding-top: 8px;
     }
 }
 
 /* Form actions */
-.form ul.errorlist {
+.form ul.errorlist,
+form ul.errorlist {
     margin: 0;
     padding: 0;
     font-size: 85%;
     color: #ba2121;
 }
 
-.form ul.errorlist li {
+.form ul.errorlist li,
+form ul.errorlist li {
     display: block;
 }
 
-.form span.helptext {
-    display: block;
+.form .helptext,
+form .helptext {
     font-size: 85%;
     color: darkgrey;
 }
+
+.form span.helptext,
+form span.helptext {
+    display: block;
+}
+

@@ -6,8 +6,13 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="no-js">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    {% block meta %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="{{ page_description|default('Codeschool - learn through coding') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
+    {% endblock %}
     <title>
         {%- block title %}
             {% if page %}
@@ -19,40 +24,12 @@
         {%- block title_suffix %}
             {% if title_suffix %}{{ title_suffix }}{% endif %}
         {% endblock %}</title>
-    <meta name="description" content="{{ page_description|default('Codeschool - learn through coding') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% block meta %}{% endblock %}
-    <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
 
-    <!-- Imports -->
-    <script src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}"></script>
-    <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
-    <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
-    <script src="{% static 'bower_components/dialog-polyfill/dialog-polyfill.js' %}"></script>
-    <link rel="stylesheet" href="{% static 'bower_components/dialog-polyfill/dialog-polyfill.css' %}">
-    <link rel="stylesheet" href="{% static 'bower_components/material-design-lite/material.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    <link rel="import" href="{% static 'components/main.html' %}">
-    {% block extra_components %}
-        {# Override this in templates to add extra compontents #}
-        {% for html in extra_components %}
-            <link rel="import" href="{{ html }}">
-        {% endfor %}
-    {% endblock %}
-    {% block extra_css %}
-        {# Override this in templates to add extra stylesheets #}
-        {% for css in extra_css %}
-            <link rel="stylesheet" href="{{ css }}">
-        {% endfor %}
-    {% endblock %}
-    {% block header_js %}
-        {# Override this in templates to add extra javascript that must be in
-          the header #}
-        {% for js in header_js %}
-            <script src="{{ js }}"></script>
-        {% endfor %}
-    {% endblock %}
+    <!-- CSS and styles -->
     {% block style %}
+        <link rel="stylesheet" href="{% static 'bower_components/dialog-polyfill/dialog-polyfill.css' %}">
+        <link rel="stylesheet" href="{% static 'bower_components/material-design-lite/material.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
         {% if content_color %}
             <style>
                 #content-area main > *:nth-child(odd) {
@@ -61,10 +38,23 @@
             </style>
         {% endif %}
     {% endblock %}
+
+    <!-- Javascript -->
+    {% block javascript_header %}
+        <script src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}"></script>
+        <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
+        <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+        <script src="{% static 'bower_components/dialog-polyfill/dialog-polyfill.js' %}"></script>
+    {% endblock %}
+
+    <!-- Web components -->
+    {% block webcomponents %}
+        <link rel="import" href="{% static 'components/main.html' %}">
+    {% endblock %}
 </head>
 
 <body class="{% block body_class %}fullbleed layout vertical{% if body_class %} {{ body_class }}{% endif %}{% endblock %}">
-    <!--[if lt IE 8]>
+    <!--[if le IE 9]>
         <p class="browserupgrade">
             You are using an <strong>outdated</strong> browser. Please
             <a href="http://browsehappy.com/">upgrade your browser</a> to
@@ -124,8 +114,19 @@
 
         <main>
             {% block content %}
-                {% block content_title %}{% endblock %}
-                {% if content %}{{ content }}{% endif %}
+                <section>
+                    {% block content_head %}
+                        <h1>{% block content_title %}{{ content_title }}</h1>{% endblock %}
+                    {% endblock %}
+                </section>
+
+                {% block content_sessions %}
+                    <section>
+                        {% block content_body %}
+                            {{ content_body|markdown }}
+                        {% endblock %}
+                    </section>
+                {% endblock %}
             {% endblock %}
         </main>
     </div>
@@ -165,32 +166,31 @@
     </footer>
     {% endblock %}
 
-{% block hidden_content %}
-    <dialog id="dialog" class="dialog mdl-dialog">
-        <i id="dialog-close" onclick="this.parentNode.close()" class="material-icons">close</i>
-        <div id="dialog-content">{% block dialog_content %}{% endblock %}</div>
-    </dialog>
-{% endblock %}
+    {% block hidden_content %}
+        <dialog id="dialog" class="dialog mdl-dialog">
+            <i id="dialog-close" onclick="this.parentNode.close()" class="material-icons">close</i>
+            <div id="dialog-content">{% block dialog_content %}{% endblock %}</div>
+        </dialog>
+    {% endblock %}
 
-    <!-- Global javascript -->
-    <script src="{% static 'bower_components/material-design-lite/material.min.js' %}"></script>
-    <script src="{% static 'js/srvice.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
-    <script src="{% static 'js/plugins.js' %}"></script>
-{% block extra_js %}
-{% endblock %}
+    <!-- Javascript in the end of file -->
+    {% block javascript %}
+        <script src="{% static 'bower_components/material-design-lite/material.min.js' %}"></script>
+        <script src="{% static 'js/srvice.js' %}"></script>
+        <script src="{% static 'js/main.js' %}"></script>
+        <script src="{% static 'js/plugins.js' %}"></script>
+    {% endblock %}
 
-{% if google_analytics|default(False) %}
-<!-- Google Analytics -->
-<script>
-    (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-    function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-    e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-    e.src='https://www.google-analytics.com/analytics.js';
-    r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-    ga('create','{{ google_analytics_site_id|default('codeschool') }}','auto');ga('send','pageview');
-</script>
-{% endif %}
-
+    {% if google_analytics|default(False) %}
+        <!-- Google Analytics -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','{{ google_analytics_site_id|default('codeschool') }}','auto');ga('send','pageview');
+        </script>
+    {% endif %}
 </body>
 </html>

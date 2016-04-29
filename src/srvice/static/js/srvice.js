@@ -724,15 +724,12 @@ var srvice = (function($) {
             return [args, {}];
         } else if (args.length == 0) {
             return [[], {}];
-        } else if (args.length == 1 && args[0] instanceof 'object') {
+        } else if (args.length == 1 && args[0] instanceof Object) {
             return [[], args[0]];
         } else {
             return [args, {}];
         }
     }
-
-
-
 
     $.srvice = srvice;
     srvice.serverUri = '/srvice';

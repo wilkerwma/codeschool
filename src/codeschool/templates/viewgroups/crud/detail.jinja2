@@ -1,0 +1,15 @@
+{% extends 'viewgroups/crud/detail-base.jinja2' %}
+
+{% block content_head %}
+    {{ super() }}
+    {{ self.object_detail() }}
+{% endblock %}
+
+{% block object_description %}
+    <h2>{{ _('Description') }}</h2>
+    <div>{{ object.long_description|markdown }}</div>
+{% endblock %}
+
+{% block content_body %}
+    {{ self.object_description() }}
+{% endblock %}

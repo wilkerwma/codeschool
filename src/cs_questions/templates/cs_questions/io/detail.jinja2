@@ -2,6 +2,7 @@
 
 {% block header_content %}
     {{ super() }}
+
     <div class="rules-box">
         <h3>{{ _('Rules') }}</h3>
         <dl>
@@ -16,13 +17,7 @@
         <h2>{{ _('Response') }}</h2>
         {% if not lang %}
             <div>
-                <p>Programming language:
-                    <select name="{{ form['language'].name }}">
-                        {% for plang in languages %}
-                            <option value="{{ plang.ref }}" {% if plang.ref == form['language'].value %}selected{% endif %}>{{ plang.name }}</option>
-                        {% endfor %}
-                    </select>
-                </p>
+                <p>Programming language: {{ form['language'] }}</p>
             </div>
         {% else %}
             <input type="hidden" name="{{ form['language'].name }}" value="{{ form['language'].value }}">
@@ -31,13 +26,10 @@
     </div>
 {% endblock %}
 
-{% block extra_css %}
-    {{ super() }}
-    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/codemirror/lib/codemirror.css' %}">
-{% endblock %}
-
 {% block style %}
     {{ super() }}
+
+    <link rel="stylesheet" type="text/css" href="{% static 'bower_components/codemirror/lib/codemirror.css' %}">
     <style>
         .iospec-testcase {
             padding-left: 30px;
@@ -51,7 +43,7 @@
     </style>
 {% endblock %}
 
-{% block extra_js %}
+{% block javascript %}
     <script type="text/javascript" src="{% static 'bower_components/codemirror/lib/codemirror.js' %}"></script>
     <script type="text/javascript" src="{% static 'bower_components/codemirror/addon/edit/matchbrackets.js' %}"></script>
     <script type="text/javascript" src="{% static 'bower_components/codemirror/mode/python/python.js' %}"></script>

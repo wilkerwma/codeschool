@@ -4,6 +4,13 @@
     color: #ddd;
 }
 
+@media only screen and (min-width: 600px) {
+    #nav-footer {
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
 #copyright-footer {
     padding: 10px;
     background: #333 url('../img/bg_dark_noise.png') repeat;

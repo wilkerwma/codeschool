@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'cs_courses',
     'cs_questions',
     'cs_activities',
+    'viewgroups',
+    'srvice',
 
     # Wagtail and dependencies
     'wagtail.wagtailforms',
@@ -69,7 +71,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'easy_thumbnails',
     'guardian',
-    'srvice',
     'rest_framework',
     'userena',
 

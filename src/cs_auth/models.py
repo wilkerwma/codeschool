@@ -38,6 +38,8 @@ class Profile(UserenaBaseProfile):
 
     @property
     def age(self):
+        if self.date_of_birth is None:
+            return None
         today = timezone.now().date()
         return int(round((today - self.date_of_birth).days / 365.25))
 

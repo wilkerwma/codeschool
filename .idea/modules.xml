@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/codeschool.iml" filepath="$PROJECT_DIR$/.idea/codeschool.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../django-pandas/.idea/django-pandas.iml" filepath="$PROJECT_DIR$/../django-pandas/.idea/django-pandas.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../viewgroups/.idea/viewgroups.iml" filepath="$PROJECT_DIR$/../viewgroups/.idea/viewgroups.iml" />
     </modules>
   </component>
 </project>

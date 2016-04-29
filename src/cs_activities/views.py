@@ -1,24 +1,31 @@
 import srvice
 from django import http
+from django.utils.translation import ugettext_lazy as _
 from cs_activities import models
-from codeschool.urlsubclassmapper import MultiViews, MultiViewTypeDispatcher
+from viewgroups import CRUDWithInheritanceViewGroup, CRUDViewGroup
 
 
-class ActivityViews(MultiViewTypeDispatcher):
+class ActivityCRUD(CRUDWithInheritanceViewGroup):
+    model = models.Activity
+    template_extension = '.jinja2'
+    template_basename = 'cs_activities/'
+    use_crud_views = True
+    context_data = {
+        'content_color': "#589cbc",
+        'set object_name': _('activity'),
+    }
+    exclude_fields = ['published_at', 'parent', 'icon_src']
+
+
+@ActivityCRUD.register
+class GenericActivityViews(CRUDViewGroup):
     model = models.Activity
 
 
-@ActivityViews.register('generic')
-class GenericActivityViews(MultiViews):
-    model = models.Activity
-    exclude = ['published_at']
-
-
-@ActivityViews.register('sync-code')
-class SyncCodeActivityViews(MultiViews):
+@ActivityCRUD.register
+class SyncCodeActivityViews(CRUDViewGroup):
    model = models.SyncCodeActivity
-   exclude = ['published_at', 'parent']
-   template_base = 'cs_activities/sync-code/'
+   template_basename = 'cs_activities/sync-code/'
 
 
 @srvice.srvice
@@ -83,5 +90,4 @@ def code_sync_get(request, pk=None, item=None, jump=None):
     elif jump == 'prev' and item.prev is not None:
         item = item.prev
 
-    return [getattr(item, 'pk', None),
-            getattr(item, 'text', '')]
+    return [getattr(item, 'pk', None), getattr(item, 'text', '')]

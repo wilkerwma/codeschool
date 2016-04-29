@@ -14,6 +14,18 @@ main, nav, div, article, section, aside {
     padding: 0;
 }
 
+dl{
+    padding: 10px;
+    padding-left: 20px;
+    margin-top: -20px;
+}
+
+dt {
+    float: left;
+    margin-right: 20px;
+}
+
+
 #wagtail-userbar {
     top: 100px;
 }

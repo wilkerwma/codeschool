@@ -4,7 +4,7 @@
 
 {% block content %}
     <section>
-        {% block content_header %}
+        {% block header_content %}
             {% if can_edit %}
                 <div class="config-handle">
                     <a href="./{{ object.pk }}/edit"><i class="material-icons">edit</i></a>
@@ -13,6 +13,7 @@
                     {% endif %}
                 </div>
             {% endif %}
+
             <h1>{% block content_title %}{{ detail_object.title }}{% endblock %}</h1>
             {% block short_description %}
                 {% if detail_object.short_description %}
@@ -23,7 +24,7 @@
     </section>
 
     <section>
-        {% block content_body %}
+        {% block object_detail %}
             {% block details %}
                 {% if detail_object.details %}
                     <h2>{{ _('Details') }}</h2>

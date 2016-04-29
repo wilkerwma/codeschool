@@ -1,22 +1,41 @@
+from django.utils.translation import ugettext_lazy as _
+from viewgroups import CRUDViewGroup, CRUDWithInheritanceViewGroup
 from codeschool.models import User
-from codeschool.shortcuts import render
-from codeschool.urlsubclassmapper import URLSubclassMapper, ViewMapper, auto_form
 from cs_questions import models
+from cs_questions import forms
 users = User.objects
 
 
-mapper = URLSubclassMapper(models.Question.objects)
+class QuestionViews(CRUDWithInheritanceViewGroup):
+    model = models.Question
+    template_extension = '.jinja2'
+    template_basename = 'cs_questions/'
+    use_crud_views = True
+    exclude_fields = ['status', 'status_changed', 'author_name', 'comment', 'owner']
+    detail_fields = []
+    context_data = {
+        'content_color': '#BC5454',
+        'object_name': _('question'),
+    }
 
 
-def index(request):
-    """List of all public questions."""
-
-    questions = models.Question.objects.all().order_by('pk')
-    context = {'questions': questions}
-    return render(request, 'cs_questions/index.jinja2', context)
+@QuestionViews.register
+class NumericQuestionViews(CRUDViewGroup):
+    model = models.NumericQuestion
 
 
-class QuestionViews(ViewMapper):
+@QuestionViews.register
+class CodingIoQuestionViews(CRUDViewGroup):
+    model = models.io.CodingIoQuestion
+    template_base = 'cs_questions/io/'
+
+    class DetailViewMixin:
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context['form'] = forms.CodingIoResponseForm()
+            return context
+
+class fpp:
     """
     Base mapper for all Question view subtypes.
     """
@@ -31,7 +50,6 @@ class QuestionViews(ViewMapper):
         'id', 'created', 'modified', 'status', 'status_changed', 'activity',
         'group', 'user', 'response_ptr'
     )
-    response_form = auto_form('model.response_cls')
 
     def finalize(self, obj):
         obj.update()
@@ -70,10 +88,6 @@ class QuestionViews(ViewMapper):
         return self.render(self.detail_template, obj)
 
 
-@mapper.register(model=models.NumericQuestion, name='numeric')
-class NumericQuestionViews(QuestionViews):
-    response_form_includes = ['value']
-
 
 # Import views from other modules
-from cs_questions.question_coding_io.views import CodingIoQuestionViews
+#from cs_questions.question_coding_io.views import CodingIoQuestionViews

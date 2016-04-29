@@ -21,9 +21,15 @@
     <orderEntry type="jdk" jdkName="Python 3.5.1 virtualenv at ~/.virtualenvs/codeschool" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="pyjudge" />
-    <orderEntry type="module" module-name="django-pandas" />
+    <orderEntry type="module" module-name="viewgroups" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
+    <option name="TEMPLATE_FOLDERS">
+      <list>
+        <option value="$MODULE_DIR$/src/cs_questions/templates" />
+        <option value="$MODULE_DIR$/src/codeschool/templates" />
+      </list>
+    </option>
   </component>
 </module>
