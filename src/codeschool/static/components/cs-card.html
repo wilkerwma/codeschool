@@ -1,5 +1,4 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<script src="../bower_components/ace-builds/src-min/ace.js" charset="utf-8"></script>
 
 
 <dom-module id="cs-card">
@@ -11,6 +10,24 @@
     </template>
 
     <style>
+        :host {
+            display: block;
+            margin: 10px;
+            background-color: white;
+        }
+
+        :host[faded] {
+            background-color: rgba(220, 220, 220, 170);
+        }
+
+        :host[icon] #icon {
+            display: block;
+        }
+
+        ::content h1 {
+            font-size: 1.7em;
+        }
+
         #card {
             padding: 20px;
             color: #333;
@@ -22,11 +39,9 @@
 
         #icon {
             font-size: 4em;
+            display: none;
         }
 
-        ::content h1 {
-            font-size: 1.7em;
-        }
     </style>
 
     <script>
@@ -37,7 +52,6 @@
                     icon: {
                         type: String,
                         reflectToAttribute: true,
-                        observer: '_onIconChanged'
                     },
                     href: {
                         type: String,
@@ -46,8 +60,7 @@
                     faded: {
                         type: Boolean,
                         value: false,
-                        reflectToAttribute: true,
-                        observer: '_onFadedChanged'
+                        reflectToAttribute: true
                     }
                 },
 
@@ -62,36 +75,9 @@
                            window.location = this.href;
                        }
                     });
-                    this._onIconChanged(this.icon);
-                    this._onFadedChanged(this.faded);
-                },
-
-                // Observers
-                _onIconChanged: function(value) {
-                    this.$.icon.hidden = (value === undefined);
-                },
-                _onFadedChanged: function(value) {
-                    if (value) {
-                        this.classList.add('faded');
-                    } else {
-                        this.classList.remove('faded');
-                    }
                 }
             })
         );
     </script>
 </dom-module>
-
-<style>
-    cs-card {
-        display: block;
-        margin: 10px;
-        background-color: white;
-    }
-    cs-card.faded {
-        background-color: rgba(220, 220, 220, 170);
-    }
-</style>
-
-
 
