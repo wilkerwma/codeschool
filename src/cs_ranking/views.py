@@ -17,16 +17,10 @@ def battle_result(request,id_battle):
         result_battle = BattleResult.objects.get(id=id_battle)
         battles = result_battle.battles.all()
 
-        if len(battles) == 2:
-            # This process can be automatized
-            win = determine_winner(battles[0].code_winner,battles[1].code_winner) # The code winner is 0 or 1
-            loser = not win # The possible index are only 1 or 0, then the loser is the inverse of winner
+        # This process can be automatized
+        win = winner_length(battles)
  
-            context={ "battle_winner": battles[win],"battle_loser":battles[loser],
-                            "time_winner":battles[win].time_result(),"time_loser":battles[loser].time_result(),
-                            "len_winner":len(battles[win].code_winner),"len_loser":len(battles[loser].code_winner)}
-        else:
-            raise Http404("All battles not found")
+        context = { "battles": battles,"battle_winner": battles[win]}
     except BattleResult.DoesNotExist as e:
         print("Not found battle"+str(e))
         raise Http404("Battle not found")
@@ -44,12 +38,13 @@ def battle_user(request):
     context = {"battles": battles}
     return render(request, 'ranking/battle_user.jinja2', context)
 
-def determine_winner(code_one="",code_two=""):
-    winner_index=0 # Determine the index of the winner (0 or 1)
-
-    if len(code_one) > len(code_two):
-        winner_index=1
-    else:
-        winner_index=0
-
+def winner_length(battles):
+    
+    winner_index=0 # Determine the index of the win ( any number 0..len(battles)-1)
+    bigger_length = len(battles.first().code_winner)
+    for index in range(1,len(battles)):
+        code_length = len(battles[index].code_winner)
+        if  code_length < bigger_length:
+            bigger_length = code_length
+            winner_index 
     return winner_index

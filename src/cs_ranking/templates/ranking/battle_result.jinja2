@@ -3,25 +3,26 @@
     Battle winners
 {% endblock %}
 {% block content %} 
-<h1>Resultado da Batalha</h1>
-<div>
-    <h2>Winner</h2>
-    User: {{ battle_winner.user }} <br>
-    Ranking position: "number" <br>
-    Time: {{ time_winner  }}<br>
-    Code winner: {{ battle_winner.code_winner }} <br>
-    Characters count: {{ len_winner  }}<br>
-    Time execution code: "in seconds"<br>
-    Number of submitions: "a lot!"<br>
-</div>
-<div>
-    <h2>Looser</h2>
-    User: {{ battle_loser.user }} <br>
-    Ranking position: "number" <br>
-    Time: {{ time_loser  }}<br>
-    Code winner: {{ battle_loser.code_winner }} <br>
-    Characters count: {{ len_loser  }}<br>
-    Time execution code: "in seconds"<br>
-    Number of submitions: "a lot!"<br>
-</div>
+    <h1>Resultado da Batalha</h1>
+    <div>
+        <h2>Winner</h2>
+            User: {{ battle_winner.user }} <br>
+            Ranking position: "number" <br>
+            Time: {{ battle_winner.time_end - battle_winner.time_begin }} <br>
+            Code winner: {{ battle_winner.code_winner }} <br>
+            Characters count: {{ battle_winner.code_winner|length  }}<br>
+        </div>
+    {% for battle in battles %}
+        {% if battle.user.id != battle_winner.user.id %}
+            <div id="{{battle.user.id}}">
+                User: {{ battle.user }} <br>
+                Ranking position: "number" <br>
+                Time: {{ battle.time_end - battle.time_begin }} <br>
+                Code winner: {{ battle.code_winner }} <br>
+                Characters count: {{ battle.code_winner|length  }}<br>
+        <!--    Time execution code: "in seconds"<br>
+            Number of submitions: "a lot!"<br -->
+            </div>
+            {% endif %}
+    {% endfor %}
 {% endblock %}

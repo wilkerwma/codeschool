@@ -1,7 +1,6 @@
 # Determine the seeds to test data
 import django
 from django.conf import settings
-from codeschool.settings import base
 
 import os
 NAMES = ["João", "Ana","Amanda","Letícia","Roberta","Pedro","Marcelo","Rayanne"]
@@ -16,7 +15,9 @@ def seed():
     global battles_result
     create_users(10) 
     for u in users:
+        u.set_password(PASSWORD)
         u.save()
+
     create_battles_result(10)
     for br in battles_result:
         br.save()
@@ -57,11 +58,13 @@ if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "codeschool.settings")
     django.setup()
 
-    if not settings.configured:
-        settings.configure(base,DEGUB=True)
+#    if not settings.configured:
+#        settings.configure(base,DEGUB=True)
     from cs_ranking.models import Battle,BattleResult
     from django.contrib.auth.models import User
     from django.utils import timezone
+#    from codeschool.settings import base
+
     seed()
     print(Battle.objects.all())
     print(User.objects.all())
