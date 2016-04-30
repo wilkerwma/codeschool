@@ -63,24 +63,12 @@
     <![endif]-->
 
     {% block body %}{% if is_document|default(True) %}{% block wagtail %}{{ wagtailuserbar() }}{% endblock %}{% endif %}
-    <header id="nav-header">
-        <div class="logo">
-            <img src="{% static 'img/logo.svg' %}" alt="Codeschool">
-            <paper-icon-button onclick="page.toggle_menu()" icon="menu"></paper-icon-button>
-        </div>
-        <ul>
-            <li><a href="#" class="disabled-link">Opções</a></li>
-            <li><a href="#" class="disabled-link">Avisos</a></li>
-            <li><a href="/courses/">Cursos</a></li>
-            <li><a href="/accounts/login/">Login</a></li>
-            {%  if user.first_name %}
-                {% set first_letter=user.first_name[0] %}
-            {% else %}
-                {% set first_letter='?' %}
-            {% endif %}
-            <li><button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored fab-button" onclick="srvice.go('/accounts/{{ user.username|default('signin') }}/')">{{ first_letter }}</button></li>
-        </ul>
-    </header>
+    <cs-head {% if user.first_name %}username="{{ user.first_name }}"{% endif %}>
+        <a href="#" class="disabled-link">Opções</a>
+        <a href="#" class="disabled-link">Avisos</a>
+        <a href="/courses/">Cursos</a>
+        <a href="/accounts/login/">Login</a>
+    </cs-head>
 
     <div id="content-area">
         <nav>
