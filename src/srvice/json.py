@@ -26,7 +26,7 @@ __supported_encoders__ = {
 def register(cls, name=None, encode=None, decode=None):
     """Register encode/decode functions for the given Python type.
 
-    The name parameters refers to the value that is associated to the "@type"
+    The name parameters refers to the value that is associated to the "@"
     key in the resulting dictionary. It is the encoder's responsability to add
     this key."""
 
@@ -49,9 +49,9 @@ def decode(data):
     """Decode a JSON-like structure into the corresponding Python data."""
 
     if isinstance(data, dict):
-        if '@type' in data:
-            decoder = __decode_registry__[data['@type']]
-            return decoder({k: v for (k, v) in data.items() if k != '@type'})
+        if '@' in data:
+            decoder = __decode_registry__[data['@']]
+            return decoder({k: v for (k, v) in data.items() if k != '@'})
     return data
 
 
@@ -127,8 +127,8 @@ def _(data):
 @encode.register(collections.Mapping)
 def _(data):
     encoded = {str(k): encode(v) for (k, v) in data.items()}
-    if '@type' in data:
-        return {'@type': 'object', 'data': encoded}
+    if '@' in data:
+        return {'@': 'object', 'data': encoded}
     return encoded
 
 
@@ -147,13 +147,9 @@ def _(data):
 @encode.register(bytes)
 def _(data):
     data = base64.b64encode(data).decode('ascii')
-    return {'@type': 'bytes', 'data': data}
+    return {'@': 'bytes', 'data': data}
 
 
 @decode.register(bytes)
 def _(data):
     return data['data']
-
-
-print(encode({'foo': b'bar'}))
-print(dumps({'foo': b'bar'}))

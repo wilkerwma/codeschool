@@ -9,18 +9,16 @@
 
         <article>
             {% for course in courses -%}
-            <a href="{{ course.pk }}" class="card mdl-card mdl-shadow--2dp">
-                <i class="material-icons">help</i>
+            <cs-card href="{{ course.pk }}" icon="help">
                 <h1>{{ course.name }}</h1>
                 <p>{{ course.short_description }}</p>
-            </a>
+            </cs-card>
             {%- endfor %}
 
-            <a onclick="srvice.dialog({url: 'add-course'})" class="card-faded  mdl-card mdl-shadow--2dp" >
-                <i class="material-icons">add_circle</i>
+            <cs-card onclick="srvice.dialog({url: 'add-course'})" faded icon="add_circle">
                 <h1>Adicionar</h1>
                 <p>Cadastre-se em outros cursos.</p>
-            </a>
+            </cs-card>
         </article>
     </section>
 

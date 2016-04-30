@@ -1,0 +1,97 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<script src="../bower_components/ace-builds/src-min/ace.js" charset="utf-8"></script>
+
+
+<dom-module id="cs-card">
+    <template>
+        <div id="card">
+            <a href="{{ href }}" id="link"><i id="icon" class="material-icons">{{ icon }}</i></a>
+            <content></content>
+        </div>
+    </template>
+
+    <style>
+        #card {
+            padding: 20px;
+            color: #333;
+            margin: 20px;
+            text-align: center;
+            vertical-align: center;
+            min-height: 150px;
+        }
+
+        #icon {
+            font-size: 4em;
+        }
+
+        ::content h1 {
+            font-size: 1.7em;
+        }
+    </style>
+
+    <script>
+        HTMLImports.whenReady(
+            AceEditorElement = Polymer({
+                is: 'cs-card',
+                properties: {
+                    icon: {
+                        type: String,
+                        reflectToAttribute: true,
+                        observer: '_onIconChanged'
+                    },
+                    href: {
+                        type: String,
+                        reflectToAttribute: true
+                    },
+                    faded: {
+                        type: Boolean,
+                        value: false,
+                        reflectToAttribute: true,
+                        observer: '_onFadedChanged'
+                    }
+                },
+
+                hostAttributes: {
+                    // Hash with default value for HTML attributes
+                },
+
+                ready: function () {
+                    $(this).addClass('mdl-card mdl-shadow--2dp');
+                    $(this).click(function () {
+                       if (this.href) {
+                           window.location = this.href;
+                       }
+                    });
+                    this._onIconChanged(this.icon);
+                    this._onFadedChanged(this.faded);
+                },
+
+                // Observers
+                _onIconChanged: function(value) {
+                    this.$.icon.hidden = (value === undefined);
+                },
+                _onFadedChanged: function(value) {
+                    if (value) {
+                        this.classList.add('faded');
+                    } else {
+                        this.classList.remove('faded');
+                    }
+                }
+            })
+        );
+    </script>
+</dom-module>
+
+<style>
+    cs-card {
+        display: block;
+        margin: 10px;
+        background-color: white;
+    }
+    cs-card.faded {
+        background-color: rgba(220, 220, 220, 170);
+    }
+</style>
+
+
+

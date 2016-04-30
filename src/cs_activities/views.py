@@ -2,7 +2,7 @@ import srvice
 from django import http
 from django.utils.translation import ugettext_lazy as _
 from cs_activities import models
-from viewgroups import CRUDWithInheritanceViewGroup, CRUDViewGroup
+from viewpack import CRUDWithInheritanceViewGroup, CRUDViewPack
 
 
 class ActivityCRUD(CRUDWithInheritanceViewGroup):
@@ -18,12 +18,12 @@ class ActivityCRUD(CRUDWithInheritanceViewGroup):
 
 
 @ActivityCRUD.register
-class GenericActivityViews(CRUDViewGroup):
+class GenericActivityViews(CRUDViewPack):
     model = models.Activity
 
 
 @ActivityCRUD.register
-class SyncCodeActivityViews(CRUDViewGroup):
+class SyncCodeActivityViews(CRUDViewPack):
    model = models.SyncCodeActivity
    template_basename = 'cs_activities/sync-code/'
 

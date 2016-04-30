@@ -82,32 +82,6 @@
 /* Content cards */
 .content-cards > aside > p {display: none}
 
-.card,
-.card-faded {
-    display: block;
-    padding: 20px;
-    background-color: white;
-    color: #333;
-    margin: 20px;
-    text-align: center;
-    vertical-align: center;
-    min-height: 150px;
-}
-
-.card-faded {
-    background-color: rgba(220, 220, 220, 170);
-}
-
-.card > i,
-.card-faded > i {
-    font-size: 4em;
-}
-
-.card h1,
-.card-faded h1 {
-    font-size: 1.7em;
-}
-
 @media only screen and (min-width: 600px) {
     .content-cards > aside > p {display: block}
 

@@ -50,6 +50,7 @@ setup(
         'codeschool': ['static/*.*', 'static/*/*.*', 'static/*/*/*.*'],
     },
     install_requires=[
+        'django-viewpack>=0.1'
         'django>=1.9',
         'django-model-utils',
         'django_jinja',

@@ -1,6 +1,6 @@
 {% extends "cs_questions/detail.jinja2" %}
 
-{% block header_content %}
+{% block content_head %}
     {{ super() }}
 
     <div class="rules-box">
@@ -22,7 +22,7 @@
         {% else %}
             <input type="hidden" name="{{ form['language'].name }}" value="{{ form['language'].value }}">
         {% endif %}
-        {{ form['source'] }}
+        <ace-editor mode="python" read-only>print('hello world')</ace-editor>
     </div>
 {% endblock %}
 
@@ -43,29 +43,3 @@
     </style>
 {% endblock %}
 
-{% block javascript %}
-    <script type="text/javascript" src="{% static 'bower_components/codemirror/lib/codemirror.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bower_components/codemirror/addon/edit/matchbrackets.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bower_components/codemirror/mode/python/python.js' %}"></script>
-    <script>
-        $(function () {
-            var editor = CodeMirror.fromTextArea(
-                    document.getElementById('id_source'),
-                    {
-                        mode: "python",
-                        version: 3,
-                        lineNumbers: true,
-                        indentUnit: 4,
-                        indentWithTabs: false,
-                        matchBrackets: true
-                    });
-            // Indent with tabs
-            editor.setOption("extraKeys", {
-                Tab: function (cm) {
-                    var spaces = new Array(cm.getOption("indentUnit") + 1).join(" ");
-                    cm.replaceSelection(spaces);
-                }
-            });
-        });
-    </script>
-{% endblock %}

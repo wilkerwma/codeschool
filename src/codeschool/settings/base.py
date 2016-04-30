@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'cs_courses',
     'cs_questions',
     'cs_activities',
-    'viewgroups',
+                     'viewpack',
     'srvice',
 
     # Wagtail and dependencies

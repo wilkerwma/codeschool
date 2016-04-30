@@ -1,13 +1,13 @@
 from django.conf.urls import include, url
 from django.conf import settings
 from django.contrib import admin
-from cs_auth import views as auth_views
+from codeschool import views as views
 from cs_search import views as search_views
 
 
 urlpatterns = [
     # Basic wagtail/django functionality
-    url(r'^$', auth_views.index, name='index'),
+    url(r'^$', views.index, name='index'),
     url(r'^django-admin/', include(admin.site.urls)),
     url(r'^admin/', include('wagtail.wagtailadmin.urls')),
     url(r'^documents/', include('wagtail.wagtaildocs.urls')),
@@ -18,7 +18,7 @@ urlpatterns = [
     url(r'^srvice/', include('srvice.urls')),
 
     # Authentication
-    url(r'^accounts/', include('cs_auth.urls')),
+    url(r'^accounts/', include('cs_auth.urls', namespace='auth')),
 
     # Local apps and functionality
     url(r'^activities/', include('cs_activities.urls')),

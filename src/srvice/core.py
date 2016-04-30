@@ -207,12 +207,10 @@ def srvice(*args, method='POST'):
                 result = result.as_json_result()
             else:
                 result = {"result": result}
-        print(result)
         return http.JsonResponse(result)
 
     # Register view function
     rpc_namespace[qualname] = callback
-    print(qualname)
     return func
 
 

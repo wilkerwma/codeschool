@@ -38,25 +38,22 @@
 
         <article>
             {% for activity in user_activities -%}
-                <a href="{{ activity.get_absolute_url() }}" class="card mdl-card mdl-shadow--2dp">
-                    <i class="material-icons">{{ activity.material_icon|default('help_outline') }}</i>
+                <cs-card href="{{ activity.get_absolute_url() }}" icon="{{ activity.material_icon|default('help_outline') }}">
                     <h1>{{ activity.name }}</h1>
                     <p>{{ activity.short_description }}</p>
-                </a>
+                </cs-card>
             {%- endfor %}
 
             {% if course.teacher != user %}
-                <a onclick="alert('em construção')" class="card-faded mdl-card mdl-shadow--2dp">
-                    <i class="material-icons">add_circle</i>
+                <cs-card icon="add_circle" faded>
                     <h1>Aprofunde-se</h1>
                     <p>Atividades e desafios adicionais selecionados para você :)</p>
-                </a>
+                </cs-card>
             {% else %}
-                <a onclick="srvice.dialog({url: 'add-activities'})" class="card-faded mdl-card mdl-shadow--2dp" >
-                    <i class="material-icons">add_circle</i>
+                <cs-card onclick="srvice.dialog({url: 'add-activities'})" icon="add_circle" faded>
                     <h1>Adicione conteúdo</h1>
                     <p>Clique aqui para adicionar novas atividades em seu curso.</p>
-                </a>
+                </cs-card>
             {% endif %}
         </article>
     </section>

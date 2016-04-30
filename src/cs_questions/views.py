@@ -1,5 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
-from viewgroups import CRUDViewGroup, CRUDWithInheritanceViewGroup
+from viewpack import CRUDViewPack, CRUDWithInheritanceViewGroup
 from codeschool.models import User
 from cs_questions import models
 from cs_questions import forms
@@ -20,14 +20,14 @@ class QuestionViews(CRUDWithInheritanceViewGroup):
 
 
 @QuestionViews.register
-class NumericQuestionViews(CRUDViewGroup):
+class NumericQuestionViews(CRUDViewPack):
     model = models.NumericQuestion
 
 
 @QuestionViews.register
-class CodingIoQuestionViews(CRUDViewGroup):
+class CodingIoQuestionViews(CRUDViewPack):
     model = models.io.CodingIoQuestion
-    template_base = 'cs_questions/io/'
+    template_basename = 'cs_questions/io/'
 
     class DetailViewMixin:
         def get_context_data(self, **kwargs):

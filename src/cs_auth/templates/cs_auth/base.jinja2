@@ -23,10 +23,10 @@
 
     {% if user.username == profile.user.username %}
         <div class="user-toolbar toolbar highlight">
-            <a href="{% url 'userena_profile_detail' username %}">{{ _("View profile") }}</a>
-            <a href="{% url 'userena_profile_edit' username %}">{{ _("Edit details") }}</a>
-            <a href="{% url 'userena_password_change' username %}">{{ _("Change password") }}</a>
-            <a href="{% url 'userena_email_change' username %}">{{ _("Change email") }}</a>
+            <a href="{% url 'auth:userena_profile_detail' username %}">{{ _("View profile") }}</a>
+            <a href="{% url 'auth:userena_profile_edit' username %}">{{ _("Edit details") }}</a>
+            <a href="{% url 'auth:userena_password_change' username %}">{{ _("Change password") }}</a>
+            <a href="{% url 'auth:userena_email_change' username %}">{{ _("Change email") }}</a>
         </div>
     {% endif %}
 {% endblock %}
