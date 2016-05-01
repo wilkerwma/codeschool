@@ -1,7 +1,13 @@
-<!-- Polymer -->
-<link rel="import" href="../bower_components/polymer/polymer.html">
-<script src="../bower_components/ace-builds/src-min/ace.js" charset="utf-8"></script>
-
+<!--link rel="import" href="../../bower_components/polymer/polymer.html"-->
+<script>
+    var $aceScript = null;
+    function $aceLoader() {
+        var path = '/static/bower_components/ace-builds/src-min/ace.js';
+        return $.getScript(path).then(function() {
+            ace.config.set('basePath', '/static/bower_components/ace-builds/src-min/');
+        });
+    }
+</script>
 
 <dom-module id="ace-editor">
     <template>
@@ -10,7 +16,8 @@
 
     <style>
         #editor {
-            min-height: 10em;
+            min-height: 15em;
+            font-size: 1em;
         }
     </style>
 
@@ -74,23 +81,31 @@
                 },
 
                 ready: function () {
-                    this.ace = ace.edit(this.$.editor);
-                    this.ace.resize();
-                    this.find = this.ace.find;
-                    this.replace = this.ace.replace;
-                    this.replaceAll = this.ace.replaceAll;
-                    this.commands = this.ace.commands;
-
-                    // Trigger observers to set default values
-                    this._onModeChanged(this.mode);
-                    this._onThemeChanged(this.theme);
-                    this._onReadOnlyChanged(this.readOnly);
-                    this._onTabSizeChanged(this.tabSize);
-                    this._onSoftTabsChanged(this.softTabs);
-                    this._onWrapModeChanged(this.wrapMode);
-                    this._onHighlightActiveLineChanged(this.highlightActiveLine);
-                    this._onShowPrintMarginChanged(this.showPrintMargin);
-
+                    var elem = this;
+                    
+                    function ready_cb() {
+                        elem.ace = ace.edit(elem.$.editor);
+                        elem.ace.resize();
+                        elem.find = elem.ace.find;
+                        elem.replace = elem.ace.replace;
+                        elem.replaceAll = elem.ace.replaceAll;
+                        elem.commands = elem.ace.commands;
+    
+                        // Trigger observers to set default values
+                        elem._onModeChanged(elem.mode);
+                        elem._onThemeChanged(elem.theme);
+                        elem._onReadOnlyChanged(elem.readOnly);
+                        elem._onTabSizeChanged(elem.tabSize);
+                        elem._onSoftTabsChanged(elem.softTabs);
+                        elem._onWrapModeChanged(elem.wrapMode);
+                        elem._onHighlightActiveLineChanged(elem.highlightActiveLine);
+                        elem._onShowPrintMarginChanged(elem.showPrintMargin);
+                    }
+                    
+                    if ($aceScript === null) {
+                        $aceScript = $aceLoader();
+                    }
+                    $aceScript.then(ready_cb);
                 },
 
                 setValue: function(value) {

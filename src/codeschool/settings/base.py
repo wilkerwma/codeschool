@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'cs_courses',
     'cs_questions',
     'cs_activities',
-                     'viewpack',
+    'viewpack',
     'srvice',
 
     # Wagtail and dependencies
@@ -66,7 +66,6 @@ INSTALLED_APPS = [
     'address',
     'annoying',
     'djangobower',
-    #'django_jinja',
     'djinga',
     'django_extensions',
     'easy_thumbnails',
@@ -176,11 +175,12 @@ TEMPLATES = [
             'extensions': [
                 'codeschool.jinja.ext.DjangoComment',
                 'codeschool.jinja.ext.DjangoLoad',
-                "jinja2.ext.do",
-                "jinja2.ext.loopcontrols",
-                "jinja2.ext.with_",
-                "jinja2.ext.i18n",
-                "jinja2.ext.autoescape",
+                'compressor.contrib.jinja2ext.CompressorExtension',
+                'wagtail.wagtailcore.jinja2tags.core',
+                'wagtail.wagtailadmin.jinja2tags.userbar',
+                'wagtail.wagtailimages.jinja2tags.images',
+                'jdj_tags.extensions.DjangoL10n',
+                #'jdj_tags.extensions.DjangoNow',  # not released yet!
                 'djinga.ext.static',
                 'djinga.ext.css',
                 'djinga.ext.js',
@@ -188,12 +188,12 @@ TEMPLATES = [
                 'djinga.ext.django',
                 'djinga.ext.csrf_token',
                 'djinga.ext.url',
-                #'djinga.ext.htmlcompress.HTMLCompress',
-                #'jdj_tags.extensions.DjangoNow',  # not released yet!
-                'jdj_tags.extensions.DjangoL10n',
-                'wagtail.wagtailcore.jinja2tags.core',
-                'wagtail.wagtailadmin.jinja2tags.userbar',
-                'wagtail.wagtailimages.jinja2tags.images',
+                #'djinga.ext.htmlcompress.HTMLCompress',  # only on deploy
+                "jinja2.ext.do",
+                "jinja2.ext.loopcontrols",
+                "jinja2.ext.with_",
+                "jinja2.ext.i18n",
+                "jinja2.ext.autoescape",
             ],
             "context_processors": [
                 'django.template.context_processors.request',
@@ -261,6 +261,22 @@ STATIC_URL = '/static/'
 
 MEDIA_ROOT = os.path.join(PROJECT_DIR, 'collect', 'media')
 MEDIA_URL = '/media/'
+
+# Enable django compressor
+COMPRESS_ENABLED = True
+#COMPRESS_JINJA2_GET_ENVIRONMENT = None
+COMPRESS_CSS_FILTERS = [
+    'compressor.filters.css_default.CssAbsoluteFilter',
+    'compressor.filters.cssmin.rCSSMinFilter',
+    #'compressor.filters.cssmin.CSSCompressorFilter',
+]
+COMPRESS_PRECOMPILERS = [
+    ('text/coffeescript', 'coffee --compile --stdio'),
+    ('text/less', 'lessc {infile} {outfile}'),
+    ('text/x-sass', 'sass {infile} {outfile}'),
+    ('text/x-scss', 'sass --scss {infile} {outfile}'),
+    ('text/stylus', 'stylus < {infile} > {outfile}'),
+]
 
 
 # Bower applications

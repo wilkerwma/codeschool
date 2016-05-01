@@ -1,0 +1,67 @@
+<link rel="import" href="../../bower_components/Sortable/Sortable.html">
+
+<dom-module id="selectable-actions">
+    <template>
+        <div id="error" style="display: none"></div>
+        <content></content>
+    </template>
+
+    <script>
+        (function($) {
+            Polymer({
+                is: 'selectable-actions',
+                properties: {
+                    dataId: Boolean,
+                    action: String,
+                    disabledClass: {
+                        type: String,
+                        value: 'disabled'
+                    }
+                },
+
+                ready: function() {
+                    var element = this;
+                    var ref = $(this).attr('data-id') || null;
+                    var menu = $(this).find('paper-menu')[0];
+                    var nav = $(this).find('nav [action]');
+
+                    // Create on-click handler for each button
+                    $(nav).each(function () {
+                        var action = $(this).attr('action');
+                        var data_attr = $(this).attr('action-data') || '';
+                        data_attr = (new Function('return ' + data_attr))();
+
+                        $(this).click(function() {
+                            if (!$(this).hasClass('disabled')) {
+                                var selected = $.map(menu.selectedItems, function (x) {
+                                    return $(x).attr('data-id');
+                                });
+
+                                var data = $.extend({
+                                    selected: selected,
+                                    ref: ref
+                                }, data_attr);
+
+                                $.srvice(action, data);
+                            }
+                        })
+                    });
+
+                    // Register to menu changed event
+                    menu.addEventListener('iron-select', function(x) {
+                        nav.removeClass(element.disabledClass);
+
+                        var select_size = (this.selectedItems || []).length;
+                        if (select_size === 0) {
+                            nav.filter('[requires-selection]').addClass(element.disabledClass);
+                        }
+                        if (select_size !== 1) {
+                            nav.filter('[requires-single]').addClass(element.disabledClass);
+                        }
+                    });
+                    menu.fire('iron-select');
+                }
+            });
+        })(jQuery);
+    </script>
+</dom-module>

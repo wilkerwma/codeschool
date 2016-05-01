@@ -46,11 +46,19 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src'),
     package_data={
-        '': ['templates/*.*'],
-        'codeschool': ['static/*.*', 'static/*/*.*', 'static/*/*/*.*'],
+        '': [
+            'templates/*.*',
+            'templates/*/*.*',
+            'templates/*/*/*.*',
+            'templates/*/*/*/*.*'],  # this is ridiculous. is there a better
+                                     # option in setuptools?
+        'codeschool': [
+            'static/*.*',
+            'static/*/*.*',
+            'static/*/*/*.*'],
     },
     install_requires=[
-        'django-viewpack>=0.1'
+        'django-viewpack>=0.1.1'
         'django>=1.9',
         'django-model-utils',
         'django_jinja',
@@ -63,6 +71,9 @@ setup(
         'django-annoying',
         'django-autoslug',
         'django-compressor',
+        'slimit',
+        'csscompressor',
+        'html5lib'
         'django-extensions',
         'django-guardian',
         'pytz',
