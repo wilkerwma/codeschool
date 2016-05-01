@@ -6,6 +6,27 @@ from django.contrib.auth import models as auth_model
 class BattleResult(models.Model):
     date = models.DateField(auto_now_add=True)
     battle_winner = models.OneToOneField('Battle',blank=True,null=True)
+    type = "size"
+
+    def determine_winner(self,battles):
+        if not self.battle_winner:
+            if type == "size":
+                index_winner = self.winner_lenght(battles)
+                self.battle_winner = battles[index_winner]
+                self.save()
+        return self.battle_winner
+
+    def winner_lenght(self,battles):
+        winner_index=0 # Determine the index of the win ( any number 0..len(battles)-1)
+        bigger_length = len(battles.first().code_winner)
+        for index in range(1,len(battles)):
+            code_length = len(battles[index].code_winner)
+            if  code_length < bigger_length:
+                bigger_length = code_length
+                winner_index
+        return winner_index
+
+
     def __str__(self):
         if self.battle_winner:
             return "%s (%s) winner: %s" %(self.id,str(self.date),self.battle_winner.user)
@@ -21,16 +42,6 @@ class Battle(models.Model):
     code_winner = models.TextField()
     
     battle_result = models.ForeignKey(BattleResult,related_name='battles')
-
-    # Return the diff of time in seconds
-    def time_result(self):
-        try:
-            delta_time = (self.time_end - self.time_begin)
-            seconds = delta_time.total_seconds()
-        except TypeError as e:
-            print("error"+str(e))
-            seconds = 0.0
-        return seconds
 
     def __str__(self):
         return "Battle %s/%s - %s" % (self.battle_result.id,self.id,self.user)
