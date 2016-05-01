@@ -14,8 +14,8 @@
             </div>
             <button id="fabbutton"
                     class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored fab-button"
-                    onclick="srvice.go('/accounts/{{ accountLink }}/')">
-                {{ fabLetter }}
+                    onclick="window.location = '/accounts/{{ _accountLink }}/';">
+                {{ _fabLetter }}
             </button>
         </nav>
     </template>
@@ -34,7 +34,7 @@
         #logo {
             background-color: #eee;
             width: 100%;
-            padding: 10px 0px;
+            padding: 10px 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -47,7 +47,7 @@
 
         #nav {
             width: 100%;
-            margin: 0px;
+            margin: 0;
             padding: 0;
         }
 
@@ -144,18 +144,18 @@
                 AceEditorElement = Polymer({
                     is: 'cs-head',
                     properties: {
-                        accountLink: {
+                        _accountLink: {
                             type: String,
                             value: 'login'
                         },
-                        fabLetter: {
+                        _fabLetter: {
                             type: String,
                             value: '?'
                         },
-                        faded: {
-                            type: Boolean,
-                            value: false,
-                            reflectToAttribute: true
+                        username: {
+                            type: String,
+                            reflectToAttribute: true,
+                            observer: '_onUsernameChanged'
                         }
                     },
 
@@ -164,11 +164,16 @@
                     },
 
                     ready: function () {
-                        $(this).click(function () {
-                            if (this.href) {
-                                window.location = this.href;
-                            }
+                        this._onUsernameChanged(this.username);
+
+                        $(this.$.fabbutton).click(function () {
+                            window.location = '/accounts/' + (this.accountLink || 'login');
                         });
+                    },
+
+                    _onUsernameChanged: function(value) {
+                        this._fabLetter = this.username? this.username[0]: '?';
+                        this._accountLink = this.username || 'login';
                     }
                 })
         );
