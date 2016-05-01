@@ -8,7 +8,7 @@
         <h2>Winner</h2>
             User: {{ battle_winner.user }} <br>
             Ranking position: "number" <br>
-            Time: {{ battle_winner.time_end - battle_winner.time_begin }} <br>
+            Time: {{ (battle_winner.time_end - battle_winner.time_begin)|deltaformat }} <br>
             Code winner: {{ battle_winner.code_winner }} <br>
             Characters count: {{ battle_winner.code_winner|length  }}<br>
         </div>
@@ -17,7 +17,7 @@
             <div id="{{battle.user.id}}">
                 User: {{ battle.user }} <br>
                 Ranking position: "number" <br>
-                Time: {{ battle.time_end - battle.time_begin }} <br>
+                Time: {{ (battle.time_end - battle.time_begin)|deltaformat }} <br>
                 Code winner: {{ battle.code_winner }} <br>
                 Characters count: {{ battle.code_winner|length  }}<br>
         <!--    Time execution code: "in seconds"<br>

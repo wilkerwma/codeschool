@@ -10,7 +10,7 @@
         {% for battle in battles %}
         <tr>
             <td> {{ battle.id }} </td>
-            <td> {{ battle.time_begin }} ~ {{ battle.time_end }} </td>
+            <td> {{ battle.time_begin|dateformat(format="short") }} ~ {{ battle.time_end|dateformat(format="short") }} </td>
             <td> <a href="{{battle.battle_result_id}}"> {{ battle.battle_result }} </a></td>
 
         </tr>
