@@ -18,5 +18,5 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^ranking/', include('ranking.urls')),
+    url(r'^ranking/', include('cs_ranking.urls')),
 ]
