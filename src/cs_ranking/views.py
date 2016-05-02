@@ -18,8 +18,8 @@ def battle_result(request,id_battle):
         battles = result_battle.battles.all()
 
         # Determine the winner of this battle result based in the type (lenght, time resolution)
-        winner = result_battle.determine_winner(battles)
-
+        winner = result_battle.determine_winner()
+        
         context = { "battles": battles,"battle_winner": winner}
 
     except BattleResult.DoesNotExist as e:
@@ -55,17 +55,21 @@ def battle_user(request):
     context = {"battles": battles}
     return render(request, 'ranking/battle_user.jinja2', context)
 
+
 # Create a new invitation
-def intitate_user(request):
+def invitate_user(request):
     pass
 
 # View the invitations
 def invitations(request):
+    print(request.user.id)
+    BattleInvitation.objects.get(challange=request.user.id)
     return redirect("/battle/battle")
 
 # Accept the invitation
 def battle_invitation(request):
     # Redirect to battle page
+    print(request)
     return redirect("/battle/battle") 
 
     

@@ -6,26 +6,25 @@ from django.contrib.auth import models as auth_model
 class BattleResult(models.Model):
     date = models.DateField(auto_now_add=True)
     battle_winner = models.OneToOneField('Battle',blank=True,null=True)
-    type = "size"
+    type = "length"
 
-    def determine_winner(self,battles):
+    def determine_winner(self):
         if not self.battle_winner:
-            if type == "size":
-                index_winner = self.winner_lenght(battles)
-                self.battle_winner = battles[index_winner]
-                self.save()
+            self.battle_winner = getattr(self,'winner_'+self.type)()
+            self.save()
         return self.battle_winner
 
-    def winner_lenght(self,battles):
-        winner_index=0 # Determine the index of the win ( any number 0..len(battles)-1)
-        bigger_length = len(battles.first().code_winner)
-        for index in range(1,len(battles)):
-            code_length = len(battles[index].code_winner)
-            if  code_length < bigger_length:
-                bigger_length = code_length
-                winner_index
-        return winner_index
+    def winner_length(self):
 
+#       L = sorted([(len(battle.code_winner), battle) for battle in self.battles.all()], key=lambda code_battle: code_battle[0])
+        winner = self.battles.first()
+        len_code = 0
+        for battle in self.battles.all():
+            if len_code < len(battle.code_winner):
+                len_code = len(battle.code_winner)
+                winner = battle
+        return winner
+        
 
     def __str__(self):
         if self.battle_winner:
@@ -34,8 +33,9 @@ class BattleResult(models.Model):
             return "%s (%s)" % (self.id,str(self.date))
 
 
-#Battle class with attributes necessary to one participation for one challanger
 class Battle(models.Model):
+    """Battle class with attributes necessary to one participation for one challanger"""
+
     user = models.ForeignKey(auth_model.User)
     time_begin = models.DateTimeField()
     time_end = models.DateTimeField()
@@ -49,9 +49,8 @@ class Battle(models.Model):
 
 # Class for invitations
 class BattleInvitation(models.Model):
-    challanged = models.ForeignKey(auth_model.User,related_name="invitations")
-    challange = models.ForeignKey(auth_model.User,related_name="invites")
-    type_battle = models.TextField(default="lenght")
+    challangers = models.ManyToManyField(auth_model.User)
+    type_battle = models.TextField(default="length")
     status = models.TextField(default="waiting")
  
     def __str__(self):
