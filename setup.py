@@ -58,14 +58,14 @@ setup(
             'static/*/*/*.*'],
     },
     install_requires=[
-        'django-viewpack>=0.1.1'
+        'django-viewpack>=0.1.1',
         'django>=1.9',
         'django-model-utils',
-        'django_jinja',
         'django-picklefield',
         'wagtail',
         'frozendict',
         'markdown',
+        'django_jinja',
         'djinga',
         'djangorestframework',
         'django-annoying',
@@ -73,7 +73,7 @@ setup(
         'django-compressor',
         'slimit',
         'csscompressor',
-        'html5lib'
+        'html5lib',
         'django-extensions',
         'django-guardian',
         'pytz',
