@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import Http404
 from .models import Battle,BattleResult
 
+from datetime import datetime
+
 # Principal method to battles
 def index(request):
     all_battles = BattleResult.objects.all()
@@ -29,6 +31,18 @@ def battle_result(request,id_battle):
 def battle(request):
     if (request.method) == "POST":
         form = request.POST
+        battle_code = form.get('code')
+        time_now = datetime.now()
+        battle_result = BattleResult.objetcts.get(id=1)
+
+        battle = Battle.objects.create(
+            user=request.user,
+            battle_code=battle_code,
+            time_begin=time_now,
+            time_end=time_now,
+            battle_result=battle_result
+        )
+
         return render(request, 'ranking/battle.jinja2')
     else:
         return render(request, 'ranking/battle.jinja2')

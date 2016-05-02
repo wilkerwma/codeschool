@@ -39,11 +39,11 @@ class Battle(models.Model):
     user = models.ForeignKey(auth_model.User)
     time_begin = models.DateTimeField()
     time_end = models.DateTimeField()
-    code_winner = models.TextField()
-    
+    battle_code = models.TextField()
+
     battle_result = models.ForeignKey(BattleResult,related_name='battles')
 
     def __str__(self):
         return "Battle %s/%s - %s" % (self.battle_result.id,self.id,self.user)
-        
-       
+
+
