@@ -14,10 +14,10 @@ def battle_result(request,id_battle):
         # Obtain the battles of battle result
         result_battle = BattleResult.objects.get(id=id_battle)
         battles = result_battle.battles.all()
-        
+
         # Determine the winner of this battle result based in the type (lenght, time resolution)
         winner = result_battle.determine_winner(battles)
-        
+
         context = { "battles": battles,"battle_winner": winner}
 
     except BattleResult.DoesNotExist as e:
@@ -27,7 +27,11 @@ def battle_result(request,id_battle):
     return render(request,'ranking/battle_result.jinja2',context)
 
 def battle(request):
-    return render(request, 'ranking/battle.jinja2')
+    if (request.method) == "POST":
+        form = request.POST
+        return render(request, 'ranking/battle.jinja2')
+    else:
+        return render(request, 'ranking/battle.jinja2')
 
 # Define the battles of a user
 def battle_user(request):

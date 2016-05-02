@@ -26,6 +26,7 @@ Battle
 <div>
     <button id="button-submit">Submit</button>
     <form method="POST" id="form">
+        {% csrf_token %}
         <select id="lang" name="lang">
             <option value="python" selected>Python</option>
             <option value="javascript">JavaScript</option>
