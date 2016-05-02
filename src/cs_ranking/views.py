@@ -59,6 +59,10 @@ def battle_user(request):
 def intitate_user(request):
     pass
 
+# View the invitations
+def invitations(request):
+    return redirect("/battle/battle")
+
 # Accept the invitation
 def battle_invitation(request):
     # Redirect to battle page

@@ -53,4 +53,7 @@ class BattleInvitation(models.Model):
     challange = models.ForeignKey(auth_model.User,related_name="invites")
     type_battle = models.TextField(default="lenght")
     status = models.TextField(default="waiting")
+ 
+    def __str__(self):
+        return "%s challenge you!" % self.challange
 
