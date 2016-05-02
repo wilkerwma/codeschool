@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import Http404
 from .models import Battle,BattleResult
 
@@ -55,4 +55,13 @@ def battle_user(request):
     context = {"battles": battles}
     return render(request, 'ranking/battle_user.jinja2', context)
 
+# Create a new invitation
+def intitate_user(request):
+    pass
 
+# Accept the invitation
+def battle_invitation(request):
+    # Redirect to battle page
+    return redirect("/battle/battle") 
+
+    

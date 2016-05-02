@@ -47,3 +47,10 @@ class Battle(models.Model):
         return "Battle %s/%s - %s" % (self.battle_result.id,self.id,self.user)
 
 
+# Class for invitations
+class BattleInvitation(models.Model):
+    challanged = models.ForeignKey(auth_model.User,related_name="invitations")
+    challange = models.ForeignKey(auth_model.User,related_name="invites")
+    type_battle = models.TextField(default="lenght")
+    status = models.TextField(default="waiting")
+
