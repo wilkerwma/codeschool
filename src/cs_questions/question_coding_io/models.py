@@ -6,26 +6,11 @@ from django.utils.translation import ugettext_lazy as _
 from ejudge.graders.io import grade as grade_code, run as run_code
 from model_utils import FieldTracker
 from codeschool import models
-from codeschool.shortcuts import lazy
+from codeschool.shortcuts import lazy, render_object
 from cs_activities.models import Response
 from cs_core.models import ProgrammingLanguage
 from cs_questions.models import Question, QuestionActivity
-
-
-class CodingIoResponse(Response):
-    source = models.TextField(blank=True)
-    language = models.ForeignKey(ProgrammingLanguage)
-    feedback = models.PickledObjectField(blank=True, null=True)
-
-    @property
-    def title(self):
-        return self.feedback.title if self.feedback else None
-
-    def as_html(self, *args, **kwds):
-        return self.feedback.as_html(*args, **kwds)
-
-    def as_text(self, *args, **kwds):
-        return self.feedback.as_text(*args, **kwds)
+SANDBOX = settings.CODESCHOOL_USE_SANDBOX
 
 
 class CodingIoQuestion(Question, models.StatusModel):
@@ -69,7 +54,6 @@ class CodingIoQuestion(Question, models.StatusModel):
                         'evaluating each test case.'),
     )
     tracker = FieldTracker()
-    response_cls = CodingIoResponse
 
     @lazy
     def iospec(self):
@@ -281,7 +265,7 @@ class CodingIoQuestion(Question, models.StatusModel):
 
     def grade(self, response, error=None):
         """Grade the given response object and return the corresponding
-        CodingIoFeedback."""
+        feedback object."""
 
         try:
             key = self.answer_keys.get(language=response.language)
@@ -309,14 +293,7 @@ class CodingIoQuestion(Question, models.StatusModel):
         # Construct ejudge feedback object
         lang = response.language.ref
         source = response.source
-        feedback = grade_code(source, iospec, lang=lang)
-
-        # Create a codeschool feedback and save it to the database
-        response.status = 'graded'
-        response.feedback = feedback
-        response.grade = feedback.grade * 100
-        response.save()
-        return feedback
+        return grade_code(source, iospec, lang=lang)
 
 
 class CodingIoAnswerKey(models.Model):
@@ -422,11 +399,46 @@ class CodingIoAnswerKey(models.Model):
             raise self.ValidationError('could not validate Answer key')
 
 
-class CodingIoActivity(QuestionActivity):
-    answer_key = models.ForeignKey(CodingIoAnswerKey)
+class CodingIoResponse(Response):
+    question_fallback = models.ForeignKey(CodingIoQuestion, blank=True, null=True)
+    source = models.TextField(blank=True)
+    language = models.ForeignKey(ProgrammingLanguage)
 
-    class Meta:
-        app_label = 'cs_questions'
+    @property
+    def question(self):
+        """Returns the related question object either from the activity object
+        or from the question_fallback attribute."""
+
+        if self.activity is not None:
+            return self.activity.question
+        if self.question_fallback is not None:
+            return self.question_fallback
+        raise ValueError('no question defined for response')
+
+    @question.setter
+    def question(self, value):
+        self.question_fallback = value
+
+    def compute_feedback(self):
+        """Returns a feedback object from response.
+
+        This method performs the automatic grading by running the user supplied
+        code with a series of inputs and comparing the results with those of an
+        iospec template."""
+
+        return self.question.grade(self)
+
+    def html_feedback(self):
+        if self.is_done:
+            return render_object(
+                self.feedback,
+                template_name='cs_questions/render/feedback.jinja2')
+        else:
+            return super().html_feedback()
+
+
+class CodingIoActivity(QuestionActivity):
+    language = models.ForeignKey(ProgrammingLanguage)
 
 
 # Utility functions

@@ -2,7 +2,9 @@
 
 {% block content_head %}
     {{ super() }}
-    {{ self.object_detail() }}
+    <div class="detail-box">
+        {{ self.object_detail() }}
+    </div>
 {% endblock %}
 
 {% block object_description %}

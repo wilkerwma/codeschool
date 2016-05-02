@@ -29,6 +29,7 @@
       <list>
         <option value="$MODULE_DIR$/src/cs_questions/templates" />
         <option value="$MODULE_DIR$/src/codeschool/templates" />
+        <option value="$MODULE_DIR$/src/cs_activities/templates" />
       </list>
     </option>
   </component>

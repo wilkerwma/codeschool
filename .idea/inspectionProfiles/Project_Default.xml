@@ -4,7 +4,7 @@
     <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="13">
+          <list size="14">
             <item index="0" class="java.lang.String" itemvalue="nobr" />
             <item index="1" class="java.lang.String" itemvalue="noembed" />
             <item index="2" class="java.lang.String" itemvalue="comment" />
@@ -18,12 +18,14 @@
             <item index="10" class="java.lang.String" itemvalue="paper-tabs" />
             <item index="11" class="java.lang.String" itemvalue="paper-tab" />
             <item index="12" class="java.lang.String" itemvalue="cs-card" />
+            <item index="13" class="java.lang.String" itemvalue="ace-editor" />
           </list>
         </value>
       </option>
       <option name="myCustomValuesEnabled" value="true" />
     </inspection_tool>
     <inspection_tool class="JSUnusedGlobalSymbols" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyAttributeOutsideInitInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="PyIncorrectDocstringInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="PyMethodMayBeStaticInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="PyMethodOverridingInspection" enabled="false" level="WARNING" enabled_by_default="false" />

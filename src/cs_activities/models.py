@@ -121,9 +121,20 @@ class SyncCodeEditItem(models.Model):
 
 class Response(models.InheritableModel, models.TimeStampedStatusModel):
     """
-    Represents a student's response to some activity. The student may submit
-    many responses for the same object. It is also possible to submit
-    different responses with different students.
+    Represents a student's response to some activity.
+
+    Response objects can be in 3 different states:
+
+    pending:
+        The response has been sent, but was not graded. Grading can be manual or
+        automatic, depending on the activity.
+    waiting:
+        Waiting for manual feedback.
+    invalid:
+        The response has been sent, but contains malformed data.
+    done:
+        The response was graded and evaluated and it initialized a feedback
+        object.
     """
 
     STATUS_PENDING = 'pending'
@@ -133,10 +144,12 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
     STATUS = models.Choices(
         (STATUS_PENDING, _('pending')),
         (STATUS_WAITING, _('waiting')),
+        (STATUS_INVALID, _('invalid')),
         (STATUS_DONE, _('done')),
     )
     activity = models.ForeignKey(Activity, blank=True, null=True)
     user = models.ForeignKey(models.User)
+    feedback_data = models.PickledObjectField(blank=True, null=True)
     grade = models.DecimalField(
         'Percentage of maximum grade',
         max_digits=6,
@@ -144,24 +157,84 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
         blank=True,
         null=True,
     )
-    data = models.PickledObjectField(blank=True, null=True)
 
-    #
-    # Visualization
-    #
-    ok_message = '*Contratulations!* Your response is correct!'
-    wrong_message = 'I\'m sorry, your response is wrong.'
-    partial_message = 'Your answer is partially correct: you made %(grade)d%% of the total grade.'
+    # Status properties
+    is_done = property(lambda x: x.status == x.STATUS_DONE)
+    is_pending = property(lambda x: x.status == x.STATUS_PENDING)
+    is_waiting = property(lambda x: x.status == x.STATUS_WAITING)
+    is_invalid = property(lambda x: x.status == x.STATUS_INVALID)
 
-    def as_html(self):
-        data = {'grade': self.grade * 100}
-        if self.grade == 1:
-            return markdown(self.ok_message)
-        elif self.grade == 0:
-            return markdown(self.wrong_message)
-        else:
-            return markdown(self.partial_message % data)
+    @property
+    def feedback(self):
+        """Return the feedback object for graded responses.
+
+        The default behavior is to return feedback_data."""
+
+        if self.status == self.STATUS_DONE:
+            return self.feedback_data
+
+    class InvalidResponseError(Exception):
+        """Raised by compute_response() when the response is invalid."""
+
+    def get_feedback(self, commit=True):
+        """Return the feedback to the given response.
+
+        If response was not graded, it calls the function `compute_feedback` to
+        compute the feedback and save it.
+
+        The result is is JSON-encoded and saved in the `feedback_data` field.
+        Users should access the `feedback` field that may expose the feedback
+        in a more convenient and structured form.
+        """
+
+        if self.status == self.STATUS_PENDING:
+            try:
+                data = self.compute_feedback()
+            except self.InvalidResponseError:
+                self.status = self.STATUS_INVALID
+            else:
+                if data is NotImplemented:
+                    self.status = self.STATUS_WAITING
+                else:
+                    self.feedback_data = data
+                    self.status = self.STATUS_DONE
+            if commit:
+                self.save(update_fields=['status', 'feedback_data'])
+        return self.feedback
+
+    def compute_feedback(self):
+        """
+        Compute the feedback object.
+
+        It must return NotImplemented for activities that require manual
+        grading. If the response is invalid, it must raise a
+        Response.InvalidResponseError.
+        """
+
+        return NotImplemented
 
     def __str__(self):
         tname = type(self).__name__
-        return '%s(%s, grade=%s)' % (tname, self.activity, self.grade)
+        return '%s(%s)' % (tname, self.status)
+
+    # Feedback and visualization
+    ok_message = _('*Contratulations!* Your response is correct!')
+    wrong_message = _('I\'m sorry, your response is wrong.')
+    partial_message = _('Your answer is partially correct: you made %(grade)d%% of the total grade.')
+
+    def html_feedback(self):
+        """
+        A string of html source representing the feedback.
+        """
+
+        if self.is_done:
+            data = {'grade': (self.grade or 0) * 100}
+
+            if self.grade == 1:
+                return markdown(self.ok_message)
+            elif not self.grade:
+                return markdown(self.wrong_message)
+            else:
+                return markdown(self.partial_message % data)
+        else:
+            return markdown(_('Your response has not been graded yet!'))

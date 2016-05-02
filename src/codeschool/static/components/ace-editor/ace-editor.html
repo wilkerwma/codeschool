@@ -16,7 +16,7 @@
 
     <style>
         #editor {
-            min-height: 15em;
+            height: 25em;
             font-size: 1em;
         }
     </style>
@@ -73,6 +73,17 @@
                         value: false,
                         observer: '_onShowPrintMarginChanged',
                         reflectToAttribute: true
+                    },
+                    name: {
+                        type: String,
+                        observer: '_onNameChanged',
+                        reflectToAttribute: true
+                    },
+                    form: {
+                        type: String,
+                        observer: '_onFormChanged',
+                        readOnly: true,
+                        reflectToAttribute: true
                     }
                 },
 
@@ -90,7 +101,7 @@
                         elem.replace = elem.ace.replace;
                         elem.replaceAll = elem.ace.replaceAll;
                         elem.commands = elem.ace.commands;
-    
+
                         // Trigger observers to set default values
                         elem._onModeChanged(elem.mode);
                         elem._onThemeChanged(elem.theme);
@@ -100,8 +111,17 @@
                         elem._onWrapModeChanged(elem.wrapMode);
                         elem._onHighlightActiveLineChanged(elem.highlightActiveLine);
                         elem._onShowPrintMarginChanged(elem.showPrintMargin);
+                        elem.name && elem._onNameChanged(elem.name);
+                        elem.form && elem._onFormChanged(elem.form);
+
+                        // Connect submit event of an eventual parent form
+                        var textarea = $(elem._textarea());
+
+                        (elem.form? $('#' + elem.form): textarea.closest('form')).submit(function() {
+                            textarea.val(elem.getValue());
+                        });
                     }
-                    
+
                     if ($aceScript === null) {
                         $aceScript = $aceLoader();
                     }
@@ -116,6 +136,10 @@
                     return this.ace.getValue();
                 },
 
+                _textarea: function() {
+                    return $(this.$.editor).find('textarea')[0];
+                },
+
                 // Observers
                 _onModeChanged:                 function(value) {this.ace && this.ace.getSession().setMode("ace/mode/" + value)},
                 _onThemeChanged:                function(value) {this.ace && this.ace.setTheme("ace/theme/" + value)},
@@ -124,7 +148,9 @@
                 _onSoftTabsChanged:             function(value) {this.ace && this.ace.getSession().setUseSoftTabs(value)},
                 _onWrapModeChanged:             function(value) {this.ace && this.ace.getSession().setUseWrapMode(value)},
                 _onHighlightActiveLineChanged:  function(value) {this.ace && this.ace.setHighlightActiveLine(value)},
-                _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)}
+                _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)},
+                _onNameChanged:                 function(value) {this.ace && this._textarea().setAttribute('name', value)},
+                _onFormChanged:                 function(value) {this.ace && this._textarea().setAttribute('form', value)}
             })
         );
     </script>

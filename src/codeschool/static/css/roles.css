@@ -167,3 +167,57 @@ input[type=reset].danger.flat {
 .list-item-description {
     color: #666;
 }
+
+/* Titles and title highlights */
+h1.banner,
+h2.banner,
+h3.banner,
+h4.banner,
+h5.banner,
+h6.banner {
+    display: inline-block;
+    padding: 0 30px 0 20px;
+    margin-left: -10px;
+    color: white;
+    background: #00a7a7;
+    margin-bottom: 20px;
+}
+
+@media only screen and (min-width: 640px) {
+    h1.banner,
+    h2.banner,
+    h3.banner,
+    h4.banner,
+    h5.banner,
+    h6.banner {
+        margin-left: -40px;
+    }
+}
+
+/* Markdown expansion areas */
+.long-description pre {
+    padding: 20px;
+    background: #eee;
+}
+
+/* Rules boxes with a description list that appear in the head part of the
+   content */
+
+.detail-box {
+    margin: 20px auto;
+    width: 75%;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.detail-box > * {
+    padding: 20px 30px;
+}
+
+.detail-box > :first-child {
+    display: block;
+    font-family: "Roboto", sans-serif;
+    font-size: 1.2em;
+    padding: 0 20px;
+    margin: 0;
+    background-color: rgba(147, 147, 147, 0.5);
+}

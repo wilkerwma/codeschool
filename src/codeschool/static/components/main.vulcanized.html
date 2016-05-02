@@ -26432,7 +26432,7 @@ style this element.
 
     <style>
         #editor {
-            min-height: 15em;
+            height: 25em;
             font-size: 1em;
         }
     </style>
@@ -26489,6 +26489,16 @@ style this element.
                         value: false,
                         observer: '_onShowPrintMarginChanged',
                         reflectToAttribute: true
+                    },
+                    name: {
+                        type: String,
+                        observer: '_onNameChanged',
+                        reflectToAttribute: true
+                    },
+                    form: {
+                        type: String,
+                        observer: '_onFormChanged',
+                        reflectToAttribute: true
                     }
                 },
 
@@ -26516,6 +26526,8 @@ style this element.
                         elem._onWrapModeChanged(elem.wrapMode);
                         elem._onHighlightActiveLineChanged(elem.highlightActiveLine);
                         elem._onShowPrintMarginChanged(elem.showPrintMargin);
+                        elem._onNameChanged(elem.name);
+                        elem._onFormChanged(elem.form);
                     }
                     
                     if ($aceScript === null) {
@@ -26532,6 +26544,11 @@ style this element.
                     return this.ace.getValue();
                 },
 
+                _textarea: function() {
+                    console.log($(this.$.editor).find('textarea'));
+                    return $(this.$.editor).find('textarea')[0];
+                },
+
                 // Observers
                 _onModeChanged:                 function(value) {this.ace && this.ace.getSession().setMode("ace/mode/" + value)},
                 _onThemeChanged:                function(value) {this.ace && this.ace.setTheme("ace/theme/" + value)},
@@ -26540,7 +26557,9 @@ style this element.
                 _onSoftTabsChanged:             function(value) {this.ace && this.ace.getSession().setUseSoftTabs(value)},
                 _onWrapModeChanged:             function(value) {this.ace && this.ace.getSession().setUseWrapMode(value)},
                 _onHighlightActiveLineChanged:  function(value) {this.ace && this.ace.setHighlightActiveLine(value)},
-                _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)}
+                _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)},
+                _onNameChanged:                 function(value) {this.ace && this._textarea().setAttribute('name', value)},
+                _onFormChanged:                 function(value) {this.ace && this._textarea().setAttribute('form', value)}
             })
         );
     </script>

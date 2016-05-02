@@ -6,11 +6,11 @@ from cs_questions.question_coding_io.forms import \
     QuestionEditForm, AnswerKeyEditForm, AnswerKeyAddForm
 from cs_activities.views import mapper as activities_mapper
 from cs_questions.question_coding_io.models import CodingIoQuestion, CodingIoActivity
-from cs_questions.views import QuestionViews, mapper
+from cs_questions.views import QuestionInheritanceCRUD, mapper
 
 
 @mapper.register(name='io', model=CodingIoQuestion)
-class CodingIoQuestionViews(QuestionViews):
+class CodingIoQuestionInheritanceCRUD(QuestionInheritanceCRUD):
     model_form = QuestionEditForm
 
     def read_model(self, data):

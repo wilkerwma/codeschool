@@ -14,6 +14,7 @@ from django.template.response import TemplateResponse as _TemplateResponse
 from annoying.functions import (get_object_or_None, get_object_or_this,
                                 get_config)
 from codeschool.utils import *
+from codeschool.views import render_object
 
 
 def render_context(request, template, **kwds):

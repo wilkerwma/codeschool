@@ -3,8 +3,8 @@
 {% block content_head %}
     {{ super() }}
 
-    <div class="rules-box">
-        <h3>{{ _('Rules') }}</h3>
+    <div class="detail-box">
+        <h3>{{ _('Details') }}</h3>
         <dl>
             <dt>{{ _('Maximum runtime') }}</dt>
             <dd>{{ gettext('%(time)s seconds', time=question.timeout) }}</dd>
@@ -13,16 +13,13 @@
 {% endblock %}
 
 {% block response_form %}
-    <div class="code-area">
-        <h2>{{ _('Response') }}</h2>
-        {% if not lang %}
-            <div>
-                <p>Programming language: {{ form['language'] }}</p>
-            </div>
-        {% else %}
-            <input type="hidden" name="{{ form['language'].name }}" value="{{ form['language'].value }}">
-        {% endif %}
-        <ace-editor mode="python" read-only>print('hello world')</ace-editor>
+    <h2 class="banner">{{ _('Response') }}</h2>
+    <div class="code-area mdl-shadow--4dp">
+        <div class="select">
+            <p>Programming language {{ form['language'] }}</p>
+        </div>
+        <ace-editor mode="python" name="source"
+                    form="response-form">{{ form['source'].value() }}</ace-editor>
     </div>
 {% endblock %}
 
@@ -30,15 +27,55 @@
     {{ super() }}
 
     <style>
+        .iospec-feedback {
+            padding: 20px;
+            margin: -20px;
+        }
+
+        .iospec-feedback .congratulations {
+            margin: -20px;
+            padding: 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-align: center;
+            background-color: rgba(78, 154, 6, 0.5);
+        }
+
+        .iospec-feedback .iospec-title {
+            background-color: #666;
+            color: white;
+            margin: -20px -20px 20px;
+            padding: 5px 20px;
+        }
         .iospec-testcase {
             padding-left: 30px;
         }
+
         .iospec-testcase h4 {
             margin-left: -20px;
         }
+
         .iospec-input {
             color: darkred;
         }
+
+        .code-area {
+            margin-bottom: 20px;
+            border: 1px solid #666;
+        }
+
+        .code-area .select {
+            background-color: #666;
+            color: white;
+            text-align: right;
+            padding: 10px 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .code-area .select select {
+            color: black;
+        }
+
     </style>
 {% endblock %}
 
