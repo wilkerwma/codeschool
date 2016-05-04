@@ -1,4 +1,1 @@
-ejudge
-wagtail
-django
 -e .
