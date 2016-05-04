@@ -1,37 +1,40 @@
 <div class="iospec-feedback">
     {% if feedback.is_correct|default(False) %}
-        <p class="congratulations">{{ _('Congratulations! Your answer is correct!') }}/p>
+        <p class="congratulations">{{ _('Congratulations! Your answer is correct!') }}</p>
     {% else %}
         <h3 class="iospec-title">{{ _(feedback.title) }}</h3>
         <div class="iospec-testcase">
             <h4>{{ _('Your response') }}</h4>
-            <code>
-                {% for atom in feedback.case %}
-                    <span class="iospec-{{ atom.type }}">{{ atom }}</span>
-                    {% if atom.type == 'input' %}<br>{% endif %}
-                {% endfor %}
-            </code>
+            {% if feedback.case %}
+                <code>
+                    {% for atom in feedback.case %}
+                        <span class="iospec-{{ atom.type }}">{{ atom }}</span>
+                        {% if atom.type == 'input' %}<br>{% endif %}
+                    {% endfor %}
+                </code>
+            {% else %}
+                <span class="iospec-empty">{{ _('-- empty --') }}</span>
+            {% endif %}
         </div>
         <div class="iospec-testcase">
             <h4>{{ _('Expected answer') }}</h4>
-            <code>
-                {% for atom in feedback.answer_key %}
-                    <span class="iospec-{{ atom.type }}">{{ atom }}</span>
-                    {% if atom.type == 'input' %}<br>{% endif %}
-                {% endfor %}
-            </code>
+            {% if feedback.answer_key %}
+                <code>
+                    {% for atom in feedback.answer_key %}
+                        <span class="iospec-{{ atom.type }}">{{ atom }}</span>
+                        {% if atom.type == 'input' %}<br>{% endif %}
+                    {% endfor %}
+                </code>
+            {% else %}
+                <span class="iospec-empty">{{ _('-- empty --') }}</span>
+            {% endif %}
+
         </div>
         {% if feedback.case.is_error %}
             <div class="iospec-testcase">
                 <h4>{{ _('Error message') }}</h4>
                 <code>
-                    <pre>
-                        {% if feedback.case.error_message.strip() %}
-                            {{ _(feedback.case.error_message) }}
-                        {% else %}
-                            {{ _('Unknown error') }}
-                        {% endif %}
-                    </pre>
+                    <pre>{% if feedback.case.error_message.strip() %}{{ _(feedback.case.error_message) }}{% else %}{{ _('Unknown error') }}{% endif %}</pre>
                 </code>
             </div>
         {% endif %}

@@ -1,21 +1,23 @@
 import hashlib
 from iospec import parse_string as parse_iospec, IoTestCase
 import iospec.feedback
+import ejudge
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from ejudge.graders.io import grade as grade_code, run as run_code
 from model_utils import FieldTracker
 from codeschool import models
+from codeschool.db import saving
 from codeschool.shortcuts import lazy, render_object
 from cs_activities.models import Response
-from cs_core.models import ProgrammingLanguage
+from cs_core.models import ProgrammingLanguage, get_language, get_languages
 from cs_questions.models import Question, QuestionActivity
-SANDBOX = settings.CODESCHOOL_USE_SANDBOX
 
 
 class CodingIoQuestion(Question, models.StatusModel):
-    """CodeIo questions evaluates code and judge them by their inputs and
-    outputs."""
+    """
+    CodeIo questions evaluate source code and judge them by checking if the
+    inputs and corresponding outputs match an expected pattern.
+    """
 
     STATUS_INVALID = 'invalid'
     STATUS_UGLY = 'ugly'
@@ -74,17 +76,35 @@ class CodingIoQuestion(Question, models.StatusModel):
         super().save(*args, **kwds)
 
     @classmethod
-    def from_markio(cls, source) -> 'CodingIoQuestion':
-        """Creates a CodingIoQuestion object from a Markio source file.
+    def from_markio(cls, source, commit=None, return_keys=False):
+        """Creates a CodingIoQuestion object from a Markio source string and
+        saves the resulting question in the database.
 
-        It saves the object into the database since it has to register foreign
-        keys."""
+        This function can run without touching the database if the markio file
+        does not define any information that should be saved in an answer key.
+
+        Args:
+            source:
+                A string with the Markio source code.
+            commit (bool):
+                If True (default), saves resulting question in the database.
+            return_keys (bool):
+                If True, also return a dictionary mapping language references
+                to answer keys.
+
+        Returns:
+            question:
+                A question object.
+            [answer_keys]:
+                A map from language references to :class:`CodingIoAnswerKey`
+                objects.
+        """
 
         import markio
 
         # Create question object from parsed markio data
         data = markio.parse_string(source)
-        question = CodingIoQuestion.objects.create(
+        question = CodingIoQuestion(
             title=data.title,
             author_name=data.author,
             timeout=data.timeout,
@@ -92,29 +112,34 @@ class CodingIoQuestion(Question, models.StatusModel):
             long_description=data.description,
             iospec_source=data.tests,
         )
+        saving(question, commit)
 
         # Add answer keys
         answer_keys = {}
         for (lang, answer_key) in data.answer_key.items():
-            language = ProgrammingLanguage.objects.get(ref=lang)
-            key = CodingIoAnswerKey(question=question,
-                                    language=language,
-                                    source=answer_key)
-            key.save()
+            language = get_language(lang)
+            key = saving(CodingIoAnswerKey(question=question,
+                                           language=language,
+                                           source=answer_key), commit)
             answer_keys[lang] = key
         for (lang, placeholder) in data.placeholder.items():
             if placeholder is None:
                 continue
             try:
                 answer_keys[lang].placeholder = placeholder
-                answer_keys[lang].save(update_fields=['placeholder'])
+                saving(answer_keys[lang], commit, update_fields=['placeholder'])
             except KeyError:
                 language = ProgrammingLanguage.objects.get(lang)
-                CodingIoAnswerKey(question=question,
-                                  language=language,
-                                  placeholder=placeholder).save()
+                key = CodingIoAnswerKey(question=question,
+                                        language=language,
+                                        placeholder=placeholder)
+                saving(key, commit)
 
         # Question is done!
+        if return_keys:
+            answer_keys = {key.language.ref: key
+                           for key in answer_keys.values()}
+            return question, answer_keys
         return question
 
     def update(self, save=True, validate=True):
@@ -125,8 +150,7 @@ class CodingIoQuestion(Question, models.StatusModel):
         invalid_languages = set()
         valid_languages = set()
 
-        # Validate answer keys
-        def worker():
+        def validate_answer_keys():
             nonlocal exception
 
             for key in self.answer_keys.all():
@@ -156,24 +180,24 @@ class CodingIoQuestion(Question, models.StatusModel):
             else:
                 self.status = 'valid'
 
-        # Save fields for when save and rollback is necessary
+        # Save fields if rollback is necessary
         iospec_source = self.iospec_source
         iospec_size = self.iospec_size
         has_changed = (self.tracker.has_changed('iospec_source') or
                        self.tracker.has_changed('iospec_size'))
 
-        # If fields had changed, compute update and restore original
+        # If fields had changed, update and restore original values
         if has_changed:
             self.save(update_fields=['iospec_source', 'iospec_size'])
             try:
-                worker()
+                validate_answer_keys()
             finally:
                 if not save:
                     self.iospec_size = iospec_size
                     self.iospec_source = iospec_source
                     self.save(update_fields=['iospec_source', 'iospec_size'])
         else:
-            worker()
+            validate_answer_keys()
 
         # Force save if necessary
         if save:
@@ -449,13 +473,20 @@ def md5hash(st):
 
     return hashlib.md5(st.encode('utf8')).hexdigest()
 
-# Picks up the correct runner and grader functions
-if not settings.CODESCHOOL_USE_SANDBOX:
-    _run_code, _grade_code = run_code, grade_code
 
-    def run_code(*args, **kwds):
-        return _run_code(*args, sandbox=False, **kwds)
+def run_code(source, inputs, lang=None):
+    """Runs source code with given inputs and return the corresponding IoSpec
+    tree."""
 
-    def grade_code(*args, **kwds):
-        return _grade_code(*args, sandbox=False, **kwds)
+    return ejudge.io.run(source, inputs, lang,
+                         raises=False,
+                         sandbox=settings.CODESCHOOL_USE_SANDBOX)
 
+
+def grade_code(source, answer_key, lang=None):
+    """Compare results of running the given source code with the iospec answer
+    key."""
+
+    return ejudge.io.grade(source, answer_key, lang,
+                           raises=False,
+                           sandbox=settings.CODESCHOOL_USE_SANDBOX)

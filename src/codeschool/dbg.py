@@ -1,6 +1,3 @@
-from IPython import embed
-
-
 def console():
     """Starts an interactive IPython console"""
 

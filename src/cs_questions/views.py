@@ -7,11 +7,16 @@ users = User.objects
 
 
 class QuestionInheritanceCRUD(CRUDWithInheritanceViewGroup):
+    """
+    Base CRUD that dispatch to a different view depending on the question type.
+    """
+
     model = models.Question
     template_extension = '.jinja2'
     template_basename = 'cs_questions/'
     use_crud_views = True
-    exclude_fields = ['status', 'status_changed', 'author_name', 'comment', 'owner']
+    exclude_fields = ['status', 'status_changed', 'author_name', 'comment',
+                      'owner']
     detail_fields = []
     context_data = {
         'content_color': '#BC5454',
@@ -20,6 +25,12 @@ class QuestionInheritanceCRUD(CRUDWithInheritanceViewGroup):
 
 
 class QuestionCRUD(CRUDViewPack):
+    """
+    Base CRUD functionality to all question types.
+
+    We replace the default DetailView for a DetailWithResponseView in order to
+    enable a response form in the detail page of each object.
+    """
     class DetailView(DetailObjectContextMixin,
                      VerboseNamesContextMixin,
                      DetailWithResponseView):
@@ -36,6 +47,11 @@ class QuestionCRUD(CRUDViewPack):
         def form_valid(self, form):
             return self.form_invalid(form)
 
+    class ListViewMixin:
+        def get_queryset(self):
+            qs = super().get_queryset()
+            return qs.filter(is_active=True)
+
 
 @QuestionInheritanceCRUD.register
 class NumericQuestionViews(QuestionCRUD):
@@ -44,7 +60,7 @@ class NumericQuestionViews(QuestionCRUD):
 
 @QuestionInheritanceCRUD.register
 class CodingIoQuestionViews(QuestionCRUD):
-    model = models.io.CodingIoQuestion
-    response_model = models.io.CodingIoResponse
+    model = models.CodingIoQuestion
+    response_model = models.CodingIoResponse
     response_fields = ['source', 'language']
     template_basename = 'cs_questions/io/'

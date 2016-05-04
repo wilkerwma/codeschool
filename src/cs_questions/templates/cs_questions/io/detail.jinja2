@@ -1,5 +1,10 @@
 {% extends "cs_questions/detail.jinja2" %}
 
+{% set source_code = form['source'].value() %}
+{% if not source_code %}
+    {% set source_code = '' %}
+{% endif %}
+
 {% block content_head %}
     {{ super() }}
 
@@ -18,8 +23,8 @@
         <div class="select">
             <p>Programming language {{ form['language'] }}</p>
         </div>
-        <ace-editor mode="python" name="source"
-                    form="response-form">{{ form['source'].value() }}</ace-editor>
+
+        <ace-editor mode="python" name="source">{{ source_code|e }}</ace-editor>
     </div>
 {% endblock %}
 
@@ -39,6 +44,10 @@
             font-weight: bold;
             text-align: center;
             background-color: rgba(78, 154, 6, 0.5);
+        }
+
+        .iospec-empty {
+            color: darkred;
         }
 
         .iospec-feedback .iospec-title {

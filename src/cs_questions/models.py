@@ -38,8 +38,10 @@ class Question(models.TimeStampedModel):
         Discipline,
         blank=True,
         null=True,
-        help_text=_('This optional field points to the discipline that is the '
-                    'relevant to question.'),
+        help_text=_(
+            'This optional field points to the discipline that is the relevant '
+            'to question.'
+        ),
     )
     owner = models.ForeignKey(
         models.User,
@@ -47,6 +49,17 @@ class Question(models.TimeStampedModel):
         null=True,
         help_text=_('User who created or uploaded this question.')
     )
+    is_active = models.BooleanField(
+        _('is active'),
+        default=False,
+        blank=True,
+        help_text=_(
+            'Marks a question as active/inactive. Inactive questions are not'
+            'shown publicly and are only available to the question owner.'
+        )
+    )
+
+    # Manager
     objects = InheritanceManager()
     response_cls = Response
     default_extension = '.md'
@@ -178,5 +191,5 @@ class StringMatchQuestion(Question):
         else:
             return super().grade(response)
 
-# Import other default question types
-from cs_questions.question_coding_io import models as io
+# Import other question types
+from cs_questions.models_io import *

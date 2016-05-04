@@ -35,11 +35,11 @@ class QuestionBase(admin.ModelAdmin):
         return bool(obj.comment)
 
 
-@admin.register(models.io.CodingIoQuestion)
+@admin.register(models.CodingIoQuestion)
 class CodingIoQuestionAdmin(QuestionBase):
     # Inline models
     class AnswerKeyInline(admin.StackedInline):
-        model = models.io.CodingIoAnswerKey
+        model = models.CodingIoAnswerKey
         fields = ('language', 'source', 'placeholder', 'is_valid')
         readonly_fields = ('is_valid',)
         extra = 0
@@ -65,5 +65,5 @@ class CodingIoQuestionAdmin(QuestionBase):
     answer_keys.short_description = '# keys'
 
 admin.site.register(models.QuestionActivity)
-admin.site.register(models.io.CodingIoActivity)
+admin.site.register(models.CodingIoActivity)
 admin.site.register(models.NumericQuestion)
