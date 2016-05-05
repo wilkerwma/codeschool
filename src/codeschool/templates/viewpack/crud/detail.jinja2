@@ -1,10 +1,29 @@
 {% extends 'viewpack/crud/detail-base.jinja2' %}
 
+{% if has_actions is not defined%}
+    {% set has_actions = can_edit or can_download %}
+{% endif %}
+
 {% block content_head %}
-    {{ super() }}
-    <div class="detail-box">
+    <action-handle expand-on-hover>
+        {% if has_actions %}
+            <h1 class="action-handle-title">{{ _('Actions') }}</h1>
+            {% if can_edit %}
+                <p><a href="./{{ object.pk }}/edit"><i
+                        class="material-icons">edit</i> Edit</a></p>
+            {% endif %}
+            {% if can_download %}
+                <p><a href="./{{ object.pk }}/download"><i class="material-icons">file_download</i></a>
+                </p>
+            {% endif %}
+        {% endif %}
+
+        <!-- Detail box -->
+        <h1 class="action-handle-title">{{ _('Details') }}</h1>
         {{ self.object_detail() }}
-    </div>
+    </action-handle>
+    {{ super() }}
+
 {% endblock %}
 
 {% block object_description %}

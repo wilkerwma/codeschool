@@ -20,6 +20,12 @@ class Profile(UserenaBaseProfile):
         verbose_name=_('user'),
         related_name='profile',
     )
+    school_id = models.CharField(
+        _('school id'),
+        help_text=_('Identification number in your school issued id card.'),
+        max_length=50,
+        blank=True,
+        null=True)
     nickname = models.CharField(max_length=50, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     gender = models.SmallIntegerField(
@@ -261,9 +267,7 @@ class FriendshipStatus(models.StatusModel):
                     status='pending').save()
 
 
-
 # Mokey patch the user class
-
 class UserMixin:
     @property
     def is_student(self):
