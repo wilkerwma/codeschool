@@ -82,11 +82,10 @@
     </cs-head>
 
     <div id="content-area">
-        <nav>
-            <ul>
+        <cs-nav>
             {% block nav_sections %}
                 {% if not disable_courses_section %}
-                    <li>
+                    <nav>
                         <p><a href="/courses/">{{ _('Courses') }}</a></p>
                         <ul>
                             <li><a href="/questions/">{{ _('List of questions') }}</a></li>
@@ -94,22 +93,20 @@
                                 <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
                             {% endfor %}
                         </ul>
-                    </li>
+                    </nav>
                 {% endif %}
                 {% if not disable_profile_section and user is defined %}
-                    <li>
+                    <nav>
                         <p><a href="/accounts/{{ user.username }}/">{{ _('Profile') }}</a></p>
                         <ul>
                             <li><a href="/accounts/{{ request.user.username }}/edit">{{ _('Edit') }}</a></li>
                             <li class="disabled-link">Amigos</li>
                             <li class="disabled-link">Configurações</li>
                         </ul>
-                    </li>
+                    </nav>
                 {% endif %}
             {% endblock %}
-            </ul>
-            <img src="{% static 'img/dingbat.svg' %}">
-        </nav>
+        </cs-nav>
 
         <main>
             {% block content %}
@@ -130,7 +127,7 @@
         </main>
     </div>
 
-    <cs-foot id="nav-footer">
+    <cs-foot>
         <div>
             <p>Amigos (em construção)</p>
             <ul>
