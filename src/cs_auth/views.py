@@ -61,7 +61,11 @@ class LoginView(TemplateView):
         # information
         if isinstance(response, http.HttpResponseRedirect):
             # Fill extra info in signup form
+<<<<<<< HEAD
             aux = form.cleaned_data
+=======
+            aux = request.POST
+>>>>>>> 1d13514b3154e090b59e493db53fcc0eed39e50d
             success_url = '/accounts/%s' % aux['username']
             user = User.objects.get(username=aux['username'])
             user.first_name = aux['first_name']

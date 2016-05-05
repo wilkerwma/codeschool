@@ -22,10 +22,11 @@ class SignupForm(_SignupForm):
         max_length=100,
     )
 
-
+# Reorder fields
 SignupForm.base_fields = OrderedDict(
     (k, SignupForm.base_fields[k]) for k in SignupForm._field_ordering
 )
+
 
 class SignupOptionalForm(forms.ModelForm):
     class Meta:
