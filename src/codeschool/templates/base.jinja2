@@ -35,7 +35,6 @@
             <link rel="stylesheet" href="{% static 'css/forms.css' %}">
             <link rel="stylesheet" href="{% static 'css/roles.css' %}">
             <link rel="stylesheet" href="{% static 'css/content.css' %}">
-            <link rel="stylesheet" href="{% static 'css/footer.css' %}">
             <link rel="stylesheet" href="{% static 'css/ternary.css' %}">
             <link rel="stylesheet" href="{% static 'css/dialogs.css' %}">
             <link rel="stylesheet" href="{% static 'css/main.css' %}">
@@ -131,8 +130,8 @@
         </main>
     </div>
 
-    <footer id="nav-footer">
-        <div class="flex">
+    <cs-foot id="nav-footer">
+        <div>
             <p>Amigos (em construção)</p>
             <ul>
                 <li>Fulano fez isso</li>
@@ -141,7 +140,7 @@
             </ul>
         </div>
 
-        <div class="flex">
+        <div>
             <p>Agenda (em construção)</p>
             <ul>
                 <li>Prova dia X</li>
@@ -150,7 +149,7 @@
             </ul>
         </div>
 
-        <div class="flex">
+        <div>
             <p>Notícias (em construção)</p>
             <ul>
                 <li>Adicionou notas</li>
@@ -158,12 +157,7 @@
                 <li>Não haverá prova dia XXX</li>
             </ul>
         </div>
-    </footer>
-
-    <footer id="copyright-footer">
-        <p>Copyright 2016 - <a href="http://github.com/fabiommendes/codeschool">Codeschool</a></p>
-        <p>Site gerenciado por Fábio M. Mendes na UnB/Gama.</p>
-    </footer>
+    </cs-foot>
     {% endblock %}
 
     {% block hidden_content %}

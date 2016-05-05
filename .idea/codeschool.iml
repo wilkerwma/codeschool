@@ -17,11 +17,12 @@
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/src/.cache" />
       <excludeFolder url="file://$MODULE_DIR$/src/codeschool.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/src/codeschool/bower" />
+      <excludeFolder url="file://$MODULE_DIR$/src/codeschool/static/bower_components" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.5.1 virtualenv at ~/.virtualenvs/codeschool" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="pyjudge" />
-    <orderEntry type="module" module-name="viewgroups" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />

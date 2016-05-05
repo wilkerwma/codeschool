@@ -58,7 +58,6 @@ setup(
             'static/*/*/*.*'],
     },
     install_requires=[
-        'django-viewpack>=0.1.1',
         'django>=1.9',
         'django-model-utils',
         'django-picklefield',
