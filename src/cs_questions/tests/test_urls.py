@@ -9,17 +9,17 @@ def test_io_questions_crud_urls(question_io, client):
     pk = question_io.pk
 
     # Detail
-    request = client.get('/questions/%s/' % pk)
-    assert request.status_code in [200, 301]
+    response = client.get('/questions/%s/' % pk)
+    assert response.status_code in [200, 301]
 
     # Update
-    request = client.get('/questions/%s/edit/' % pk)
-    assert request.status_code in [200, 301]
+    response = client.get('/questions/%s/edit/' % pk)
+    assert response.status_code in [200, 301]
 
     # Delete
-    request = client.get('/questions/%s/delete/' % pk)
-    assert request.status_code in [200, 301]
+    response = client.get('/questions/%s/delete/' % pk)
+    assert response.status_code in [200, 301]
 
     # Create
-    request = client.get('/questions/new/io/')
-    assert request.status_code in [200, 301]
+    response = client.get('/questions/new/io/')
+    assert response.status_code in [200, 301]

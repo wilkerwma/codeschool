@@ -6,11 +6,10 @@
         <div class="iospec-testcase">
             <h4>{{ _('Your response') }}</h4>
             {% if feedback.case %}
-                <code>
-                    {% for atom in feedback.case %}
-                        <span class="iospec-{{ atom.type }}">{{ atom }}</span>
-                        {% if atom.type == 'input' %}<br>{% endif %}
-                    {% endfor %}
+                <code class="iospec-answer">
+                    {%- for atom in feedback.case -%}
+                        <span class="iospec-{{ atom.type }}">{{ atom }}</span>{% if atom.type == 'input' %}<br>{% endif %}
+                    {%- endfor -%}
                 </code>
             {% else %}
                 <span class="iospec-empty">{{ _('-- empty --') }}</span>
@@ -19,16 +18,14 @@
         <div class="iospec-testcase">
             <h4>{{ _('Expected answer') }}</h4>
             {% if feedback.answer_key %}
-                <code>
-                    {% for atom in feedback.answer_key %}
-                        <span class="iospec-{{ atom.type }}">{{ atom }}</span>
-                        {% if atom.type == 'input' %}<br>{% endif %}
-                    {% endfor %}
+                <code class="iospec-answer">
+                    {%- for atom in feedback.answer_key -%}
+                        <span class="iospec-{{ atom.type }}">{{ atom }}</span>{% if atom.type == 'input' %}<br>{% endif %}
+                    {%- endfor -%}
                 </code>
             {% else %}
                 <span class="iospec-empty">{{ _('-- empty --') }}</span>
             {% endif %}
-
         </div>
         {% if feedback.case.is_error %}
             <div class="iospec-testcase">

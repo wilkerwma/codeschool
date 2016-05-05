@@ -31,6 +31,7 @@ class QuestionCRUD(CRUDViewPack):
     We replace the default DetailView for a DetailWithResponseView in order to
     enable a response form in the detail page of each object.
     """
+
     class DetailView(DetailObjectContextMixin,
                      VerboseNamesContextMixin,
                      DetailWithResponseView):
@@ -46,11 +47,6 @@ class QuestionCRUD(CRUDViewPack):
 
         def form_valid(self, form):
             return self.form_invalid(form)
-
-    class ListViewMixin:
-        def get_queryset(self):
-            qs = super().get_queryset()
-            return qs.filter(is_active=True)
 
 
 @QuestionInheritanceCRUD.register

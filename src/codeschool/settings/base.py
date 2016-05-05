@@ -227,7 +227,19 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(SOURCE_FOLDER_DIR, 'db.sqlite3'),
+        'TEST': {
+            'NAME': os.path.join(SOURCE_FOLDER_DIR, 'testdb.sqlite3'),
+        }
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'codeschool',
+    #     'USER': 'chips',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '',
+    # }
+
 }
 
 

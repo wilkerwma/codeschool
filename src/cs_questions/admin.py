@@ -12,7 +12,7 @@ class QuestionBase(admin.ModelAdmin):
         (None, {
             'fields': (('title', 'author_name'),
                        'discipline',
-                       'owner',
+                       ('owner', 'is_active'),
                        'short_description', 'long_description',),
         }),
         ('Advanced', {
