@@ -1,12 +1,12 @@
 from django.utils.translation import ugettext_lazy as _
-from viewpack import CRUDViewPack, CRUDWithInheritanceViewGroup
+from viewpack import CRUDViewPack, InheritanceCRUDViewPack
 from viewpack.views.childviews import DetailObjectContextMixin, VerboseNamesContextMixin, DetailWithResponseView
 from codeschool.models import User
 from cs_questions import models
 users = User.objects
 
 
-class QuestionInheritanceCRUD(CRUDWithInheritanceViewGroup):
+class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
     """
     Base CRUD that dispatch to a different view depending on the question type.
     """
@@ -22,6 +22,11 @@ class QuestionInheritanceCRUD(CRUDWithInheritanceViewGroup):
         'content_color': '#BC5454',
         'object_name': _('question'),
     }
+
+    class ListView(InheritanceCRUDViewPack.ListView):
+        def get_queryset(self):
+            return super().get_queryset().filter(is_active=True)
+
 
 
 class QuestionCRUD(CRUDViewPack):

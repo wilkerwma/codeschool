@@ -2,10 +2,10 @@ import srvice
 from django import http
 from django.utils.translation import ugettext_lazy as _
 from cs_activities import models
-from viewpack import CRUDWithInheritanceViewGroup, CRUDViewPack
+from viewpack import InheritanceCRUDViewPack, CRUDViewPack
 
 
-class ActivityCRUD(CRUDWithInheritanceViewGroup):
+class ActivityCRUD(InheritanceCRUDViewPack):
     model = models.Activity
     template_extension = '.jinja2'
     template_basename = 'cs_activities/'
