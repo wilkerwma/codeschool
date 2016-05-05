@@ -12,7 +12,9 @@
     <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
         <div class="mdl-tabs__tab-bar dark">
             {% for (tab, title) in tabs %}
-                <a href="#{{ tab }}" class="mdl-tabs__tab{% if loop.index == 1 %} is-active{% endif %}">{{ title }}</a>
+                <a href="#{{ tab }}" class="mdl-tabs__tab
+                {%- if (active_tab is defined and tab == active_tab) or (active_tab is not defined and loop.index == 1) -%}
+                     {{- " is-active" }}{% endif %}">{{ title }}</a>
             {% endfor %}
         </div>
 

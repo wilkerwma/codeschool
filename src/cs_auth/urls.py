@@ -3,6 +3,6 @@ from cs_auth import views
 
 
 urlpatterns = [
-    url(r'^login/$', views.login, name='login'),
+    url(r'^login/$', views.LoginView.as_view(), name='login'),
     url(r'^', include('userena.urls', namespace=None)),
 ]

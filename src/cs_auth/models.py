@@ -322,9 +322,5 @@ class UserMixin:
         pks = self.enrolled_courses.values_list('teacher', flat=True)
         return models.User.objects.filter(pk__in=pks).distinct()
 
-    @property
-    def userena_signup(self):
-        return UserenaSignup.objects.get_or_create(user=u)[0]
-
 
 models.User.__bases__ = (UserMixin,) + models.User.__bases__
