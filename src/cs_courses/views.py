@@ -2,8 +2,7 @@ from collections import namedtuple
 from django import http
 from srvice import srvice, Client
 from codeschool.decorators import login_required
-from codeschool.models import User
-from codeschool.shortcuts import render_context, render, get_object_or_404
+from codeschool.shortcuts import render_context, render, get_object_or_404, redirect
 from cs_courses import models
 from cs_activities.models import Activity
 
@@ -25,6 +24,11 @@ def discipline_detail(request, id):
 @login_required
 def course_detail(request, pk):
     course = get_object_or_404(models.Course, pk=pk)
+
+    if request.method == 'POST':
+        if request.POST['action'] == 'cancel-subscription':
+            course.students.remove(request.user)
+            return redirect('../')
 
     return render_context(
         request, 'cs_courses/course-detail.jinja2',
@@ -57,17 +61,6 @@ def do_subscribe(request, ref, selected=()):
         js.refresh()
     else:
         js.dialog('close')
-    return js
-
-
-@srvice
-def leave_course(request, user, course):
-    js = Client()
-    if request.user.username != user:
-        raise PermissionError
-    course = models.Course.objects.get(pk=course)
-    course.students.remove(request.user)
-    js.redirect('/courses/')
     return js
 
 
