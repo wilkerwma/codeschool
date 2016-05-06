@@ -172,6 +172,7 @@ TEMPLATES = [
             "trim_blocks": True,
             "lstrip_blocks": True,
             "finalize": django_compat_finalizer,
+            'autoescape': False,
             'extensions': [
                 'codeschool.jinja.ext.DjangoComment',
                 'codeschool.jinja.ext.DjangoLoad',

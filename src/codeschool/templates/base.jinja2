@@ -74,87 +74,89 @@
     <![endif]-->
 
     {% block body %}{% if is_document|default(True) %}{% block wagtail %}{{ wagtailuserbar() }}{% endblock %}{% endif %}
-    <cs-head {% if user.first_name %}username="{{ user.first_name }}"{% endif %}>
-        <a href="#" class="disabled-link">Opções</a>
-        <a href="#" class="disabled-link">Avisos</a>
-        <a href="/courses/">Cursos</a>
-        <a href="/accounts/login/">Login</a>
-    </cs-head>
+    <div id="cs-body">
+        <cs-head id="cs-head" {% if user.first_name %} username="{{ user.first_name }}"{% endif %}>
+            <a href="#" class="disabled-link">Opções</a>
+            <a href="#" class="disabled-link">Avisos</a>
+            <a href="/courses/">Cursos</a>
+            <a href="/accounts/login/">Login</a>
+        </cs-head>
 
-    <div id="content-area">
-        <cs-nav>
-            {% block nav_sections %}
-                {% if not disable_courses_section %}
-                    <nav>
-                        <p><a href="/courses/">{{ _('Courses') }}</a></p>
-                        <ul>
-                            <li><a href="/questions/">{{ _('List of questions') }}</a></li>
-                            {% for course in user.related_courses %}
-                                <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </nav>
-                {% endif %}
-                {% if not disable_profile_section and user is defined %}
-                    <nav>
-                        <p><a href="/accounts/{{ user.username }}/">{{ _('Profile') }}</a></p>
-                        <ul>
-                            <li><a href="/accounts/{{ request.user.username }}/edit">{{ _('Edit') }}</a></li>
-                            <li class="disabled-link">Amigos</li>
-                            <li class="disabled-link">Configurações</li>
-                        </ul>
-                    </nav>
-                {% endif %}
-            {% endblock %}
-        </cs-nav>
+        <div id="content-area">
+            <cs-nav id="cs-nav">
+                {% block nav_sections %}
+                    {% if not disable_courses_section %}
+                        <nav>
+                            <p><a href="/courses/">{{ _('Courses') }}</a></p>
+                            <ul>
+                                <li><a href="/questions/">{{ _('List of questions') }}</a></li>
+                                {% for course in user.related_courses %}
+                                    <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                    {% if not disable_profile_section and user is defined %}
+                        <nav>
+                            <p><a href="/accounts/{{ user.username }}/">{{ _('Profile') }}</a></p>
+                            <ul>
+                                <li><a href="/accounts/{{ request.user.username }}/edit">{{ _('Edit') }}</a></li>
+                                <li class="disabled-link">Amigos</li>
+                                <li class="disabled-link">Configurações</li>
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% endblock %}
+            </cs-nav>
 
-        <main>
-            {% block content %}
-                <section>
-                    {% block content_head %}
-                        <h1>{% block content_title %}{{ content_title }}</h1>{% endblock %}
-                    {% endblock %}
-                </section>
-
-                {% block content_sessions %}
+            <main>
+                {% block content %}
                     <section>
-                        {% block content_body %}
-                            {{ content_body|markdown }}
+                        {% block content_head %}
+                            <h1>{% block content_title %}{{ content_title }}</h1>{% endblock %}
                         {% endblock %}
                     </section>
+
+                    {% block content_sessions %}
+                        <section>
+                            {% block content_body %}
+                                {{ content_body|markdown }}
+                            {% endblock %}
+                        </section>
+                    {% endblock %}
                 {% endblock %}
-            {% endblock %}
-        </main>
+            </main>
+        </div>
+
+        <cs-foot id="cs-foot">
+            <div>
+                <p>Amigos (em construção)</p>
+                <ul>
+                    <li>Fulano fez isso</li>
+                    <li>Cicrano fez aquilo</li>
+                    <li>Beltrano fez aquio outro</li>
+                </ul>
+            </div>
+
+            <div>
+                <p>Agenda (em construção)</p>
+                <ul>
+                    <li>Prova dia X</li>
+                    <li>Trabalho para dia Y</li>
+                    <li>Estudar XY</li>
+                </ul>
+            </div>
+
+            <div>
+                <p>Notícias (em construção)</p>
+                <ul>
+                    <li>Adicionou notas</li>
+                    <li>Mensagem do prof. CB</li>
+                    <li>Não haverá prova dia XXX</li>
+                </ul>
+            </div>
+        </cs-foot>
     </div>
-
-    <cs-foot>
-        <div>
-            <p>Amigos (em construção)</p>
-            <ul>
-                <li>Fulano fez isso</li>
-                <li>Cicrano fez aquilo</li>
-                <li>Beltrano fez aquio outro</li>
-            </ul>
-        </div>
-
-        <div>
-            <p>Agenda (em construção)</p>
-            <ul>
-                <li>Prova dia X</li>
-                <li>Trabalho para dia Y</li>
-                <li>Estudar XY</li>
-            </ul>
-        </div>
-
-        <div>
-            <p>Notícias (em construção)</p>
-            <ul>
-                <li>Adicionou notas</li>
-                <li>Mensagem do prof. CB</li>
-                <li>Não haverá prova dia XXX</li>
-            </ul>
-        </div>
-    </cs-foot>
     {% endblock %}
 
     {% block hidden_content %}

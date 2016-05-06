@@ -2,6 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from viewpack import CRUDViewPack, InheritanceCRUDViewPack
 from viewpack.views.childviews import DetailObjectContextMixin, VerboseNamesContextMixin, DetailWithResponseView
 from codeschool.models import User
+from codeschool.capabilities import can_download, can_edit, can_create, can_view
 from cs_questions import models
 users = User.objects
 
@@ -14,7 +15,6 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
     model = models.Question
     template_extension = '.jinja2'
     template_basename = 'cs_questions/'
-    use_crud_views = True
     exclude_fields = ['status', 'status_changed', 'author_name', 'comment',
                       'owner']
     detail_fields = []
@@ -26,7 +26,6 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
     class ListView(InheritanceCRUDViewPack.ListView):
         def get_queryset(self):
             return super().get_queryset().filter(is_active=True)
-
 
 
 class QuestionCRUD(CRUDViewPack):
@@ -53,6 +52,15 @@ class QuestionCRUD(CRUDViewPack):
         def form_valid(self, form):
             return self.form_invalid(form)
 
+        def get_context_data(self, **kwargs):
+            user = self.request.user
+            obj = self.object
+            return super().get_context_data(
+                can_edit=can_edit(obj, user),
+                can_download=can_download(obj, user),
+                **kwargs
+            )
+
 
 @QuestionInheritanceCRUD.register
 class NumericQuestionViews(QuestionCRUD):
@@ -61,6 +69,7 @@ class NumericQuestionViews(QuestionCRUD):
 
 @QuestionInheritanceCRUD.register
 class CodingIoQuestionViews(QuestionCRUD):
+    subclass_view_name = 'io'
     model = models.CodingIoQuestion
     response_model = models.CodingIoResponse
     response_fields = ['source', 'language']

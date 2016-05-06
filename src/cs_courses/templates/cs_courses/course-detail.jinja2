@@ -1,34 +1,5 @@
 {% extends "cs_courses/base.jinja2" %}
 
-{% block nav_sections %}
-    <li>
-        <p>{{ course.name }}</p>
-        <ul>
-            <li onclick="srvice.dialog({sourceId: 'confirmation-dialog', action: 'open'})">Cancelar inscrição</li>
-        </ul>
-    </li>
-    {{ super() }}
-{% endblock %}
-
-{% block hidden_content %}
-    {{ super() }}
-    <div id="confirmation-dialog" class="hidden">
-        <h1>{{ _('Confirmation') }}</h1>
-        <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
-        <p>{{ _('All your activities and progress will be deleted.') }}</p>
-        <div class="toolbar highlight">
-            <button class="separated raised" onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
-            <button class="danger"
-                    onclick="srvice('cs-courses.leave-course', {
-                            user: '{{ user.username }}',
-                            course: {{ course.pk }}
-                        })">
-                {{ _('Yes, leave course') }}
-            </button>
-        </div>
-    </div>
-{% endblock %}
-
 {% block content %}
     <section class="content-cards">
         <aside>
@@ -98,4 +69,35 @@
             </div>
         </article>
     </section>
+{% endblock %}
+
+
+{% block nav_sections %}
+    <nav>
+        <p>{{ course.name }}</p>
+        <ul>
+            <li onclick="srvice.dialog({sourceId: 'confirmation-dialog', action: 'open'})">Cancelar inscrição</li>
+        </ul>
+    </nav>
+    {{ super() }}
+{% endblock %}
+
+
+{% block hidden_content %}
+    {{ super() }}
+    <div id="confirmation-dialog" class="hidden">
+        <h1>{{ _('Confirmation') }}</h1>
+        <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
+        <p>{{ _('All your activities and progress will be deleted.') }}</p>
+        <div class="toolbar highlight">
+            <button class="separated raised" onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+            <button class="danger"
+                    onclick="srvice('cs-courses.leave-course', {
+                            user: '{{ user.username }}',
+                            course: {{ course.pk }}
+                        })">
+                {{ _('Yes, leave course') }}
+            </button>
+        </div>
+    </div>
 {% endblock %}

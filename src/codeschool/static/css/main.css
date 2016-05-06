@@ -25,6 +25,40 @@ dt {
     background: #ffe180;
 }
 
+#cs-head,
+#cs-nav,
+#cs-foot {
+    box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+#cs-head {
+    z-index: 3;
+}
+
+#cs-foot {
+    z-index: 1;
+}
+
+
+/* Background on very large screens */
+@media only screen and (min-width: 1000px) {
+    body {
+        background: url('../img/bg/swirl_pattern.png');
+        background-color: #ddd;
+    }
+
+    #cs-body {
+        background: white;
+        width: 1000px;
+        margin: 0 auto;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        box-shadow: 0 0 50px 5px rgba(0, 0, 0, 0.2);
+    }
+}
+
 /*
 paper-item > a {
     display: block;

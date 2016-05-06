@@ -8,14 +8,8 @@
     <action-handle expand-on-hover>
         {% if has_actions %}
             <h1 class="action-handle-title">{{ _('Actions') }}</h1>
-            {% if can_edit %}
-                <p><a href="./{{ object.pk }}/edit"><i
-                        class="material-icons">edit</i> Edit</a></p>
-            {% endif %}
-            {% if can_download %}
-                <p><a href="./{{ object.pk }}/download"><i class="material-icons">file_download</i></a>
-                </p>
-            {% endif %}
+            {% if can_edit %}<menu-item href="./edit" icon="edit">Edit</menu-item>{% endif %}
+            {% if can_download %}<menu-item href="./download" icon="file_download">Download</menu-item>{% endif %}
         {% endif %}
 
         <!-- Detail box -->

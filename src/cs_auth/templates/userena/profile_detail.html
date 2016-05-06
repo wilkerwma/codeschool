@@ -1,19 +1,19 @@
 {% extends 'cs_auth/base.jinja2' %}
 
 
-{% block content_title %}
-    {{ gettext('Profile: %(name)s', name=username) }}{% endblock %}
-
+{% block content_title %}{{ gettext('Profile: %(name)s', name=username) }}{% endblock %}
 {% block style %}
     {{ super() }}
     <style>
         dt {
-            float: none;
+            float: none
         }
-
+        dd {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
     </style>
 {% endblock %}
-
 
 {% block content_sessions %}
     <div>
@@ -24,7 +24,7 @@
                 {% block profile_definition_list %}
                     {% if profile.user.get_full_name %}
                         <dt>{{ _("Name") }}</dt>
-                        <dd>{{ profile.user.get_full_name() }}</dd>
+                        <dd>{{ profile.user.get_full_name()|e }}</dd>
                     {% endif %}
                     {% if profile.user.email and not hide_email %}
                         <dt>{{ _("Email") }}</dt>
@@ -40,7 +40,7 @@
                     {% endif %}
                     {% if profile.location %}
                         <dt>{{ _("Location") }}</dt>
-                        <dd>{{ profile.location }}</dd>
+                        <dd>{{ profile.location|e }}</dd>
                     {% endif %}
                     {% if profile.about_me %}
                         <dt>{{ _("About me") }}</dt>

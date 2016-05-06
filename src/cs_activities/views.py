@@ -9,7 +9,6 @@ class ActivityCRUD(InheritanceCRUDViewPack):
     model = models.Activity
     template_extension = '.jinja2'
     template_basename = 'cs_activities/'
-    use_crud_views = True
     context_data = {
         'content_color': "#589cbc",
         'set object_name': _('activity'),
