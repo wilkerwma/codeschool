@@ -246,7 +246,8 @@ class FriendshipStatus(models.StatusModel):
         ('pending', _('pending')),
         ('friend', _('friend')),
         ('acquaintance', _('acquaintance')),
-        ('unfriend', _('unfriend'))
+        ('unfriend', _('unfriend')),
+        ('colleague',_('colleague'))
     )
 
     owner = models.ForeignKey(models.User, related_name='associated')
@@ -261,11 +262,15 @@ class FriendshipStatus(models.StatusModel):
         try:
             FriendshipStatus.objects.get(owner=self.other, other=self.owner)
         except FriendshipStatus.DoesNotExist:
-            FriendshipStatus(
-                    owner=self.other,
-                    other=self.owner,
-                    status='pending').save()
-
+            friendship = FriendshipStatus(
+                                owner=self.other,
+                                other=self.owner)
+            if(self.status == "colleague"):
+                friendship.status = "colleague"
+            else:
+                friendship.status = "pending"
+            friendship.save()
+                                
 
 # Mokey patch the user class
 class UserMixin:

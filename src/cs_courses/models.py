@@ -5,7 +5,7 @@ from autoslug import AutoSlugField
 from wagtail.wagtailcore.fields import RichTextField
 from codeschool import models
 from cs_activities.models import Activity
-
+from cs_auth.models import FriendshipStatus as FriendShip
 
 #
 # Main model classes
@@ -59,6 +59,22 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     current_lesson_start = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(_('is active'), default=False)
 
+    def save(self, *args, **kwds):
+        super().save(*args,**kwds)
+        for student in self.students.values():
+            for colleague in self.students.values():
+                if(student["id"] != colleague["id"]):
+                    obj_student = models.User(**student)
+                    obj_colleague = models.User(**colleague)
+                    try:
+                       FriendShip.objects.get(owner=obj_student,
+                                              other=obj_colleague) 
+                    except FriendShip.DoesNotExist:
+                        FriendShip(owner=obj_student,
+                                   other=obj_colleague,
+                                   status="colleague").save()
+                                
+        
     # Managers
     @property
     def past_activities(self):
