@@ -3,7 +3,7 @@
 {% block content_title %}{{ verbose_name|title }}: {{ detail_object.title }}{% endblock %}
 
 {% block form_actions %}
-    <button type="submit" form="{{ form_id }}" name="action" value="delete">{{ _('Delete') }}</button>
-    <button type="submit" form="{{ form_id }}" name="action" value="copy">{{ _('Copy') }}</button>
+    <button type="submit" form="{{ form_id }}" name="action" value="delete" class="form__delete-button">{{ _('Delete') }}</button>
+    <button type="submit" form="{{ form_id }}" name="action" value="copy" class="form__copy-button">{{ _('Copy') }}</button>
     {{ super() }}
 {% endblock %}

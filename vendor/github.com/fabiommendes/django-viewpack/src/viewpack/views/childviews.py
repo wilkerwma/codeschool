@@ -8,6 +8,7 @@ from django.db import models
 from django import http
 from viewpack.utils import lazy, delegate_to_parent, get_view_name
 from viewpack.types import DetailObject, LazyBool
+from viewpack import permissions
 
 __all__ = [
     # Base
@@ -42,10 +43,12 @@ MRO_NEUTRAL = {
     'ParentTemplateNamesMixin.get_template_names',
     'ParentContextMixin.get_context_data',
     'SingleObjectMixin.get_context_data',
+    'UpdateView.get', 'UpdateView.post',
 }
 MRO_STOP = {
     'TemplateResponseEndpointMixin.get_template_names':
-        '*TemplateResponseMixin.get_template_names'
+        '*TemplateResponseMixin.get_template_names',
+    'DetailView.get': '*BaseDetailView.get',
 }
 
 
@@ -279,6 +282,8 @@ class SingleObjectMixin(ContextMixin, detail.SingleObjectMixin):
     query_pk_and_slug = delegate_to_parent('query_pk_and_slug', False)
 
     def get_object(self, queryset=None):
+        if 'object' in self.__dict__:
+            return self.object
         try:
             return self.parent.get_object(queryset)
         except (AttributeError, NotImplementedError):
@@ -296,6 +301,7 @@ class SingleObjectMixin(ContextMixin, detail.SingleObjectMixin):
                 context.setdefault(name, obj)
 
         return context
+
 
 @check_mro
 class SingleObjectTemplateResponseMixin(TemplateResponseMixin,
@@ -348,7 +354,36 @@ class SingleObjectTemplateResponseMixin(TemplateResponseMixin,
 @check_mro
 class DetailView(SingleObjectTemplateResponseMixin, SingleObjectMixin,
                  detail.DetailView):
-    pass
+    """
+    Fetch object from database and display it using a template.
+
+    Extends Django's builtin UpdateView class to search for configurations and
+    template names in the parent class.
+
+    If the attribute ``check_permissions = True``, it will also use the
+    functions on :mod:`viewpack.permissions` to grant the view permission to
+    users.
+    """
+    check_permissions = delegate_to_parent('check_permissions', False)
+    raise_404_on_permission_error = delegate_to_parent('check_permissions', True)
+
+    def get(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'view') or
+                super().get(request, args, kwargs))
+
+    def can_view(self):
+        """
+        Return True if the current user can view object and False otherwise.
+
+        This method tries to execute the parent's can_view method. If it does
+        not exist, it uses :func:`viewpack.permissions.can_view`.
+        """
+        if not self.check_permissions:
+            return True
+        elif hasattr(self.parent, 'can_view'):
+            return self.parent.can_view(self.object)
+        else:
+            return permissions.can_view(self.object, self.request.user)
 
 
 #
@@ -378,7 +413,41 @@ class CreateView(SingleObjectTemplateResponseMixin, ModelFormMixin,
 @check_mro
 class UpdateView(SingleObjectTemplateResponseMixin, ModelFormMixin,
                  edit.UpdateView):
-    pass
+    """
+    Edit object using a ModelForm.
+
+    Extends Django's builtin UpdateView class to search for configurations and
+    template names in the parent class.
+
+    If the attribute ``check_permissions = True``, it will also use the
+    functions on :mod:`viewpack.permissions` to grant the edit permission to
+    users.
+    """
+    check_permissions = delegate_to_parent('check_permissions', False)
+    raise_404_on_permission_error = delegate_to_parent('check_permissions', True)
+
+    def get(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'edit') or
+                super().get(request, args, kwargs))
+
+    def post(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'edit') or
+                super().post(request, args, kwargs))
+
+    def can_edit(self):
+        """
+        Return True if the current user can edit `self.object` and False
+        otherwise.
+
+        This method tries to execute the parent's can_edit method. If it does
+        not exist, it uses :func:`viewpack.permissions.can_edit`.
+        """
+        if not self.check_permissions:
+            return True
+        elif hasattr(self.parent, 'can_edit'):
+            return self.parent.can_edit(self.object)
+        else:
+            return permissions.can_edit(self.object, self.request.user)
 
 
 @check_mro
@@ -421,7 +490,8 @@ class MultipleObjectTemplateResponseMixin(TemplateResponseMixin,
             opts = self.object_list.model._meta
 
             # This is almost exactly the the default django implementation. We
-            # just change the line bellow in order to support different extensions.
+            # just change the lines bellow in order to support different
+            # extensions.
             extension = self.template_extension
             extension = '.' + extension.lstrip('.') if extension else extension
             names.append("%s/%s%s%s" % (
@@ -638,3 +708,25 @@ class DetailWithResponseView(FormMixin, DetailView):
         """
 
         return form.save()
+
+
+def _check_permission_then_go(self, permission):
+    """Auxiliary function that implements permission check before proceeding.
+
+    Args:
+        self:
+            View instance
+        permission:
+            String with permission name (e.g.: 'edit', 'view', etc)
+    """
+
+    self.object = self.get_object()
+    has_permission = getattr(self, 'can_' + permission)()
+    if has_permission:
+        return None
+    elif self.raise_404_on_permission_error:
+        raise http.Http404
+    else:
+        return http.HttpResponseForbidden(
+            "You don't have permission to %s the requested object" % permission
+        )

@@ -34,7 +34,7 @@
     {% endblock %}
 
     {% block form_actions %}
-        <button type="submit" form="{{ form_id }}" name="action" value="detail">{{ _('View') }}</button>
-        <button type="submit" form="{{ form_id }}" name="action" value="update">{{ _('Save') }}</button>
+        <button type="submit" form="{{ form_id }}" name="action" value="detail" class="form__view-button">{{ _('View') }}</button>
+        <button type="submit" form="{{ form_id }}" name="action" value="update" class="form__save-button">{{ _('Save') }}</button>
     {% endblock %}
 {% endblock %}

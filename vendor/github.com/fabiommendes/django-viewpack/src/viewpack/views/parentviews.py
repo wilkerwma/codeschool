@@ -143,6 +143,11 @@ class CRUDViewPack(SingleObjectParentMixin, TemplateResponseParentMixin, ViewPac
     #: template for child views.
     disable_crud_templates = delegate_to_parent('disable_crud_templates', False)
 
+    #: If True (default), if will use the functions in
+    # :mod:`viewpack.permissions` to check if the user has permissions to view,
+    # edit or create new objects.
+    check_permissions = delegate_to_parent('check_permissions', False)
+
     def get_template_names(self, view_name):
         assert isinstance(view_name, str), 'invalid view name: %r' % view_name
 
