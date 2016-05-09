@@ -1,0 +1,40 @@
+{% extends "viewpack/crud/base.jinja2" %}
+
+{#
+    Common template for the update and create views.
+
+    Define these blocks:
+
+    form:
+        Defines the <form> tags and renders the form without action buttons
+        inside it. User can pass form_id to control its html id.
+    form_hidden:
+        Hidden input elements in the form. Includes the csrf token by default.
+    form_data:
+        Renders form element. Accepts form_as_table=true to render it as a table.
+    form_actions:
+        Define action buttons.
+
+    The form gets an id from the form_id variable.
+ #}
+
+{% block content_body %}
+    {% block form %}
+        <form method="POST" id="{{ form_id }}">
+            {% block form_hidden %}{% csrf_token %}{% endblock %}
+            {% block form_data %}
+                {% if form_as_table %}
+                    <table>{{ form.as_table() }}</table>
+                {% else %}
+                    {% block form_extra %}{% endblock %}
+                    {{ form }}
+                {% endif %}
+            {% endblock %}
+        </form>
+    {% endblock %}
+
+    {% block form_actions %}
+        <button type="submit" form="{{ form_id }}" name="action" value="detail">{{ _('View') }}</button>
+        <button type="submit" form="{{ form_id }}" name="action" value="update">{{ _('Save') }}</button>
+    {% endblock %}
+{% endblock %}

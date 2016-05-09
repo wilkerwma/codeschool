@@ -1,0 +1,8 @@
+{# If set to true, forms are rendered as tables #}
+{% if form_as_table is not defined %}{% set form_as_table = false %}{% endif %}
+
+{# The id given to the <form> elements #}
+{% if form_id is not defined %}{% set form_id = 'form' %}{% endif %}
+
+{# Import #}
+{% extends "viewpack/base.jinja2" %}

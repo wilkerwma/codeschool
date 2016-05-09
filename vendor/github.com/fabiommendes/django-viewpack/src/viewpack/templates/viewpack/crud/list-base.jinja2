@@ -1,0 +1,33 @@
+{% extends "viewpack/crud/base.jinja2" %}
+
+{#
+    This template defines these new blocks inside `content_body` block.
+
+    show_list:
+        display when list of objects is not empty
+    list_item:
+        sub-block that renders an object inside a <li>
+    empty_list:
+        html displayed if list of items is empty.
+ #}
+{% block content_title %}{{ gettext('List of %(name)s', name=verbose_name_plural) }}{% endblock %}
+
+{% block content_body %}
+    {% if object_list %}
+        {% block show_list %}
+            <ul class="object-list">
+                {% for object in object_list  %}
+                    <li>
+                        {% block list_item scoped %}
+                            <p><a href="./{{ object.pk }}/">{{ object }}</a></p>
+                        {% endblock %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endblock %}
+    {% else %}
+        {% block empty_list %}
+            <p>{{ gettext('No %(name)s found', name=verbose_name_plural) }}</p>
+        {% endblock %}
+    {% endif %}
+{% endblock %}

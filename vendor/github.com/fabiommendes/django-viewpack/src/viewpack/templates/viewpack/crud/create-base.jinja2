@@ -1,0 +1,11 @@
+{% extends "viewpack/crud/form.jinja2" %}
+
+{#
+    Update form.
+
+    It defines a form block that creates the form and renders it as a table
+    if form_as_table=True or as p's.
+
+    The form gets an id from the form_id variable.
+ #}
+{% block content_title %}{{ gettext('Create new %(name)s', name=verbose_name) }}{% endblock %}
