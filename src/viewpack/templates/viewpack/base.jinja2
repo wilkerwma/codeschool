@@ -1,0 +1,13 @@
+{% extends "base.jinja2" %}
+
+{#
+    We divide the content in two parts:
+        1) The head contains a single title in the sub-block content_title.
+           It may contain additional information via overrides.
+        2) The body contains most of the data.
+#}
+
+{% block content %}
+    {% block content_header %}<h1>{% block content_title %}URL: {{ request.get_base_path() }}{% endblock %}</h1>{% endblock %}
+    {% block content_body %}{% endblock %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "viewpack/crud/form.jinja2" %}
+
+{% block content_title %}{{ verbose_name|title }}: {{ detail_object.title }}{% endblock %}
+
+{% block form_actions %}
+    <button type="submit" form="{{ form_id }}" name="action" value="delete">{{ _('Delete') }}</button>
+    <button type="submit" form="{{ form_id }}" name="action" value="copy">{{ _('Copy') }}</button>
+    {{ super() }}
+{% endblock %}

@@ -1,0 +1,11 @@
+- model: viewgroups_test_app.testmodel
+  pk: 1
+  fields:
+    name: first
+    description: this is the first object
+
+- model: viewgroups_test_app.testmodel
+  pk: 2
+  fields:
+    name: second
+    description: this is the second object

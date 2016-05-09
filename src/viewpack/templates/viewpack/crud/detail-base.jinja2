@@ -1,0 +1,48 @@
+{% extends "viewpack/crud/base.jinja2" %}
+
+{#
+    This view defines a few blocks inside the `content_body` block:
+
+    object_detail:
+        defines a <dl> list of descriptions in the list of (name, value)
+        pairs called `detail_list`.
+    detail_item:
+        a sub-block with the <dt>name</dt>, <dd>value</dd> values.
+    object_description:
+        renders a detailed description using the contents of the context
+        variable `description` or the object's description or
+        long_description fields.
+ #}
+{% block content_title %}{{ verbose_name|title }}: {{ detail_object.title }}{% endblock %}
+
+{% if detail_items is not defined %}
+    {% set detail_items = detail_object.description_list %}
+{% endif %}
+{% if description is not defined %}
+    {% set description = detail_object.long_description %}
+{% endif %}
+
+{% block content_body %}
+    {% block object_detail %}
+        {% if detail_items %}
+            <div class="object-detail">
+                <h2>{{ _('Details') }}</h2>
+                <dl>
+                    {% for (name, value) in detail_items %}
+                        {% block detail_item scoped %}
+                            <dt>{{ name }}</dt>
+                            <dd>{{ value }}</dd>
+                        {% endblock %}
+                    {% endfor %}
+                </dl>
+            </div>
+        {% endif %}
+    {% endblock %}
+
+    {% block object_description %}
+        {% if description %}
+            <h2>{{ _('Description') }}</h2>
+            <div>{{ description }}</div>
+        {% endif %}
+    {% endblock %}
+{% endblock %}

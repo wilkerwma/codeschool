@@ -1,0 +1,25 @@
+{% extends "viewpack/crud/base.jinja2" %}
+
+{#
+    This template defines these new blocks inside `content_body` block.
+
+    show_list:
+        display when list of objects is not empty
+    list_item:
+        sub-block that renders an object inside a <li>
+    empty_list:
+        html displayed if list of items is empty.
+ #}
+{% block content_title %}{{ gettext('Create new %(name)s', name=verbose_name) }}{% endblock %}
+
+{% block content_body %}
+    <ul class="actions-list">
+        {% for (name, view) in name_view_list %}
+            <li>
+                {% block view scoped %}
+                    <p><a href="./{{ name }}/">{{ view.model._meta.verbose_name.title() }}</a></p>
+                {% endblock %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "viewpack/crud/form.jinja2" %}
+
+{#
+    Confirm removal using a POST action in a form
+
+    object_description:
+        Short description of object displayed just before the "Delete object?"
+        quesiton.
+ #}
+{% block content_title %}{{ verbose_name|title }}: {{ detail_object.title }}{% endblock %}
+
+{% block form_data %}{% endblock %}
+
+{% block form_actions %}
+    <p>{{ _('Do you really want to delete this object? It is not possible to undo this action.') }}</p>
+    <button type="submit" form="{{ form_id }}" name="action" value="detail">{{ _('No') }}</button>
+    <button type="submit" form="{{ form_id }}" name="action" value="delete">{{ _('Yes') }}</button>
+{% endblock %}
+
+{% block content_body %}
+    {% block object_description %}{% endblock %}
+    {{ super() }}
+{% endblock %}
