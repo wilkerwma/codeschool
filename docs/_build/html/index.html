@@ -1,0 +1,323 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to markio’s documentation! &mdash; markio 0.1.2 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="markio 0.1.2 documentation" href="#" />
+    <link rel="next" title="Troubleshoot" href="install.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-markio-s-documentation">
+<h1>Welcome to markio&#8217;s documentation!<a class="headerlink" href="#welcome-to-markio-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p>Beta software
+You are using a software that has not reached a stable version yet. Please
+beware that interfaces might change, APIs might disappear and general
+breakage can occur before <em>1.0</em>.</p>
+<p class="last">If you plan to use this software for something important, please read the
+roadmap, and the issue tracker in Github. If you are unsure about the
+future of this project, please talk to the developers, or (better yet) get
+involved with the development of markio!</p>
+</div>
+<p>The <code class="docutils literal"><span class="pre">.markio</span></code> format is a markdown-based format for representing IO based
+programming questions. This library consists in a parser and a processor for
+the format. It does not judge submissions by executing programming tasks and
+comparing inputs/outputs but it provides some data structures that makes the
+implementation of such a program much easier.</p>
+<div class="section" id="the-syntax">
+<h2>The syntax<a class="headerlink" href="#the-syntax" title="Permalink to this headline">¶</a></h2>
+<p>Markio files are regular markdown files with a conventional structure used to
+represent an IO based programming question. The <cite>markio`</cite> parser processes the
+markdown source and returns a dictionary with the document structure.
+A <code class="docutils literal"><span class="pre">.markio</span></code> markdown file begins like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Hello Person
+============
+
+    Author: Chips Chipperfield &lt;chips@chipperfield.com&gt;
+    Slug: hello-person
+    Timeout: 1s
+    Tags: #begginer #basic
+
+A program that prints a personalized greeting to the user.
+</pre></div>
+</div>
+<p>The document must start with an h1-level title corresponding to the question
+title name. The title may be followed by an optional block with meta data.
+Each metadata field is optional and only the fields shown above are supported.
+The title and metadata information are accessible from the parsed structure
+directly in the &#8216;title&#8217;, &#8216;author&#8217;, &#8216;slug&#8217;, etc keys.</p>
+<p>Bellow that, it is possible to specify a single-paragraph short description.
+This description is available both in the &#8216;short_description&#8217; attribute of the
+parsed structure.</p>
+<p>The file than consists of various h2-sections. Most of these sections are
+accessed in the parsed dictionary as a lowercase version of their title names:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Description
+-----------
+
+Create a program that asks the user name and prints the message
+&quot;Hello, &lt;name&gt;!&quot; on the screen. The program output should be **exactelly**
+as requested, i.e., you should use **exactely** the same case and pontuaction
+marks as in the example string. You can assume that the input name is at
+most 100 characters long.
+
+### Inputs
+
+A more thorough description of inputs.
+
+### Outputs
+
+Description of the desired outputs.
+</pre></div>
+</div>
+<p>This obligatory section contains a long description text for the question. It
+accepts more or less arbitrary markdown text but all headings must be level 3
+or above. The raw markdown can be accessed by the &#8216;description&#8217; key in the
+parsed structure.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Example
+-------
+
+    What is your name? &lt;John&gt;
+    Hello John!
+</pre></div>
+</div>
+<p>The &#8216;example&#8217; section must contain a single block of <code class="docutils literal"><span class="pre">.iospec</span></code> data. For more
+info check <a class="reference external" href="http://gihub.com/fabiommendes/iospec">http://gihub.com/fabiommendes/iospec</a>. IoSpec is a simple language
+for specifying a sequence of inputs and outputs in a program interaction. Users
+should avoid using input-only specifications in this section.</p>
+<p>Although these examples might be used to judge submissions, the content of this
+section is displayed to the student. Tests designed to judge a program should
+go in the &#8220;Tests&#8221; section.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Tests
+-----
+
+    @input Mary
+    @input mary
+    @input Long Name
+    @input $string[&lt;100]
+</pre></div>
+</div>
+<p>This section also contains a single block of <code class="docutils literal"><span class="pre">.iospec</span></code> data with the
+various tests used to judge submissions. Input-only interactions are allowed
+and encouraged.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Placeholder
+-----------
+
+    A paragraph with the defaut comments that should be included in the
+    placeholder source.
+</pre></div>
+</div>
+<p>This optional section is used to store the default comment string that should
+be placed as the placeholder text in the <code class="docutils literal"><span class="pre">&lt;textarea&gt;</span></code> used in submission forms.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Answer Key (Python3)
+-------------------
+
+    # Indentation is necessary to mark source as a code block in markdown!
+
+    name = input(&#39;What is your name? &#39;)
+    print(&#39;Hello, %s!&#39; % name)
+
+Answer Key (C)
+--------------
+
+    #include&lt;stdio.h&gt;
+
+    main() {
+        char buffer[101];
+
+        puts(&quot;What is your name? &quot;);
+        scanf(&quot;%s&quot;, buffer);
+        printf(&quot;Hello, %s!\n&quot;, buffer);
+    }
+</pre></div>
+</div>
+<p>This section defines a reference program that can be used to compute the correct
+input/output sequences from the tests iospec. The reference solution can be
+given in more than one language (which is specified inside parenthesis).
+Markio do not grade or run these programs directly, however other graders may
+use the redundant information to cross-check responses.</p>
+<p>The source code can be accessed at <code class="docutils literal"><span class="pre">parsed.answer_key['python3']</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Placeholder (Python3)
+---------------------
+
+    # Type here your response. Remember to use the print() and input()
+    # functions
+</pre></div>
+</div>
+<p>Finally, it is possible to define a per-language placeholder text. This overrides
+the default placeholder input for a single specific language.</p>
+<p>The placeholder code can be accessed at <code class="docutils literal"><span class="pre">parsed.placehoder['python3']</span></code>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>TLE Answer (python3)
+--------------------
+
+import time
+
+name = input(&#39;What is your name? &#39;)
+time.sleep(1)
+print(&#39;Hello, %s!&#39; % name)
+</pre></div>
+</div>
+<p>The TLE (time limit exceeded) answer is used to calibrate the timeout for
+submissions in a specific language. This section should contain the
+implementation of an inefficient algorithm that the judge wants to disallow.
+This is a robust method to specify the timeout that is calibrated to the host
+machine processing power and is based on a well defined criteria rather than an
+arbitrarily chosen duration.</p>
+</div>
+<div class="section" id="translations-not-ready">
+<h2>Translations (not ready)<a class="headerlink" href="#translations-not-ready" title="Permalink to this headline">¶</a></h2>
+<p>Many programming quizzes involve internationalization-agnostic interactions.
+They can be easily translated to different human languages since only the user
+facing strings need to be adapted. If the input/output strings themselves need to
+be translated, it is necessary to create a whole new markio file.</p>
+<p>The translated sections can be put inside the main markio file or put on a
+separate file. In the first case, it is necessary to append the language code
+inside parenthesis after the section number (ex.: <code class="docutils literal"><span class="pre">Description</span> <span class="pre">(pt-BR)</span></code>).
+The placeholder text should be <code class="docutils literal"><span class="pre">Placeholder</span> <span class="pre">(python3,</span> <span class="pre">pt-BR)</span></code>. The title,
+short description and slug should be placed as metadata:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>Title (pt-BR): Olá Pessoa
+Slug (pt-BR): ola-pessoa
+Short description (pt-BR): Um programa que imprime uma saudação personalizada.
+</pre></div>
+</div>
+<p>The alternative translation file should be named as <code class="docutils literal"><span class="pre">&lt;name&gt;.pt_BR.markio</span></code>.
+The markio parser accepts translated section names for many languages. The user
+may choose to use the translated values or their english counterparts.</p>
+<p>The default language is english. If the user does not need an english version
+of the question, the main markio io file will be the same as a translation file.
+In that case the filename is expected to be something like
+<code class="docutils literal"><span class="pre">my-file.pt_BR.markio</span></code> and all sections should be present. The markio parser
+understands translated section names for a few languages. If your language is
+not present, please contribute with translations!</p>
+</div>
+<div class="section" id="acessory-files-not-ready">
+<h2>Acessory files (not ready)<a class="headerlink" href="#acessory-files-not-ready" title="Permalink to this headline">¶</a></h2>
+<p>The content of all sections of a markio source that contains only a block of
+source code (basically all sections but the title and description) can rather
+be put inside a separate file. If the markio parser finds a file named
+as <code class="docutils literal"><span class="pre">my-file.answer_key.c</span></code> in the same directory as the main source, it will
+automatically fill the contents of the <code class="docutils literal"><span class="pre">Answer</span> <span class="pre">Key</span> <span class="pre">(C)</span></code>. If both an external
+source and the section content are present, the external file takes precedence.</p>
+</div>
+<div class="section" id="command-line-not-ready">
+<h2>Command line (not ready)<a class="headerlink" href="#command-line-not-ready" title="Permalink to this headline">¶</a></h2>
+<p>This package installs the markio command that can perform several operations
+on markio files.</p>
+<p>...</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="apidoc.html">API documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="apidoc.html#parse-trees">Parse trees</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span>Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span>Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span>Search Page</span></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to markio&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#the-syntax">The syntax</a></li>
+<li><a class="reference internal" href="#translations-not-ready">Translations (not ready)</a></li>
+<li><a class="reference internal" href="#acessory-files-not-ready">Acessory files (not ready)</a></li>
+<li><a class="reference internal" href="#command-line-not-ready">Command line (not ready)</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="install.html" title="next chapter">Troubleshoot</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fábio Macêdo Mendes.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+      |
+      <a href="_sources/index.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
