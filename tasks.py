@@ -1,7 +1,6 @@
 from invoke import run, task
 import os
 import sys
-import djinga
 sys.path.insert(1, '%s/src' % (os.path.dirname(__file__)))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "codeschool.settings")
 print(sys.path)
@@ -25,9 +24,17 @@ def syncdb():
 
 
 @task
-def serve(bind='localhost:8000', collectstatic=False):
+def gunicorn(bind='localhost:8000', collectstatic=True):
     if collectstatic:
         run('python src/manage.py collectstatic')
     os.chdir('src')
-    run('gunicorn codeschool.wsgi -b %s' % bind) 
+    run('gunicorn codeschool.wsgi -b %s --workers 13 --name codeschool-server' % bind)
+   
+   
+@task
+def serve(collectstatic=True):
+    if collectstatic:
+        run('python src/manage.py collectstatic')
+    os.chdir('src')
+    run('gunicorn codeschool.wsgi -b unix:/tmp/gunicorn.sock --workers 13 --name codeschool-server')
    

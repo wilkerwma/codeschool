@@ -76,13 +76,18 @@ setup(
         'django-extensions',
         'django-guardian',
         'pytz',
-        'ejudge>=0.3.6',
-        'iospec>=0.2.2',
-        'markio>=0.1.2',
         'jinja2-django-tags',
         'django-bower',
         'django-address',
         'django-userena',
+        'boxed>=0.3',
+        
+        # These are vendorized until stabilize
+        #'django-viewpack', 
+        #'ejudge>=0.3.6',
+        #'iospec>=0.2.2',
+        #'markio>=0.1.2',
+        
     ],
     extras_require={
         'testing': ['pytest'],
