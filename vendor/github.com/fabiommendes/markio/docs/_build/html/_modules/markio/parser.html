@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>markio.parser &mdash; markio 0.1.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="markio 0.1.2 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for markio.parser</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">mistune</span>
+<span class="kn">from</span> <span class="nn">markio.types</span> <span class="kn">import</span> <span class="n">Markio</span>
+<span class="kn">from</span> <span class="nn">markio.constants</span> <span class="kn">import</span> <span class="p">(</span><span class="n">PROGRAMMING_LANGUAGES_CODES</span><span class="p">,</span>
+                              <span class="n">COUNTRY_CODES</span><span class="p">,</span> <span class="n">LANGUAGE_CODES</span><span class="p">)</span>
+
+
+<span class="n">markdown</span> <span class="o">=</span> <span class="n">mistune</span><span class="o">.</span><span class="n">Markdown</span><span class="p">(</span><span class="n">escape</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">blocklexer</span> <span class="o">=</span> <span class="n">mistune</span><span class="o">.</span><span class="n">BlockLexer</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="parse"><a class="viewcode-back" href="../../apidoc.html#markio.parse">[docs]</a><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse the given markio file.</span>
+
+<span class="sd">    If it is a real file in the filesystem, the parser will look for</span>
+<span class="sd">    supplementary data in adjacent files such as answer keys, lang files, etc.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    file:</span>
+<span class="sd">        A string with a path to a markio file or a file object.</span>
+<span class="sd">    extra:</span>
+<span class="sd">        A dictionary mapping fragment paths to files (or file paths) that hold</span>
+<span class="sd">        that data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">)</span> <span class="k">as</span> <span class="n">F</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parse_string</span><span class="p">(</span><span class="n">F</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{})</span>
+
+    <span class="k">return</span> <span class="n">parse_string</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="p">{})</span></div>
+
+
+<div class="viewcode-block" id="parse_string"><a class="viewcode-back" href="../../apidoc.html#markio.parse_string">[docs]</a><span class="k">def</span> <span class="nf">parse_string</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">extra</span><span class="o">=</span><span class="p">{}):</span>
+    <span class="c1"># Process mistune parse tree and create an hierarchical DOM-like dictionary</span>
+    <span class="c1"># in which section names are keys and section contents are values.</span>
+    <span class="k">def</span> <span class="nf">DOM</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">({</span><span class="bp">None</span><span class="p">:</span> <span class="n">current</span><span class="p">})</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">D</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">D</span> <span class="ow">in</span> <span class="n">tree</span> <span class="k">if</span> <span class="n">D</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;heading&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">levels</span><span class="p">:</span>
+            <span class="n">level</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tree</span>
+
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">tree</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;heading&#39;</span> <span class="ow">and</span> <span class="n">node</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">level</span><span class="p">:</span>
+                <span class="n">root</span><span class="p">[</span><span class="n">node</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">current</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">DOM</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+    <span class="n">mistune_tree</span> <span class="o">=</span> <span class="n">blocklexer</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">dom</span> <span class="o">=</span> <span class="n">DOM</span><span class="p">(</span><span class="n">mistune_tree</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">dom</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+    <span class="c1"># Verify if it starts with h1-level heading</span>
+    <span class="n">first_node</span> <span class="o">=</span> <span class="n">mistune_tree</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">first_node</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;heading&#39;</span> <span class="ow">and</span> <span class="n">first_node</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;Document should start with a H1-level heading&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dom</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;Only one H1-level title is allowed for the whole &#39;</span>
+                          <span class="s1">&#39;document&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Create return node</span>
+    <span class="n">title</span><span class="p">,</span> <span class="n">body</span> <span class="o">=</span> <span class="n">dom</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+    <span class="n">markio</span> <span class="o">=</span> <span class="n">Markio</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="c1"># Process metadata block</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="n">block</span> <span class="ow">and</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;code&#39;</span><span class="p">:</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
+        <span class="n">cfg</span><span class="o">.</span><span class="n">read_string</span><span class="p">(</span><span class="s1">&#39;[DEFAULT]</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">meta</span><span class="p">)</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;DEFAULT&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get default parameters and process them</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;author&#39;</span><span class="p">,</span> <span class="s1">&#39;slug&#39;</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">]:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">markio</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">default</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="bp">None</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">markio</span><span class="o">.</span><span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">markio</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">parse_time</span><span class="p">(</span><span class="n">markio</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="n">markio</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">parse_tags</span><span class="p">(</span><span class="n">default</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;tags&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">markio</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">cfg</span>
+
+        <span class="k">if</span> <span class="n">default</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">default</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;invalid meta information: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="c1"># Check if short description is available</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">markio</span><span class="o">.</span><span class="n">short_description</span> <span class="o">=</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;expect a single paragraph after metadata section&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Combine keys and extract description information</span>
+    <span class="n">body</span> <span class="o">=</span> <span class="n">combine_keys</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">get_description</span><span class="p">(</span><span class="n">descr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">descr</span><span class="p">)</span>
+
+    <span class="n">descriptions</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">markio</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">get_description</span><span class="p">(</span><span class="n">descriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="k">for</span> <span class="n">lang</span><span class="p">,</span> <span class="n">descr</span> <span class="ow">in</span> <span class="n">descriptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="n">normalize_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="n">markio</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">get_description</span><span class="p">(</span><span class="n">descr</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># Extract tests</span>
+    <span class="n">tests</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;tests&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">markio</span><span class="o">.</span><span class="n">tests</span> <span class="o">=</span> <span class="n">tests</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">}])[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tests</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid test subsession: Tests (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span>
+                         <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">tests</span><span class="p">)))</span>
+
+    <span class="c1"># Extract answer keys</span>
+    <span class="k">def</span> <span class="nf">get_code_block</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;expect to find a single block of code at answer &#39;</span>
+                              <span class="s1">&#39;key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">k</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;answer key&#39;</span><span class="p">,</span> <span class="p">{}):</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;must provide language for Answer Key&#39;</span><span class="p">)</span>
+
+    <span class="n">markio</span><span class="o">.</span><span class="n">answer_key</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">normalize_computer_language</span><span class="p">(</span><span class="n">k</span><span class="p">):</span> <span class="n">get_code_block</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">body</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;answer key&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Extract all examples</span>
+    <span class="n">examples</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;example&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">markio</span><span class="o">.</span><span class="n">example</span> <span class="o">=</span> <span class="n">examples</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[{</span><span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">}])[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">markio</span><span class="o">.</span><span class="n">example</span><span class="p">:</span>
+        <span class="n">markio</span><span class="o">.</span><span class="n">example</span> <span class="o">=</span> <span class="n">markio</span><span class="o">.</span><span class="n">example</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">lang</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">examples</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="n">normalize_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="n">markio</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span><span class="o">.</span><span class="n">example</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># Extract placeholder information</span>
+    <span class="n">placeholders</span> <span class="o">=</span> <span class="n">body</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;placeholder&#39;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">by_i18n</span> <span class="o">=</span> <span class="p">{</span><span class="bp">None</span><span class="p">:</span> <span class="p">{}}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">placeholders</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">k</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">D</span> <span class="o">=</span> <span class="n">by_i18n</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+            <span class="n">D</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Specify both programming language and i18n</span>
+            <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;placeholder: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">k</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">country_code_re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+
+                <span class="c1"># It is a lang/country code</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">lang</span><span class="p">,</span> <span class="n">country</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">lang</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LANGUAGE_CODES</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;unsupported language code: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">lang</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">country</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">COUNTRY_CODES</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;unsupported country code: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">country</span><span class="p">)</span>
+
+                    <span class="n">k</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lang</span><span class="p">,</span> <span class="n">country</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                    <span class="n">D</span> <span class="o">=</span> <span class="n">by_i18n</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">D</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+
+                <span class="c1"># It is a programming language</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PROGRAMMING_LANGUAGES_CODES</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;unknown programming language: </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">k</span><span class="p">)</span>
+                    <span class="n">D</span> <span class="o">=</span> <span class="n">by_i18n</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+                    <span class="n">D</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span>
+
+    <span class="n">markio</span><span class="o">.</span><span class="n">placeholder</span> <span class="o">=</span> <span class="n">by_i18n</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">lang</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">by_i18n</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">lang</span> <span class="o">=</span> <span class="n">normalize_language</span><span class="p">(</span><span class="n">lang</span><span class="p">)</span>
+        <span class="n">markio</span><span class="p">[</span><span class="n">lang</span><span class="p">]</span><span class="o">.</span><span class="n">placeholder</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># Assure there is no invalid sections</span>
+    <span class="k">if</span> <span class="n">body</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;invalid section: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">body</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="n">markio</span></div>
+
+
+<span class="k">def</span> <span class="nf">parse_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse a string full of tags.</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    &gt;&gt;&gt; parse_tags(&#39;#foo #bar #MyFooBarTag&#39;)</span>
+<span class="sd">    [&#39;foo&#39;, &#39;bar&#39;, &#39;MyFooBarTag&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;tags must start with an &quot;#&quot;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">tag</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">parse_time</span><span class="p">(</span><span class="n">st</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse a string that represents a time interval (e.g.: st = &#39;1s&#39;) and</span>
+<span class="sd">    return a float value representing this duration in seconds.&quot;&quot;&quot;</span>
+
+    <span class="n">st</span> <span class="o">=</span> <span class="n">st</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">for</span> <span class="n">ending</span><span class="p">,</span> <span class="n">mul</span> <span class="ow">in</span> <span class="p">[(</span><span class="s1">&#39;second&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;seconds&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sec&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;minute&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;minutes&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;min&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)]:</span>
+        <span class="k">if</span> <span class="n">st</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ending</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">st</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">ending</span><span class="p">)])</span> <span class="o">*</span> <span class="n">mul</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">break</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;invalid duration: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">st</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">combine_keys</span><span class="p">(</span><span class="n">D</span><span class="p">,</span> <span class="n">keytrans</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="nb">dict</span><span class="o">=</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Combine keys in a dictionary so section like &#39;foo (bar)&#39; and &#39;foo (baz)&#39;</span>
+<span class="sd">    are merged into foo: {&#39;bar&#39;: ..., &#39;baz&#39;: ...}.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    D : mapping</span>
+<span class="sd">        Input dictionary</span>
+<span class="sd">    keytrans : callable</span>
+<span class="sd">        Function that is applied to normalize the keys of the output dictionary.</span>
+<span class="sd">    dict : type</span>
+<span class="sd">        A callable that returns an empty mapping object. Useful, for instance</span>
+<span class="sd">        if the user wants to return merged OrderedDict&#39;s rather than regular</span>
+<span class="sd">        dictionaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">D</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">pre</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sep</span><span class="p">:</span>
+            <span class="n">k</span> <span class="o">=</span> <span class="n">pre</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">tail</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">SyntaxError</span><span class="p">(</span><span class="s1">&#39;expect closing parenthesis&#39;</span><span class="p">)</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">tail</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">dic</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">keytrans</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="n">dic</span><span class="p">[</span><span class="bp">None</span> <span class="k">if</span> <span class="n">part</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">keytrans</span><span class="p">(</span><span class="n">part</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span> <span class="nf">normalize_language</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normalize accepted lang codes to ISO format.&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">x</span>
+
+
+<span class="k">def</span> <span class="nf">normalize_computer_language</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Normalize accepted computer language strings.&quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">PROGRAMMING_LANGUAGES_CODES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+
+
+<span class="c1">#</span>
+<span class="c1"># Re matches</span>
+<span class="c1">#</span>
+<span class="n">country_code_re</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="s1">r&#39;^\w*([a-zA-Z][a-zA-Z])(-|_)([a-zA-Z][a-zA-Z])?\w*$&#39;</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, Fábio Macêdo Mendes.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.7</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
