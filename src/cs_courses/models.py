@@ -5,7 +5,7 @@ from autoslug import AutoSlugField
 from wagtail.wagtailcore.fields import RichTextField
 from codeschool import models
 from cs_activities.models import Activity
-from cs_auth.models import FriendshipStatus as FriendShip
+from cs_auth.models import FriendshipStatus
 
 #
 # Main model classes
@@ -59,22 +59,42 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     current_lesson_start = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(_('is active'), default=False)
 
-    def save(self, *args, **kwds):
-        super().save(*args,**kwds)
-        for student in self.students.values():
-            for colleague in self.students.values():
-                if(student["id"] != colleague["id"]):
-                    obj_student = models.User(**student)
-                    obj_colleague = models.User(**colleague)
-                    try:
-                       FriendShip.objects.get(owner=obj_student,
-                                              other=obj_colleague) 
-                    except FriendShip.DoesNotExist:
-                        FriendShip(owner=obj_student,
-                                   other=obj_colleague,
-                                   status="colleague").save()
-                                
-        
+    def register_student(self, student):
+        """
+        Register a new student in the course.
+        """
+
+        self.students.add(student)
+        self.update_friendship_status(student)
+
+    def update_friendship_status(self, student=None):
+        """
+        Recompute the friendship status for a single student by marking it as
+        a colleague of all participants in the course..
+
+        If no student is given, update the status of all enrolled students.
+        """
+
+        update = self._update_friendship_status
+        if student is None:
+            for student in self.students.all():
+                update(student)
+        else:
+            update(student)
+
+    def _update_friendship_status(self, student):
+        # Worker function for update_friendship_status
+        colleague_status = FriendshipStatus.STATUS_COLLEAGUE
+        for colleague in self.students.all():
+            if colleague != student:
+                try:
+                   FriendshipStatus.objects.get(owner=student,
+                                                other=colleague)
+                except FriendshipStatus.DoesNotExist:
+                    FriendshipStatus.objects.create(owner=student,
+                                                    other=colleague,
+                                                    status=colleague_status)
+
     # Managers
     @property
     def past_activities(self):

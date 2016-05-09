@@ -20,7 +20,7 @@ def course_index(request):
     if request.method == 'POST':
         if request.POST['action'] == 'subscribe':
             course = models.Course.objects.get(pk=request.POST['course'])
-            course.students.add(request.user)
+            course.register_student(request.user)
 
     return render_context(
         request, 'cs_courses/course-index.jinja2',

@@ -242,14 +242,16 @@ class AllowedUsernameListing(models.Model):
 
 
 class FriendshipStatus(models.StatusModel):
+    STATUS_PENDING = 'pending'
+    STATUS_FRIEND = 'friend'
+    STATUS_UNFRIEND = 'unfriend'
+    STATUS_COLLEAGUE = 'colleague'
     STATUS = models.Choices(
-        ('pending', _('pending')),
-        ('friend', _('friend')),
-        ('acquaintance', _('acquaintance')),
-        ('unfriend', _('unfriend')),
-        ('colleague',_('colleague'))
+        (STATUS_PENDING, _('pending')),
+        (STATUS_FRIEND, _('friend')),
+        (STATUS_UNFRIEND, _('unfriend')),
+        (STATUS_COLLEAGUE,_('colleague'))
     )
-
     owner = models.ForeignKey(models.User, related_name='associated')
     other = models.ForeignKey(models.User, related_name='associated_as_other')
 
@@ -262,14 +264,12 @@ class FriendshipStatus(models.StatusModel):
         try:
             FriendshipStatus.objects.get(owner=self.other, other=self.owner)
         except FriendshipStatus.DoesNotExist:
-            friendship = FriendshipStatus(
-                                owner=self.other,
-                                other=self.owner)
-            if(self.status == "colleague"):
-                friendship.status = "colleague"
+            reciprocal = FriendshipStatus(owner=self.other, other=self.owner)
+            if self.status == self.STATUS_COLLEAGUE:
+                reciprocal.status = self.STATUS_COLLEAGUE
             else:
-                friendship.status = "pending"
-            friendship.save()
+                reciprocal.status = self.STATUS_PENDING
+            reciprocal.save()
                                 
 
 # Mokey patch the user class
