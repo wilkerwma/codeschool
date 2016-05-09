@@ -89,7 +89,8 @@ button > i.material-icons.alert {
     margin-top: -10px;
 }
 
-.toolbar > .separated {
+.toolbar > .separated,
+.toolbar > .form__delete-button {
     float: left;
 }
 
@@ -113,11 +114,13 @@ button > i.material-icons.alert {
 }
 
 /* Button roles */
-.primary {
+.primary,
+.form__save-button {
     font-weight: bold;
     margin: auto 10px;
     padding-left: 20px;
     padding-right: 20px;
+    background: #008080;
 }
 
 .primary.flat {
@@ -128,7 +131,8 @@ button > i.material-icons.alert {
 button.danger,
 input[type=button].danger,
 input[type=submit].danger,
-input[type=reset].danger {
+input[type=reset].danger,
+.form__delete-button {
     background: #ff2626;
     color: white;
 }

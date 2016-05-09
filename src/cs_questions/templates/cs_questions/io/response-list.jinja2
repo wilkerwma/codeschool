@@ -21,7 +21,7 @@
                 <dt>{{ _('Date of submission') }}</dt><dd>{{ response.created }}</dd>
                 <dt>{{ _('Activity') }}</dt><dd>{{ response.activity|default('---')}}</dd>
             </dl>
-            <h3 class="banner">{{ gettext('Source code (%(lang)s)', lang=response.language.name) }}</h3>
+            <h3 class="banner">{{ _('Source code') }}</h3>
             <div class="source-code">
                 <ace-editor mode="{{ response.language.ref }}"
                             read-only>{{ response.source }}</ace-editor>
@@ -49,7 +49,7 @@
 
         h3.banner {
             margin-left: -20px;
-            padding-left: 10px;
+            padding-left: 20px;
         }
 
         .source-code {

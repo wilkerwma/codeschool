@@ -1,12 +1,14 @@
 from django.utils.translation import ugettext_lazy as _
+
+from codeschool.models import User
+from cs_questions import models
 from viewpack import CRUDViewPack, InheritanceCRUDViewPack, DispatchView
+from viewpack.permissions import can_download, can_edit
 from viewpack.views.childviews import (
     DetailObjectContextMixin, VerboseNamesContextMixin,
     DetailWithResponseView, ListView
 )
-from codeschool.models import User
-from codeschool.capabilities import can_download, can_edit, can_create, can_view
-from cs_questions import models
+
 users = User.objects
 
 
@@ -18,6 +20,8 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
     model = models.Question
     template_extension = '.jinja2'
     template_basename = 'cs_questions/'
+    check_permissions = True
+    raise_404_on_permission_error = True
     exclude_fields = ['status', 'status_changed', 'author_name', 'comment',
                       'owner']
     detail_fields = []
@@ -25,6 +29,9 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
         'content_color': '#BC5454',
         'object_name': _('question'),
     }
+
+    def can_view(self, object):
+        return True
 
     class ListView(InheritanceCRUDViewPack.ListView):
         def get_queryset(self):
