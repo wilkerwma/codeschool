@@ -5,8 +5,11 @@ from django.contrib.auth import models as auth_model
 # The model to associate two battles
 class BattleResult(models.Model):
     date = models.DateField(auto_now_add=True)
+    invitations_user = models.ManyToManyField(auth_model.User)
     battle_winner = models.OneToOneField('Battle',blank=True,null=True)
+    question = "1"
     type = "length"
+    
 
     def determine_winner(self):
         if not self.battle_winner:
@@ -15,16 +18,9 @@ class BattleResult(models.Model):
         return self.battle_winner
 
     def winner_length(self):
-
-#       L = sorted([(len(battle.code_winner), battle) for battle in self.battles.all()], key=lambda code_battle: code_battle[0])
-        winner = self.battles.first()
-        len_code = 0
-        for battle in self.battles.all():
-            if len_code < len(battle.code_winner):
-                len_code = len(battle.code_winner)
-                winner = battle
-        return winner
-        
+        def source_length(battle):
+            return len(battle.battle_code)
+        return min(self.battles.all(), key=source_length)
 
     def __str__(self):
         if self.battle_winner:
@@ -47,12 +43,13 @@ class Battle(models.Model):
         return "Battle %s/%s - %s" % (self.battle_result.id,self.id,self.user)
 
 
-# Class for invitations
+    """# Class for invitations
 class BattleInvitation(models.Model):
     challangers = models.ManyToManyField(auth_model.User)
+    battle_result = models.OneToOneField(BattleResult,blank=True,null=True)
     type_battle = models.TextField(default="length")
     status = models.TextField(default="waiting")
  
     def __str__(self):
         return "%s challenge you!" % self.challange
-
+"""

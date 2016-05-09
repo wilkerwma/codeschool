@@ -5,4 +5,4 @@ from cs_ranking import models
 # Register model for battle
 admin.site.register(models.Battle)
 admin.site.register(models.BattleResult)
-admin.site.register(models.BattleInvitation)
+

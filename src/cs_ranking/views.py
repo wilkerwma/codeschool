@@ -1,13 +1,14 @@
 from django.shortcuts import render,redirect
-from django.http import Http404
+from django.http import Http404,HttpResponse
+from django.core.urlresolvers import reverse
 from .models import Battle,BattleResult
-
 from datetime import datetime
 
 # Principal method to battles
 def index(request):
     all_battles = BattleResult.objects.all()
-    return render(request, 'ranking/index.jinja2', { "battles": all_battles })
+    invitations_user = invitations(request)
+    return render(request, 'ranking/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
 
 # Controller to view result of a battle
 def battle_result(request,id_battle):
@@ -28,23 +29,26 @@ def battle_result(request,id_battle):
 
     return render(request,'ranking/battle_result.jinja2',context)
 
-def battle(request):
-    if (request.method) == "POST":
+def battle(request,battle_pk):
+    if request.method == "POST":
+        print("Method POST")
         form = request.POST
         battle_code = form.get('code')
-        time_now = datetime.now()
-        battle_result = BattleResult.objetcts.get(id=1)
+        if battle_code:
+            time_now = datetime.now()
+            battle_result = BattleResult.objetcts.get(id=1)
 
-        battle = Battle.objects.create(
-            user=request.user,
-            battle_code=battle_code,
-            time_begin=time_now,
-            time_end=time_now,
-            battle_result=battle_result
-        )
+            battle = Battle.objects.create(
+                user=request.user,
+                battle_code=battle_code,
+                time_begin=time_now,
+                time_end=time_now,
+                battle_result=battle_result
+            )
 
         return render(request, 'ranking/battle.jinja2')
     else:
+        print("Method GET")
         return render(request, 'ranking/battle.jinja2')
 
 # Define the battles of a user
@@ -63,13 +67,28 @@ def invitate_user(request):
 # View the invitations
 def invitations(request):
     print(request.user.id)
-    BattleInvitation.objects.get(challange=request.user.id)
-    return redirect("/battle/battle")
+    invitations_user = BattleResult.objects.filter(invitations_user=request.user.id).all()
+    return invitations_user
 
 # Accept the invitation
 def battle_invitation(request):
     # Redirect to battle page
-    print(request)
-    return redirect("/battle/battle") 
+ 
+    if request.method == "POST":
+        form_post = request.POST
+        id_battle = form_post.get('id_battle')
+        method_return = None
+        if form_post.get('accept'):
+            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':id_battle}))
+        elif id_battle and form_post.get('reject'):
+            print("reject")
+            print(request.user)
+            battle_result = BattleResult.objects.get(id=id_battle)
+            print(battle_result)
+            battle_result.invitations_user.remove(request.user)
+            print(battle_result.invitations_user.all())
+            method_return = redirect("/battle/")
+        
+    return method_return
 
     

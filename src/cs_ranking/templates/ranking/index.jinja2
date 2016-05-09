@@ -2,7 +2,20 @@
 {% block title %}Code winner{% endblock %}
 {% block content %}
     This is the battles, participe too<p>
-    <a href="invitation" >See the chalanges</a><p>
+ <!--   <a href="invitation" >See the chalanges</a><p> -->
+        Invitations
+        <ul>
+            {% for invitation in invitations %}
+                <form action="/battle/accept" method="POST">
+                    {% csrf_token %}
+                    {{ invitation }}
+                    <input type="hidden" value="{{ invitation.id }}" name="id_battle"></input>
+                    <input type="submit" value="aceitar" name="accept"></input>
+                    <input type="submit" value="rejeitar" name="reject"></input>
+                </form>
+            {% endfor %}
+        </ul>
+                    
         <a href="user">My battles</a><br>
 <table id="battles">
     <thead><tr><th>ID</th><th>Data</th><th>Vencedor</th></tr></thead>
