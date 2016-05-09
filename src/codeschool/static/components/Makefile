@@ -1,4 +1,4 @@
-HTML = main.html sortable/sortable.html
+HTML = main.html
 MINIFIED = $(HTML:.html=.min.html)
 VULCANIZED = $(HTML:.html=.vulcanized.html)
 

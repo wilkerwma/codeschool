@@ -2,17 +2,30 @@ from collections import namedtuple
 from django import http
 from srvice import srvice, Client
 from codeschool.decorators import login_required
-from codeschool.shortcuts import render_context, render, get_object_or_404, redirect
+from codeschool.shortcuts import render_context, get_object_or_404, redirect
 from cs_courses import models
 from cs_activities.models import Activity
 
 
 @login_required
 def course_index(request):
-    courses = request.user.enrolled_courses.all()
+    courses = (request.user.enrolled_courses.all() |
+               request.user.owned_courses.all() |
+               request.user.courses_as_staff.all()).distinct()
+
+    open_courses = models.Course.objects\
+        .filter(is_active=True)\
+        .exclude(pk__in=courses)
+
+    if request.method == 'POST':
+        if request.POST['action'] == 'subscribe':
+            course = models.Course.objects.get(pk=request.POST['course'])
+            course.students.add(request.user)
+
     return render_context(
         request, 'cs_courses/course-index.jinja2',
-        courses=courses
+        courses=courses,
+        open_courses=open_courses,
     )
 
 
@@ -27,41 +40,20 @@ def course_detail(request, pk):
 
     if request.method == 'POST':
         if request.POST['action'] == 'cancel-subscription':
-            course.students.remove(request.user)
-            return redirect('../')
+            if request.user != course.teacher:
+                course.students.remove(request.user)
+                return redirect('../')
+            else:
+                raise RuntimeError('teachers cannot unsubscribe of their own '
+                                   'courses')
 
     return render_context(
         request, 'cs_courses/course-detail.jinja2',
         course=course,
+        role=course.role(request.user),
         user_activities=course.user_activities(request.user),
 
     )
-
-
-@login_required
-def course_subscribe(request):
-    context = dict(
-        user=request.user,
-        courses=models.Course.objects
-            .filter(is_active=True)
-            .exclude(pk__in=request.user.enrolled_courses.all())
-    )
-    return render(request, 'cs_courses/course-subscribe.jinja2', context)
-
-
-@srvice
-def do_subscribe(request, ref, selected=()):
-    js = Client()
-
-    if selected:
-        if request.user.username != ref:
-            raise PermissionError
-        course = get_object_or_404(models.Course, pk=selected[0])
-        course.students.add(request.user)
-        js.refresh()
-    else:
-        js.dialog('close')
-    return js
 
 
 @srvice
@@ -81,11 +73,6 @@ def enable_activity(request, ref, when='now', selected=()):
             activity = Activity.objects.get_subclass(pk=pk)
             activity.reschedule_now(duration, update=True)
     return js
-
-
-@login_required
-def activity_detail(request, pk):
-    raise NotImplementedError
 
 
 @login_required

@@ -12,7 +12,7 @@ urlpatterns = [
     url(r'^admin/', include('wagtail.wagtailadmin.urls')),
     url(r'^documents/', include('wagtail.wagtaildocs.urls')),
     url(r'^search/$', search_views.search, name='search'),
-    url(r'^cms/', include('wagtail.wagtailcore.urls')),
+    url(r'^pages/', include('wagtail.wagtailcore.urls')),
 
     # RPC and JSON api
     url(r'^srvice/', include('srvice.urls')),

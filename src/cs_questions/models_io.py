@@ -8,9 +8,8 @@ from model_utils import FieldTracker
 from codeschool import models
 from codeschool.db import saving
 from codeschool.shortcuts import lazy, render_object
-from cs_activities.models import Response
 from cs_core.models import ProgrammingLanguage, get_language, get_languages
-from cs_questions.models import Question, QuestionActivity
+from cs_questions.models import Question, QuestionActivity, QuestionResponse
 
 
 class CodingIoQuestion(Question, models.StatusModel):
@@ -423,25 +422,15 @@ class CodingIoAnswerKey(models.Model):
             raise self.ValidationError('could not validate Answer key')
 
 
-class CodingIoResponse(Response):
-    question_fallback = models.ForeignKey(CodingIoQuestion, blank=True, null=True)
+class CodingIoResponse(QuestionResponse):
     source = models.TextField(blank=True)
     language = models.ForeignKey(ProgrammingLanguage)
 
-    @property
-    def question(self):
-        """Returns the related question object either from the activity object
-        or from the question_fallback attribute."""
-
-        if self.activity is not None:
-            return self.activity.question
-        if self.question_fallback is not None:
-            return self.question_fallback
-        raise ValueError('no question defined for response')
-
-    @question.setter
-    def question(self, value):
-        self.question_fallback = value
+    # Feedback properties
+    title = property(lambda x: x.feedback.title)
+    testcase = property(lambda x: x.feedback.case)
+    answer_key = property(lambda x: x.feedback.answer_key)
+    is_correct = property(lambda x: x.feedback.is_correct)
 
     def compute_feedback(self):
         """Returns a feedback object from response.
@@ -450,7 +439,10 @@ class CodingIoResponse(Response):
         code with a series of inputs and comparing the results with those of an
         iospec template."""
 
-        return self.question.grade(self)
+        return self.question.codingioquestion.grade(self)
+
+    def get_grade_from_feedback(self):
+        return self.feedback_data.grade
 
     def html_feedback(self):
         if self.is_done:
@@ -459,6 +451,12 @@ class CodingIoResponse(Response):
                 template_name='cs_questions/render/feedback.jinja2')
         else:
             return super().html_feedback()
+
+    @classmethod
+    def _recompute_all_responses(cls):
+        for r in cls.objects.all():
+            r.grade = r.get_grade_from_feedback()
+            r.save()
 
 
 class CodingIoActivity(QuestionActivity):
@@ -490,3 +488,6 @@ def grade_code(source, answer_key, lang=None):
     return ejudge.io.grade(source, answer_key, lang,
                            raises=False,
                            sandbox=settings.CODESCHOOL_USE_SANDBOX)
+
+# Set the correct response class
+CodingIoQuestion.response_cls = CodingIoResponse

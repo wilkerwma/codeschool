@@ -197,9 +197,10 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
                     self.status = self.STATUS_WAITING
                 else:
                     self.feedback_data = data
+                    self.grade = self.get_grade_from_feedback()
                     self.status = self.STATUS_DONE
             if commit:
-                self.save(update_fields=['status', 'feedback_data'])
+                self.save(update_fields=['status', 'feedback_data', 'grade'])
         return self.feedback
 
     def compute_feedback(self):
@@ -210,6 +211,11 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
         grading. If the response is invalid, it must raise a
         Response.InvalidResponseError.
         """
+
+        return NotImplemented
+
+    def get_grade_from_feedback(self):
+        """Return the grade from the feedback_data attribute."""
 
         return NotImplemented
 

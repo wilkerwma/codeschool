@@ -64,6 +64,10 @@ class Question(models.TimeStampedModel):
     response_cls = Response
     default_extension = '.md'
 
+    @property
+    def responses(self):
+        return getattr(self, self.response_cls.__name__.lower() + '_set')
+
     class Meta:
         permissions = (("download_question", "Can download question files"),)
 
@@ -111,6 +115,18 @@ class QuestionActivity(Activity):
         return self.question.title
 
 
+class QuestionResponse(Response):
+    question = models.ForeignKey(Question, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if self.question is None:
+            self.question = self.activity.question
+        return super().save(*args, **kwargs)
+
+
 #
 # Derived question types
 #
@@ -132,7 +148,7 @@ class FreeAnswerQuestion(Question):
     data_file = models.FileField(blank=True, null=True)
 
 
-class NumericResponse(Response):
+class NumericResponse(QuestionResponse):
     value = models.FloatField(
         _('Value'),
         help_text=_('Result (it must be a number)')

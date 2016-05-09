@@ -4,26 +4,29 @@
     <section class="content-cards">
         <aside>
             <h1>{{ course.name }}</h1>
-            <p>Atividades para o dia de hoje</p>
+            <p>{{ _('Activities for today') }}</p>
         </aside>
 
         <article>
             {% for activity in user_activities -%}
-                <cs-card href="{{ activity.get_absolute_url() }}" icon="{{ activity.material_icon|default('help_outline') }}">
+                <cs-card href="{{ activity.get_absolute_url() }}"
+                         icon="{{ activity.material_icon|default('help_outline') }}">
                     <h1>{{ activity.name }}</h1>
                     <p>{{ activity.short_description }}</p>
                 </cs-card>
             {%- endfor %}
 
-            {% if course.teacher != user %}
+            {% if role == 'student' %}
                 <cs-card icon="add_circle" faded>
                     <h1>Aprofunde-se</h1>
-                    <p>Atividades e desafios adicionais selecionados para você :)</p>
+                    <p>Atividades e desafios adicionais selecionados para você
+                        :)</p>
                 </cs-card>
-            {% else %}
-                <cs-card onclick="srvice.dialog({url: 'add-activities'})" icon="add_circle" faded>
-                    <h1>Adicione conteúdo</h1>
-                    <p>Clique aqui para adicionar novas atividades em seu curso.</p>
+            {% elif role == 'teacher' %}
+                <cs-card onclick="srvice.dialog({url: 'add-activities'})"
+                         icon="add_circle" faded>
+                    <h1>{{ _('Add activity') }}</h1>
+                    <p>{{ _('Click here to add new activities to your course') }}.</p>
                 </cs-card>
             {% endif %}
         </article>
@@ -37,11 +40,19 @@
 
         <article>
             {% if course.lessons %}
-                <sortable-js id="course-lessons" {% if can_edit %}sync-api="cs_courses.sort-lessons" sync-id="{{ course.pk }}"{% else %}disabled{% endif %}>
+                <sortable-js id="course-lessons"
+                             {% if can_edit %}sync-api="cs_courses.sort-lessons"
+                             sync-id="{{ course.pk }}"
+                             {% else %}disabled{% endif %}>
                     {% for lesson in course.lessons %}
                         <div data-id="{{ lesson.pk }}">
-                            <p><span class="index">{{ loop.index }}.</span> {{ lesson.title }} {% if can_edit %}<i class="sortable-remove">✖</i>{% endif %}</p>
-                            {% if lesson.description %}<div>{{ lesson.description }}</div>{% endif %}
+                            <p><span
+                                    class="index">{{ loop.index }}.</span> {{ lesson.title }}
+                                {% if can_edit %}
+                                    <i class="sortable-remove">✖</i>{% endif %}
+                            </p>
+                            {% if lesson.description %}
+                                <div>{{ lesson.description }}</div>{% endif %}
                         </div>
                     {% endfor %}
                 </sortable-js>
@@ -63,7 +74,9 @@
                 <h2>Alunos inscritos</h2>
                 <ul>
                     {% for student in course.students.all().exclude(pk=user.pk).order_by('first_name') %}
-                        <li><a href="/accounts/{{ student.username}}">{{ student.get_full_name() or student.username }}</a></li>
+                        <li>
+                            <a href="/accounts/{{ student.username }}">{{ student.get_full_name() or student.username }}</a>
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -76,7 +89,12 @@
     <nav>
         <p>{{ course.name }}</p>
         <ul>
-            <li onclick="srvice.dialog({sourceId: 'confirmation-dialog', action: 'open'})">Cancelar inscrição</li>
+            {% if role in ['student', 'staff'] %}
+                <li onclick="srvice.dialog({sourceId: 'confirmation-dialog', action: 'open'})">{{ _('Cancel subscription') }}</li>
+            {% endif %}
+            {% if role == 'teacher' %}
+                <li><a href="./edit/">{{ _('Edit') }}</li>
+            {% endif %}
         </ul>
     </nav>
     {{ super() }}
@@ -85,18 +103,22 @@
 
 {% block hidden_content %}
     {{ super() }}
-    <div id="confirmation-dialog" class="hidden">
-        <h1>{{ _('Confirmation') }}</h1>
-        <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
-        <p>{{ _('All your activities and progress will be deleted.') }}</p>
-        <form id="cancel-subscription-form" method="POST">
-            {% csrf_token %}
-        </form>
-        <div class="toolbar highlight">
-            <button class="separated raised" onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
-            <button class="danger" form="cancel-subscription-form" name="action" value="cancel-subscription">
-                {{ _('Yes, leave course') }}
-            </button>
+    {% if role in ['student', 'staff']  %}
+        <div id="confirmation-dialog" class="hidden">
+            <h1>{{ _('Confirmation') }}</h1>
+            <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
+            <p>{{ _('All your activities and progress will be deleted.') }}</p>
+            <form id="cancel-subscription-form" method="POST">
+                {% csrf_token %}
+            </form>
+            <div class="toolbar highlight">
+                <button class="separated raised"
+                        onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+                <button class="danger" form="cancel-subscription-form" name="action"
+                        value="cancel-subscription">
+                    {{ _('Yes, leave course') }}
+                </button>
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}

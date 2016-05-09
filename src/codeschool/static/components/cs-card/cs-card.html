@@ -3,7 +3,7 @@
 
 <dom-module id="cs-card">
     <template>
-        <div id="card">
+        <div id="card" class="mdl-shadow--4dp">
             <a href="{{ href }}" id="link"><i id="icon" class="material-icons">{{ icon }}</i></a>
             <content></content>
         </div>
@@ -11,9 +11,11 @@
 
     <style>
         :host {
-            display: block;
+            display: flex;
             margin: 10px;
             background-color: white;
+            padding: 0;
+            min-height: 100px;
         }
 
         :host[faded] {
@@ -29,12 +31,12 @@
         }
 
         #card {
-            padding: 20px;
+            padding: 10px 20px;
             color: #333;
-            margin: 20px;
             text-align: center;
             vertical-align: center;
-            min-height: 150px;
+            flex-grow: 1;
+            align-self: stretch;
         }
 
         #icon {
@@ -68,7 +70,6 @@
                 },
 
                 ready: function () {
-                    $(this).addClass('mdl-card mdl-shadow--4dp');
                     $(this).click(function () {
                        if (this.href) {
                            window.location = this.href;

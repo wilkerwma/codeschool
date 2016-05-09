@@ -155,18 +155,149 @@ var srvice$json = (function($) {
 
 
 /**
+ * Utility functions
+ */
+srvice$util = (function($) {
+    /**
+     * Apply dialog-polyfill to dialog on unsupported browsers and display it
+     * afterwards.
+     *
+     * @param dialog: <dialog> element
+     */
+    function dialogShowModal(dialog) {
+        if (dialog.showModal === undefined) {
+            dialogPolyfill.registerDialog(dialog);
+        }
+        dialog.showModal();
+    }
+
+    function byId(x) {
+        return document.getElementById(x);
+    }
+
+    // Variadic function call. I am sure there is a better way to do this
+    function varcall(func, args) {
+        return func.apply(undefined, args); // does it work?
+
+        //noinspection UnreachableCodeJS
+        switch(args.length) {
+            case undefined:
+                throw "args must be an array";
+            case 0:
+                return func();
+            case 1:
+                return func(args[0]);
+            case 2:
+                return func(args[0], args[1]);
+            case 3:
+                return func(args[0], args[1], args[2]);
+            case 4:
+                return func(args[0], args[1], args[2], args[3]);
+            case 5:
+                return func(args[0], args[1], args[2], args[3], args[4]);
+            case 6:
+                return func(args[0], args[1], args[2], args[3], args[4], args[5]);
+            case 7:
+                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
+            case 8:
+                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
+            case 9:
+                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
+            case 10:
+                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[10]);
+        }
+        throw "not implemented: maximum of 10 variadic arguments";
+    }
+
+    function jsoncall(method, json) {
+        // Execute with positional arguments
+        if ('args' in json) {
+            var args = json.args || [];
+            delete json.args;
+
+            if (!$.isEmptyObject(json)) {
+                args[args.length] = json;
+            }
+            return varcall(method, args);
+        }
+        // Execute with a single object argument
+        else {
+            return method(json);
+        }
+    }
+
+    return {byId: byId, varcall: varcall, jsoncall: jsoncall}
+})(jQuery);
+
+
+/**
  * Define srvice supported actions.
  */
 var srvice$actions = (function($) {
+    function statements(json) {
+        for (var i = 0; i < json.data.length; i++) {
+            srvice.exec(json.data[i]);
+        }
+    }
 
+    function redirect(json) {
+        if (json.as_link) {
+            window.location.href = json.url;
+        } else {
+            window.location.replace(json.url);
+        }
+    }
 
+    function dialog(json) {
+        srvice.show_dialog(json.data, json);
+    }
+
+    function refresh() {
+        window.location.replace('.');
+    }
+
+    function jquery(json) {
+        var method;
+
+        if (json.selector !== undefined) {
+            method = $[json.action];
+        } else {
+            method = $(json.selector)[json.action];
+            delete json.selector;
+        }
+
+        // Execute method
+        if (method !== undefined) {
+            throw 'invalid jQuery method: ' + json.action;
+        }
+        delete json.action;
+
+        return jsoncall(method, json);
+    }
+
+    function jquery_chain(json){
+        var action;
+        var query = $(json.selector);
+        for (var node in json.actions) {
+            if (json.actions.hasOwnProperty(node)) {
+                action = node.action;
+                delete node.action;
+                query = jsoncall(query[action], node);
+            }
+        }
+        return query;
+    }
+
+    return {statements: statements, redirect: redirect, refresh: refresh,
+            dialog:dialog, jquery_chain: jquery_chain };
 })(jQuery);
-
 
 
 var srvice = (function($) {
     var json = srvice$json;
     var actions = srvice$actions;
+    var util = srvice$util;
+    var byId = util.byId;
 
     // Remote call execution
     function srvice(api) {
@@ -265,8 +396,7 @@ var srvice = (function($) {
         /**
          The run() function calls a program marked with a ``srvice.program``
          decorator in Django. These "programs" encode a series of operations
-         that should be carried out in the client but were actually encoded
-         in the server.
+         that should be carried out in the client.
 
          This call is asynchronous. For a synchronous version that blocks
          execution, please see srvice.runSync().
@@ -303,7 +433,7 @@ var srvice = (function($) {
         });
     };
 
-    srvice.js = function(api, async) {
+    srvice.js = function(api) {
         /**
          Execute the javascript source code in the given API point in an
          isolated namespace.
@@ -319,7 +449,7 @@ var srvice = (function($) {
             api: api,
             args: args[0],
             kwargs: args[1],
-            async: false,
+            async: async,
             program: true,
             result: null,
             method: 'js'
@@ -407,6 +537,7 @@ var srvice = (function($) {
             var context = {};
 
             if (program !== undefined) {
+                //noinspection JSUnusedAssignment
                 context = processProgram(program);
             }
             if (args.errors && error) {
@@ -415,66 +546,9 @@ var srvice = (function($) {
             return data;
         }
 
+        processResult(payload);
+
     };
-
-
-    /**
-     * Utility functions
-     */
-    function byId(x) {return document.getElementById(x)}
-
-
-    // Variadic function call. I am sure there is a better way to do this
-    function varcall(func, args) {
-        return func.apply(undefined, args); // does it work?
-
-        switch(args.length) {
-            case undefined:
-                throw "args must be an array";
-            case 0:
-                return func();
-            case 1:
-                return func(args[0]);
-            case 2:
-                return func(args[0], args[1]);
-            case 3:
-                return func(args[0], args[1], args[2]);
-            case 4:
-                return func(args[0], args[1], args[2], args[3]);
-            case 5:
-                return func(args[0], args[1], args[2], args[3], args[4]);
-            case 6:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5]);
-            case 7:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            case 8:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-            case 9:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-            case 10:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[10]);
-        }
-        throw "not implemented: maximum of 10 variadic arguments";
-    }
-
-    function jsoncall(method, json) {
-        // Execute with positional arguments
-        if ('args' in json) {
-            var args = json.args || [];
-            delete json.args;
-
-            if (!$.isEmptyObject(json)) {
-                args[args.length] = json;
-            }
-            return varcall(method, args);
-        }
-        // Execute with a single object argument
-        else {
-            return method(json);
-        }
-    }
-
-
 
 
     /**
@@ -514,62 +588,6 @@ var srvice = (function($) {
         return (result !== undefined)? encode(result): null;
     }
 
-    var actions = {
-        statements: function (json) {
-            for (var i = 0; i < json.data.length; i++) {
-                srvice.exec(json.data[i]);
-            }
-        },
-
-        redirect: function (json) {
-            if (json.as_link) {
-                window.location.href = json.url;
-            } else {
-                window.location.replace(json.url);
-            }
-        },
-
-        dialog: function (json) {
-            srvice.show_dialog(json.data, json);
-        },
-
-        refresh: function (json) {
-            window.location.replace('.');
-        },
-
-        jquery: function(json) {
-            var method;
-
-            if (json.selector !== undefined) {
-                method = $[json.action];
-            } else {
-                method = $(json.selector)[json.action];
-                delete json.selector;
-            }
-
-            // Execute method
-            if (method !== undefined) {
-                throw 'invalid jQuery method: ' + json.action;
-            }
-            delete json.action;
-
-            return jsoncall(method, json);
-        },
-
-        jquery_chain: function(json){
-            var action;
-            var query = $(json.selector);
-            for (var node in json.actions) {
-                if (json.actions.hasOwnProperty(node)) {
-                    action = node.action;
-                    delete node.action;
-                    query = jsoncall(query[action], node);
-                }
-            }
-            return query;
-        }
-    };
-
     /**
      * Make calls to a JSON rpc
      */
@@ -595,7 +613,7 @@ var srvice = (function($) {
                 if (data.status !== 200) {
                     throw data.responseText;
                 }
-                var data = JSON.parse(data.responseText);
+                data = JSON.parse(data.responseText);
 
                 if (data["exec"] !== undefined) {
                     exec_action(json["exec"]);
@@ -616,106 +634,169 @@ var srvice = (function($) {
     };
 
 
-    /**
-     * Configuration
-     */
-    var conf = {
-        url: '/srvice/'
-    };
-
-    srvice.setConf = function(key, value) {
-        conf[key] = value;
-    };
-
-    /**
-     * $srvice namespace
-     */
-    srvice.callExternal = function(url, api, data, callback) {
-        var sysurl = conf.url;
-        var result;
-
-        try {
-            conf.url = url;
-            result = srvice(api, data, callback);
+    ////////////////////////////////////////////////////////////////////////////
+    //                              DIALOGS                                   //
+    ////////////////////////////////////////////////////////////////////////////
+    function _asDialog(elem) {
+        if (elem.showModal === undefined) {
+            dialogPolyfill.registerDialog(elem);
         }
-        finally {
-            conf.url = sysurl;
+        return elem;
+    }
+
+    function _getDialog(opt, action) {
+        var opt = opt || {};
+        var dialog = opt.dialog || byId(opt.dialogId || 'dialog');
+        var content = opt.dialogContent || byId(opt.dialogContentId || 'dialog-content');
+
+        if (dialog === undefined) {
+            dialog = document.createElement('DIALOG');
+            dialog.id = 'dialog';
+            document.body.appendChild(dialog);
         }
-        return result;
-    };
-
-    srvice.dialog = function(action, text, options) {
-        // Process options
-        if (action instanceof Object) {
-            options = action || {};
-        } else {
-            options = options || {};
-            options.action = action;
-            options.text = text;
-        }
-
-        // Update default options
-        var conf = $.extend({
-            action: 'toggle',
-            text: '',
-            dialogId: 'dialog',
-            dialogContentId: 'dialog-content',
-            sourceId: null,
-            url: null
-        }, options);
-
-        // Fetch elements
-        var dialog = document.getElementById(conf.dialogId);
-        var content = document.getElementById(conf.dialogContentId);
-
-        // Select action
-        if (conf.action === 'toggle') {
-            if (dialog === undefined) {
-                conf.action = 'open';
-            } else {
-                conf.action = dialog.open? 'close': 'open';
-            }
-        }
-
-        // Close dialog
-        if (conf.action === 'close' && dialog.open) {
-            return dialog.close();
-        }
-
-        // Create dialog if it does not exist
-        if (!dialog || !content) {
-            alert('not implemented: cannot create main dialog from scratch');
-            throw Error('not implemented');
+        if (content === undefined) {
+            content = document.createElement('DIV');
+            content.id = 'dialog-content';
+            dialog.appendChild(content);
         }
 
         // Add content from html element, if given
-        if (!conf.text && conf.sourceId) {
-            conf.text = byId(conf.sourceId).innerHTML;
+        var html = opt.html;
+        if (opt.sourceId) {
+            html = (html || '') + byId(opt.sourceId).innerHTML;
         }
 
-        // Add content from url, if given
-        if (options.url) {
+        if (opt.url) {
+            // Append html in url
             $.ajax(options.url, {
                 method: 'GET',
                 dataType: 'text',
                 complete: function(data) {
-                    $(content).html(conf.text + data.responseText);
-                    dialog.showModal();
+                    $(content).html((html || '') + data.responseText);
+                    action(dialog);
                 }
             });
+        }
+        else {
+            if (html !== undefined) {
+                $(content).html(html);
+            }
+            action(dialog);
+        }
+    }
+
+    /**
+     Show dialog with some content.
+
+     It accept the following named arguments.
+
+     Keyword Args:
+        dialog:
+            The dialog element.
+        dialogId:
+            The id for the dialog element. The default is 'dialog'. It creates
+            a new dialog and appends to body if no dialog is set.
+        dialogContent:
+            A child element of dialog that should hold the html content.
+        dialogContentId:
+            The id for dialogContent. The default is 'dialog-content'. If no
+            dialog content is specified, it creates a <div id="dialog-content">
+            and append to the dialog.
+        html:
+            The inner HTML text for the dialog-content.
+        sourceId:
+            If given, represents the id from an html element whose innerHTML
+            should be copied to dialogContent element.
+        url:
+            If given, represents the url that will be used to fetch html data
+            and inssert in the dialogContent innerHTML.
+
+     Return:
+        This function is executed async and does not return anything.
+
+     */
+    srvice.openDialog = function(options) {
+        _getDialog(options, function(dialog) {
+            _asDialog(dialog).showModal();
+        });
+    };
+
+    /**
+     * Hide dialog.
+     *
+     * Accept the same arguments as the openDialog() function.
+     */
+    srvice.closeDialog = function(options) {
+        _getDialog(options, function(dialog) {
+            _asDialog(dialog).close();
+        });
+    };
+
+    /**
+     * Toggle dialog visibility.
+     *
+     * Accept the same arguments as the openDialog() function.
+     */
+    srvice.toggleDialog = function(options) {
+        _getDialog(options, function(dialog) {
+            dialog = _asDialog(dialog);
+            if (dialog.open) {
+                dialog.close()
+            }
+            else {
+                dialog.showModal();
+            }
+        });
+    };
+
+    /**
+     Modify dialog.
+
+     Has two signatures:
+
+     srvice.dialog(action, html, options):
+        Perform one of 'open', 'close', 'toggle' actions on the dialog.
+        The user can pass an additional html data and a dictionary of named
+        arguments with the same meaning as in :func:`srvice.openDialog()`.
+     srvice.dialog(options):
+        ``options`` is a dictionary of named  arguments with the same meaning
+        as in :func:`srvice.openDialog()`.
+
+     */
+    srvice.dialog = function(action, text, options) {
+        if (action instanceof Object) {
+            options = action || {};
+            action = options.action || 'toggle';
         } else {
-            $(content).html(conf.text);
-            dialog.showModal();
+            options = options || {};
+            options.text = text;
+        }
+
+        if (action == 'open') {
+            return srvice.openDialog(options);
+        }
+        else if (action == 'close') {
+            return srvice.closeDialog(options);
+        }
+        else if (action == 'toggle') {
+            return srvice.toggleDialog(options);
+        }
+        else {
+            throw Error('invalid dialog action: ' + action);
         }
     };
 
+
+    ////////////////////////////////////////////////////////////////////////////
+    //                              ???????                                   //
+    ////////////////////////////////////////////////////////////////////////////
     srvice.go = function(url, replace) {
         if (replace) {
             window.location.replace(url);
         } else {
             window.location.href = url;
         }
-    }
+    };
 
     // Auxiliary function used to normalize input arguments to many srvice
     // methods.
@@ -733,7 +814,7 @@ var srvice = (function($) {
 
     $.srvice = srvice;
     srvice.serverUri = '/srvice';
-    srvice.do = actions;
+    srvice.do = srvice$actions;
     return srvice;
 })(jQuery);
 

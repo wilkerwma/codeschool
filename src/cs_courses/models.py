@@ -78,6 +78,7 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
                 (self.activities.filter(status=Activity.STATUS.open) &
                  self.activities.filter(end__lt=timezone.now()))).select_subclasses()
 
+    # Use information from discipline
     name = property(lambda s: s.discipline.name)
     short_description = property(lambda s: s.discipline.short_description)
     long_description = property(lambda s: s.discipline.long_description)
@@ -87,6 +88,30 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
 
     def get_absolute_url(self):
         return url_reverse('course-detail', args=(self.pk,))
+
+    def role(self, user):
+        """Return a string describing the most priviledged role the user
+        as in the course. The possible values are:
+
+        teacher:
+            Owns the course and can do any kind of administrative tasks in
+            the course.
+        staff:
+            Teacher assistants. May have some privileges granted by the teacher.
+        student:
+            Enrolled students.
+        visitor:
+            Have no relation to the course. If course is marked as public,
+            visitors can access the course contents.
+        """
+
+        if user == self.teacher:
+            return 'teacher'
+        if user in self.staff.all():
+            return 'staff'
+        if user in self.students.all():
+            return 'student'
+        return 'visitor'
 
     def user_activities(self, user):
         """Return a list of all activities that are valid for the given user"""

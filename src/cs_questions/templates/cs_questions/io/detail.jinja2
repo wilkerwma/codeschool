@@ -1,4 +1,5 @@
 {% extends "cs_questions/detail.jinja2" %}
+{% from "cs_questions/macros.jinja2" import feedback_styles %}
 
 {% set source_code = form['source'].value() %}
 {% if not source_code %}
@@ -25,62 +26,6 @@
 
 {% block style %}
     {{ super() }}
-
-    <style>
-        .iospec-feedback {
-            padding: 20px;
-            margin: -20px;
-        }
-
-        .iospec-feedback .congratulations {
-            margin: -20px;
-            padding: 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            text-align: center;
-            background-color: rgba(78, 154, 6, 0.5);
-        }
-
-        .iospec-empty {
-            color: darkred;
-        }
-
-        .iospec-feedback .iospec-title {
-            background-color: #666;
-            color: white;
-            margin: -20px -20px 20px;
-            padding: 5px 20px;
-        }
-
-        .iospec-testcase {
-            padding-left: 30px;
-        }
-
-        .iospec-testcase h4 {
-            margin-left: -20px;
-        }
-
-        .iospec-input {
-            color: darkred;
-        }
-
-        .code-area {
-            margin-bottom: 20px;
-            border: 1px solid #666;
-        }
-
-        .code-area .select {
-            background-color: #666;
-            color: white;
-            text-align: right;
-            padding: 10px 10px 0;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .code-area .select select {
-            color: black;
-        }
-
-    </style>
+    {{ feedback_styles() }}
 {% endblock %}
 
