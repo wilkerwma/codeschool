@@ -1,7 +1,7 @@
 import pytest
 import factory
 from pytest_factoryboy import register
-from codeschool.testing import user, nodb, fake, faker, saving
+from codeschool.fixtures import user, nodb, fake, faker, saving
 from cs_courses.models import Discipline, Course
 
 

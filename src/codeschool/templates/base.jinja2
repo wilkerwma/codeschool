@@ -73,7 +73,7 @@
         </p>
     <![endif]-->
 
-    {% block body %}{% if is_document|default(True) %}{% block wagtail %}{{ wagtailuserbar() }}{% endblock %}{% endif %}
+    {% block body %}
     <div id="cs-body">
         <cs-head id="cs-head" {% if user.first_name %} username="{{ user.first_name }}"{% endif %}>
             <a href="#" class="disabled-link">Opções</a>

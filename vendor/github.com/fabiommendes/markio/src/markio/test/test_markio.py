@@ -95,4 +95,4 @@ def test_source_renderer():
 
 
 if __name__ == '__main__':
-    pytest.main()
+    pytest.main('test_markio.py')

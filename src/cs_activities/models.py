@@ -74,6 +74,18 @@ class Activity(models.InheritableModel):
             user in self.course.students.all()
         )
 
+    # Permissions
+    def can_edit(self, user):
+        return self.course.teacher == user
+
+    def can_view(self, user):
+        course = self.course
+        return (
+            self.can_edit(user) or
+            user in course.students.all() or
+            user in self.staff.all()
+        )
+
 
 class SyncCodeActivity(Activity):
     """
@@ -123,7 +135,7 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
     """
     Represents a student's response to some activity.
 
-    Response objects can be in 3 different states:
+    Response objects can be in 4 different states:
 
     pending:
         The response has been sent, but was not graded. Grading can be manual or
@@ -163,6 +175,9 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
     is_pending = property(lambda x: x.status == x.STATUS_PENDING)
     is_waiting = property(lambda x: x.status == x.STATUS_WAITING)
     is_invalid = property(lambda x: x.status == x.STATUS_INVALID)
+
+    # Delegate properties
+    course = property(lambda x: getattr(x.activity, 'course', None))
 
     @property
     def feedback(self):
@@ -244,3 +259,10 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
                 return markdown(self.partial_message % data)
         else:
             return markdown(_('Your response has not been graded yet!'))
+
+    # Permissions
+    def can_edit(self, user):
+        return False
+
+    def can_view(self, user):
+        return user == self.user

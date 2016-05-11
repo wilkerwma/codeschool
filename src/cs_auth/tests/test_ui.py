@@ -1,22 +1,19 @@
 import pytest
-import pytest_django
-import pytest_selenium
-from codeschool.testing import fake
-from sulfur import Driver
-
-
-@pytest.fixture
-def ui(selenium, live_server):
-    return Driver(selenium, base_url=live_server.url, wait=1)
-
-
-@pytest.fixture
-def dom(ui):
-    return ui.dom
+from codeschool.fixtures import *
 
 
 @pytest.mark.django_db
-def test_user_can_create_account_and_login(fake, ui, dom):
+def test_existing_user_can_login(ui, dom, user_with_password, password):
+    ui.get()
+    dom.id_identification = user_with_password.username
+    dom.id_password = password
+    ui.click('button.primary')
+    full_name = user_with_password.get_full_name()
+    assert full_name in ui.title
+
+
+@pytest.mark.django_db
+def _test_user_can_create_account_and_login(ui, dom):
     ui.get()
     assert 'Codeschool' in ui.title
 
@@ -29,7 +26,9 @@ def test_user_can_create_account_and_login(fake, ui, dom):
     dom.id_email = fake.email()
     dom.id_password1 = password
     dom.id_password2 = password
-    ui.click('button')
-    assert ui.wait_title_contains(username, timeout=2)
+    ui.click('button.primary')
+    user = User.objects.get(username=username)
+    full_name = user.get_full_name()
+    assert full_name in ui.title
 
 

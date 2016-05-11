@@ -9,6 +9,8 @@ class ActivityCRUD(InheritanceCRUDViewPack):
     model = models.Activity
     template_extension = '.jinja2'
     template_basename = 'cs_activities/'
+    check_permissions = True
+    raise_404_on_permission_error = True
     context_data = {
         'content_color': "#589cbc",
         'set object_name': _('activity'),
@@ -23,8 +25,8 @@ class GenericActivityViews(CRUDViewPack):
 
 @ActivityCRUD.register
 class SyncCodeActivityViews(CRUDViewPack):
-   model = models.SyncCodeActivity
-   template_basename = 'cs_activities/sync-code/'
+    model = models.SyncCodeActivity
+    template_basename = 'cs_activities/sync-code/'
 
 
 @srvice.srvice

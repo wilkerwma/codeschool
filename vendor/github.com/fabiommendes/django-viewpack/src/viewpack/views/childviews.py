@@ -43,7 +43,7 @@ MRO_NEUTRAL = {
     'ParentTemplateNamesMixin.get_template_names',
     'ParentContextMixin.get_context_data',
     'SingleObjectMixin.get_context_data',
-    'UpdateView.get', 'UpdateView.post',
+    'CanEditMixin.get', 'CanEditMixin.post',
 }
 MRO_STOP = {
     'TemplateResponseEndpointMixin.get_template_names':
@@ -192,6 +192,73 @@ class ParentContextMixin:
             if hasattr(self.parent, 'get_context_data'):
                 kwargs = self.parent.get_context_data(**kwargs)
         return super().get_context_data(**kwargs)
+
+
+#
+# Permission mixins
+#
+class CanEditMixin:
+    """
+    Adds the can_edit() method which is called before get() and post() to check
+    if the request is valid or not.
+    """
+    check_permissions = delegate_to_parent('check_permissions', False)
+    raise_404_on_permission_error = delegate_to_parent('check_permissions', True)
+
+    def get(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'edit') or
+                super().get(request, args, kwargs))
+
+    def post(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'edit') or
+                super().post(request, args, kwargs))
+
+    def can_edit(self):
+        """
+        Return True if the current user can edit `self.object` and False
+        otherwise.
+
+        This method tries to execute the parent's can_edit method. If it does
+        not exist, it uses :func:`viewpack.permissions.can_edit`.
+        """
+        if not self.check_permissions:
+            return True
+        elif hasattr(self.parent, 'can_edit'):
+            return self.parent.can_edit(self.object)
+        else:
+            return permissions.can_edit(self.object, self.request.user)
+
+
+class CanCreateMixin:
+    """
+    Adds the can_create() method which is called before get() and post() to check
+    if the request is valid or not.
+    """
+    check_permissions = delegate_to_parent('check_permissions', False)
+    raise_404_on_permission_error = delegate_to_parent('check_permissions', True)
+
+    def get(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'create') or
+                super().get(request, args, kwargs))
+
+    def post(self, request, *args, **kwargs):
+        return (_check_permission_then_go(self, 'create') or
+                super().post(request, args, kwargs))
+
+    def can_create(self):
+        """
+        Return True if the current user can create `self.object` and False
+        otherwise.
+
+        This method tries to execute the parent's can_edit method. If it does
+        not exist, it uses :func:`viewpack.permissions.can_edit`.
+        """
+        if not self.check_permissions:
+            return True
+        elif hasattr(self.parent, 'can_create'):
+            return self.parent.can_create(self.object)
+        else:
+            return permissions.can_create(self.object, self.request.user)
 
 
 #
@@ -411,7 +478,7 @@ class CreateView(SingleObjectTemplateResponseMixin, ModelFormMixin,
 
 
 @check_mro
-class UpdateView(SingleObjectTemplateResponseMixin, ModelFormMixin,
+class UpdateView(CanEditMixin, SingleObjectTemplateResponseMixin, ModelFormMixin,
                  edit.UpdateView):
     """
     Edit object using a ModelForm.
@@ -423,31 +490,6 @@ class UpdateView(SingleObjectTemplateResponseMixin, ModelFormMixin,
     functions on :mod:`viewpack.permissions` to grant the edit permission to
     users.
     """
-    check_permissions = delegate_to_parent('check_permissions', False)
-    raise_404_on_permission_error = delegate_to_parent('check_permissions', True)
-
-    def get(self, request, *args, **kwargs):
-        return (_check_permission_then_go(self, 'edit') or
-                super().get(request, args, kwargs))
-
-    def post(self, request, *args, **kwargs):
-        return (_check_permission_then_go(self, 'edit') or
-                super().post(request, args, kwargs))
-
-    def can_edit(self):
-        """
-        Return True if the current user can edit `self.object` and False
-        otherwise.
-
-        This method tries to execute the parent's can_edit method. If it does
-        not exist, it uses :func:`viewpack.permissions.can_edit`.
-        """
-        if not self.check_permissions:
-            return True
-        elif hasattr(self.parent, 'can_edit'):
-            return self.parent.can_edit(self.object)
-        else:
-            return permissions.can_edit(self.object, self.request.user)
 
 
 @check_mro
@@ -456,9 +498,20 @@ class DeletionMixin(ChildViewMixin, edit.DeletionMixin):
 
 
 @check_mro
-class DeleteView(SingleObjectTemplateResponseMixin, SingleObjectMixin,
+class DeleteView(CanEditMixin,
+                 SingleObjectTemplateResponseMixin,
+                 SingleObjectMixin,
                  edit.DeleteView):
-    pass
+    """
+    Delete object with a POST request.
+
+    Extends Django's builtin DeleteView class to search for configurations and
+    template names in the parent class.
+
+    If the attribute ``check_permissions = True``, it will also use the
+    functions on :mod:`viewpack.permissions` to grant the edit permission to
+    users.
+    """
 
 
 #

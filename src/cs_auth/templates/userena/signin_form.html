@@ -3,30 +3,25 @@
 {% block content_title %}{% trans "Signin" %}{% endblock %}
 
 {% block content_sessions %}
-    <form action="" method="post" id="signin">
-        {% csrf_token %}
-        <fieldset>
-            {{ form.non_field_errors }}
-            {% for field in form %}
-                {{ field.errors }}
-                {% comment %} Displaying checkboxes differently {% endcomment %}
-                {% if field.name == 'remember_me' %}
-                    <p class="checkbox">
-                        <label for="id_{{ field.name }}">{{ field }} {{ field.label }}</label>
-                    </p>
-                {% else %}
-                    <p>
-                        {{ field.label_tag }}
-                        {{ field }}
-                    </p>
-                {% endif %}
-            {% endfor %}
+    <div>
+        <form action="" method="post" id="signin">
+            {% csrf_token %}
+            <table class="form">
+                {{ form }}
+            </table>
             {% if next %}
-                <input type="hidden" name="next" value="{{ next }}"/>{% endif %}
-        </fieldset>
-    </form>
+                <input type="hidden" name="next" value="{{ next }}"/>
+            {% endif %}
 
-    <p class="forgot-password"><a href="{% url 'userena_password_reset' %}"
-                                  title="{% trans 'Forgot your password?' %}">{% trans "Forgot your password?" %}</a>
-    </p>
+            <div class="toolbar highlight">
+                <input type="submit" value="{{ _('Login') }}">
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <p class="forgot-password"><a href="{% url 'userena_password_reset' %}"
+                                      title="{% trans 'Forgot your password?' %}">{% trans "Forgot your password?" %}</a>
+        </p>
+    </div>
 {% endblock %}

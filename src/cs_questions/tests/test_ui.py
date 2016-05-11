@@ -1,7 +1,7 @@
 import pytest
 import pytest_django
 import pytest_selenium
-from codeschool.testing import use_db
+from codeschool.fixtures import use_db
 from cs_questions.tests.test_logic import question as question_io
 
 

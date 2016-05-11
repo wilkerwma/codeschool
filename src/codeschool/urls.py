@@ -19,6 +19,7 @@ urlpatterns = [
 
     # Authentication
     url(r'^accounts/', include('cs_auth.urls', namespace='auth')),
+    url(r'^accounts/', include('userena.urls', namespace=None)),
 
     # Local apps and functionality
     url(r'^activities/', include('cs_activities.urls')),

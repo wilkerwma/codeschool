@@ -1,7 +1,6 @@
 {% extends "base.jinja2" %}
-{% set username=user.username %}
 
-{% block content_title %}Perfil: {{ username }}{% endblock %}
+{% block content_title %}Perfil: {{ user.username }}{% endblock %}
 
 {% block style %}
     {{ super() }}
@@ -18,15 +17,18 @@
     </style>
 {% endblock %}
 
+{% set username=user.username %}
 {% block content_head %}
     <h1>{{ self.content_title() }}</h1>
 
-    {% if user.username == profile.user.username %}
-        <div class="user-toolbar toolbar highlight">
-            <a href="{% url 'auth:userena_profile_detail' username %}">{{ _("View profile") }}</a>
-            <a href="{% url 'auth:userena_profile_edit' username %}">{{ _("Edit details") }}</a>
-            <a href="{% url 'auth:userena_password_change' username %}">{{ _("Change password") }}</a>
-            <a href="{% url 'auth:userena_email_change' username %}">{{ _("Change email") }}</a>
-        </div>
+    {% if user.username %}
+        {% if user.username == profile.user.username %}
+            <div class="user-toolbar toolbar highlight">
+                <a href="{% url 'auth:profile-detail' username %}">{{ _("View profile") }}</a>
+                <a href="{% url 'auth:profile-edit' username %}">{{ _("Edit details") }}</a>
+                <a href="{% url 'auth:password-change' username %}">{{ _("Change password") }}</a>
+                <a href="{% url 'auth:email-change' username %}">{{ _("Change email") }}</a>
+            </div>
+        {% endif %}
     {% endif %}
 {% endblock %}

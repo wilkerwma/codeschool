@@ -16,7 +16,16 @@
 
         <!-- Detail box -->
         <h1 class="action-handle-title">{{ _('Details') }}</h1>
-        {{ self.object_detail() }}
+        {% block object_detail_dl %}
+            <dl>
+                {% for (name, value) in detail_items %}
+                    {% block detail_item scoped %}
+                        <dt>{{ name }}</dt>
+                        <dd>{{ value }}</dd>
+                    {% endblock %}
+                {% endfor %}
+            </dl>
+        {% endblock %}
     </action-handle>
     {{ super() }}
 

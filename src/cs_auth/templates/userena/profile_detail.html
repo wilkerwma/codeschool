@@ -1,6 +1,7 @@
 {% extends 'cs_auth/base.jinja2' %}
 
 
+{% block title_suffix %} - {{ user.get_full_name()}}{% endblock %}
 {% block content_title %}{{ gettext('Profile: %(name)s', name=username) }}{% endblock %}
 {% block style %}
     {{ super() }}

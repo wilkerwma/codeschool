@@ -77,13 +77,6 @@ class Question(models.TimeStampedModel):
     def get_absolute_url(self):
         return url_reverse('question-detail', args=(self.pk,))
 
-    def can_edit(self, user):
-        """Return True if user can edit question."""
-
-        if user is None or self.owner is None:
-            return False
-        return self.owner.pk == user.pk
-
     def update(self):
         """Tells question object to validate and update any fields necessary
         to fulfill the validation.
@@ -104,6 +97,19 @@ class Question(models.TimeStampedModel):
         """Return a Feedback object to the given response."""
 
         return self.feedback_cls(response, self.answer == response.value)
+
+    # Permission control
+    def can_edit(self, user):
+        """Only the owner of the question can edit it"""
+        if user is None or self.owner is None:
+            return False
+        return self.owner.pk == user.pk
+
+    def can_create(self, user):
+        """You have to be the teacher of a course in order to create new
+        questions."""
+
+        return not user.courses_as_teacher.empty()
 
 
 @delegation('question', ['long_description', 'short_description'])

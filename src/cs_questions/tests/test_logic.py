@@ -2,7 +2,9 @@
 Test business logic and do not touch the database.
 """
 import pytest
-from codeschool.testing import nodb, saving, use_db
+import factory
+from pytest_factoryboy import register
+from codeschool.fixtures import nodb, saving, use_db
 from cs_questions.models import CodingIoQuestion
 
 

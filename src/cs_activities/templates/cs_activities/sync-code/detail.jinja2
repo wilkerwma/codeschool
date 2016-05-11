@@ -1,9 +1,10 @@
 {% extends "viewpack/crud/detail.jinja2" %}
 
+{% set can_edit = activity.can_edit(user) %}
 {% block content_title %}{{ _('Coding Activity:') }} {{ super() }}{% endblock %}
 
 {% block object_description %}
-    <div id="code-box">
+    <div id="code-box" class="mdl-shadow--4dp">
         <div class="toolbar highlight">
             <h1 class="separated">{{ _('Follow the code') }}</h1>
             <button onclick="jump('prev')" class="flat"><i class="material-icons">keyboard_arrow_left</i></button>
@@ -32,9 +33,8 @@
     <style>
         #code-box {
             border: 1px solid black;
-            margin: 50px;
+            margin: 10px;
             padding: 0;
-            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
         }
 
         #code-box .toolbar {
