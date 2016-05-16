@@ -38,7 +38,7 @@ def battle(request,battle_pk):
         battle_code = form.get('code')
         if battle_code:
             time_now = datetime.now()
-            battle_result = Battle.objetcts.get(id=1)
+            battle_result = Battle.objects.get(id=1)
 
             battle = BattleResponse.objects.create(
                 user=request.user,
@@ -70,21 +70,20 @@ def invitation_users(request):
         battle.date = timezone.now()
         battle.type = request.POST.get('type')
         battle.question = request.POST.get('question') 
-
         battle.save()
+
         names = request.POST.get('usernames')
         print(names)
-        
-        users = []
+        users = [request.user]
+
         for name in names.split(";"):
             user = User.objects.filter(username=name.strip())
             if len(user):
                 users.append(user[0])
-            else:
-                print("haven't user")
 
         [battle.invitations_user.add(user) for user in users]
-        return redirect(reverse('fights:index'))
+        create_battle_response(battle,request.user)
+        return redirect(reverse('fights:battle',kwargs={'battle_pk':battle.id})) 
     else:
         return render(request,'ranking/invitation.jinja2')
 
@@ -96,23 +95,30 @@ def invitations(request):
 
 # Accept the invitation
 def battle_invitation(request):
-    # Redirect to battle page
- 
     if request.method == "POST":
         form_post = request.POST
         id_battle = form_post.get('id_battle')
         method_return = None
         if form_post.get('accept'):
+            battle = Battle.objects.get(id=id_battle)
+            create_battle_response(battle,request.user)
             method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':id_battle}))
         elif id_battle and form_post.get('reject'):
-            print("reject")
-            print(request.user)
             battle_result = Battle.objects.get(id=id_battle)
-            print(battle_result)
             battle_result.invitations_user.remove(request.user)
-            print(battle_result.invitations_user.all())
             method_return = redirect("/battle/")
         
     return method_return
 
-    
+def create_battle_response(battle,user):
+    battle_response = battle.battles.filter(user_id=user.id)
+    if not battle_response:
+        battle_response = BattleResponse.objects.create(
+            user=user,
+            battle_code="",
+            time_begin=timezone.now(),
+            time_end=timezone.now(),
+            battle_result=battle
+        )
+    battle.invitations_user.remove(user)
+
