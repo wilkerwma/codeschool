@@ -4,8 +4,22 @@ from userena import views as views
 from userena.urls import urlpatterns as userena_patterns
 
 
+from django.shortcuts import render
+
+
+def viewfunc(request):
+    dic = {
+        'answer': '<script>alert("se deu mau!")</script>',
+        'user': request.user,
+        'L': [1, 2, 3, 4],
+        'content_title': 'My test page',
+    }
+    return render(request, 'teste.jinja2', dic)
+
+
 urlpatterns = [
     url(r'^login/$', LoginView.as_view(), name='login'),
+    url(r'my-view/$', viewfunc, name='teste'),
 ]
 
 # Create a list of userena patterns and remove some patterns we don't want to

@@ -64,8 +64,9 @@ class Question(models.TimeStampedModel):
     response_cls = Response
     default_extension = '.md'
 
+    # Properties
     @property
-    def responses(self):
+    def unbound_responses(self):
         return getattr(self, self.response_cls.__name__.lower() + '_set')
 
     class Meta:
@@ -112,13 +113,31 @@ class Question(models.TimeStampedModel):
         return not user.courses_as_teacher.empty()
 
 
-@delegation('question', ['long_description', 'short_description'])
 class QuestionActivity(Activity):
-    question = models.ForeignKey(Question)
+    """
+    In this activity, students have to answer a single question.
+    """
+    question = models.ForeignKey(Question, related_name='activities')
 
-    @property
-    def name(self):
-        return self.question.title
+    # Properties
+    name = property(lambda x: x.question.name)
+    short_description = property(lambda x: x.question.short_description)
+    long_description = property(lambda x: x.question.long_description)
+
+    # Fetching responses
+    def retroact_question_responses(self):
+        """Use all question responses that are unlinked to an activity and
+        create responses bounded to the given activity. These responses create
+        a reference to the original response in the `parent` attribute."""
+
+        question = self.question
+        activities = question.activities.all()
+        responses = Response.objects.filter(activity__in=activities)
+        unbound = question.unbound_responses.all()
+        retroacted = responses.filter(parent__in=unbound)
+        missing = unbound.exclude(retroacted.select_related('parent'))
+
+        print(missing)
 
 
 class QuestionResponse(Response):

@@ -85,7 +85,7 @@ class QuestionCRUD(CRUDViewPack):
 
         def get_queryset(self):
             question = self.parent.object
-            return question.responses.filter(user=self.request.user)
+            return question.unbound_responses.filter(user=self.request.user)
 
 
 @QuestionInheritanceCRUD.register

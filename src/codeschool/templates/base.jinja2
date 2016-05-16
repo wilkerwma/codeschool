@@ -22,7 +22,7 @@
             {% endif %}
         {% endblock %}
         {%- block title_suffix %}
-            {% if title_suffix %}{{ title_suffix }}{% endif %}
+            {% if title_suffix %}{{ title_suffix|markdown }}{% endif %}
         {% endblock %}</title>
 
     <!-- CSS and styles -->

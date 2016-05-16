@@ -1,10 +1,7 @@
 """
 Test business logic and do not touch the database.
 """
-import pytest
-import factory
-from pytest_factoryboy import register
-from codeschool.fixtures import nodb, saving, use_db
+from codeschool.fixtures import *
 from cs_questions.models import CodingIoQuestion
 
 
@@ -76,7 +73,6 @@ def test_question_import(question, markio_source):
         assert getattr(question, attr) == getattr(imp_question, attr)
 
 
-@nodb
 def test_question_import_with_empty_answer_keys(markio_source):
     question, keys = CodingIoQuestion.from_markio(markio_source,
                                                   commit=False,
@@ -84,7 +80,6 @@ def test_question_import_with_empty_answer_keys(markio_source):
     assert keys == {}
 
 
-@nodb
 def test_question_import_with_answer_keys(markio_source):
     markio_source += (
         '\n'

@@ -7,6 +7,7 @@ from codeschool import models
 from cs_activities.models import Activity
 from cs_auth.models import FriendshipStatus
 
+
 #
 # Main model classes
 #

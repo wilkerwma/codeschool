@@ -13,6 +13,5 @@ def icon(value):
         return '<i class="material-icons">done</i>'
     elif value is False:
         return '<i class="material-icons">error</i>'
-
     else:
         return '<i class="material-icons">%s</i>' % escape(value)

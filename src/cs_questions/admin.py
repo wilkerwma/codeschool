@@ -67,3 +67,4 @@ class CodingIoQuestionAdmin(QuestionBase):
 admin.site.register(models.QuestionActivity)
 admin.site.register(models.CodingIoActivity)
 admin.site.register(models.NumericQuestion)
+admin.site.register(models.CodingIoAnswerKey)

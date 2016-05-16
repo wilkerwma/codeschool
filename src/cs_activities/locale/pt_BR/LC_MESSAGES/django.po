@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: django\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-04-23 18:27-0300\n"
-"PO-Revision-Date: 2016-04-23 18:38-0300\n"
+"PO-Revision-Date: 2016-05-11 17:51-0300\n"
 "Last-Translator: Fábio Mendes <fabiomacedomendes@gmail.com>\n"
 "Language-Team: \n"
 "Language: pt_BR\n"
@@ -48,7 +48,7 @@ msgstr "atividade"
 
 #: src/cs_activities/templates/cs_activities/sync-code/detail.jinja2:4
 msgid "Coding Activity:"
-msgstr "Atividade de programação"
+msgstr "Atividade de programação:"
 
 #: src/cs_activities/templates/cs_activities/sync-code/detail.jinja2:158
 msgid "Follow the code"

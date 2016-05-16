@@ -1,7 +1,5 @@
-import factory
-from pytest_factoryboy import register
-from codeschool.models import User
-from cs_questions.models import
+from codeschool.fixtures import *
+from cs_questions.models import CodingIoQuestion
 
 
 @register

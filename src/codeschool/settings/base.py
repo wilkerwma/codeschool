@@ -105,7 +105,7 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-ANONYMOUS_USER_ID = -1
+ANONYMOUS_USER_ID = 1
 AUTH_PROFILE_MODULE = 'cs_auth.Profile'
 
 

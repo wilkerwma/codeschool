@@ -38,9 +38,12 @@ class Activity(models.InheritableModel):
     course = models.ForeignKey('cs_courses.Course', related_name='activities')
     parent = models.ForeignKey(
         'self',
-        blank=True, null=True,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
         related_name='children'
     )
+    allow_multiple_responses = models.BooleanField(default=True)
 
     _default_material_icon = 'help_underline'
 
@@ -131,6 +134,21 @@ class SyncCodeEditItem(models.Model):
             return None
 
 
+class ResponseGroup(models.Model):
+    """Gather a group of responses of the same user together.
+
+    This is useful to
+    """
+    user = models.ForeignKey(models.User)
+    activity = models.ForeignKey(Activity)
+
+    def grade_last_response(self, user):
+        """Return the last last response submited by the user."""
+
+    def grade_best_response(self, user):
+        """Return the response with the best grade."""
+
+
 class Response(models.InheritableModel, models.TimeStampedStatusModel):
     """
     Represents a student's response to some activity.
@@ -147,6 +165,11 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
     done:
         The response was graded and evaluated and it initialized a feedback
         object.
+
+    A response always starts at pending status. We can request it to be graded
+    by calling the :func:`Response.autograde` method. This method must raise
+    an InvalidResponseError if the response is invalid or ManualGradingError if
+    the response subclass does not implement automatic grading.
     """
 
     STATUS_PENDING = 'pending'
@@ -159,15 +182,37 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
         (STATUS_INVALID, _('invalid')),
         (STATUS_DONE, _('done')),
     )
-    activity = models.ForeignKey(Activity, blank=True, null=True)
+    activity = models.ForeignKey(Activity, blank=True, null=True,
+                                 related_name='responses')
     user = models.ForeignKey(models.User)
     feedback_data = models.PickledObjectField(blank=True, null=True)
-    grade = models.DecimalField(
-        'Percentage of maximum grade',
+    given_grade = models.DecimalField(
+        _('Percentage of maximum grade'),
+        help_text=_('This grade is given by the auto-grader and represents'
+                    'the grade for the response before accounting for any '
+                    'bonuses or penalties.'),
         max_digits=6,
         decimal_places=3,
         blank=True,
         null=True,
+    )
+    final_grade = models.DecimalField(
+        _('Final grade'),
+        help_text=_('Similar to given_grade, but can account for additional '
+                    'factors such as delay penalties or any reason the teacher '
+                    'may want to override the student\'s grade.'),
+        max_digits=6,
+        decimal_places=3,
+        blank=True,
+        null=True,
+    )
+    manual_override = models.BooleanField(default=False)
+    parent = models.ForeignKey(
+        'self',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='children',
     )
 
     # Status properties
@@ -178,6 +223,14 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
 
     # Delegate properties
     course = property(lambda x: getattr(x.activity, 'course', None))
+
+    # Other properties
+    grade = property(lambda x: x.final_grade)
+    grade.setter(lambda x, v: setattr(x, 'final_grade', v))
+
+    # Compute grades
+    def get_response_group(self, user):
+        """sdfsdfs"""
 
     @property
     def feedback(self):
@@ -212,7 +265,7 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
                     self.status = self.STATUS_WAITING
                 else:
                     self.feedback_data = data
-                    self.grade = self.get_grade_from_feedback()
+                    self.given_grade = self.get_grade_from_feedback()
                     self.status = self.STATUS_DONE
             if commit:
                 self.save(update_fields=['status', 'feedback_data', 'grade'])

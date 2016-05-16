@@ -5,7 +5,9 @@
 {% block body %}
     <header class="dark">
         {% block header %}
-            <h1>{% block content_title %}{% endblock %}</h1>
+            <div class="header-title">
+                <h1>{% block content_title %}{% endblock %}</h1>
+            </div>
         {% endblock %}
     </header>
 
@@ -25,7 +27,20 @@
 
     <footer class="dark">
         {% block footer %}
-            <button class="primary" onclick="submit()">{{ _('Next') }}</button>
+            <div class="toolbar">
+                <button class="primary" onclick="submit()">{{ _('Next') }}</button>
+            </div>
         {% endblock %}
     </footer>
+{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        footer.dark .toolbar,
+        header.dark .title {
+            margin: 0 auto;
+            max-width: 800px;
+        }
+    </style>
 {% endblock %}

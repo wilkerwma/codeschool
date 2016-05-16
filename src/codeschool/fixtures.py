@@ -84,20 +84,6 @@ def dom(ui):
     return ui.dom
 
 
-@pytest.fixture
-def url_data(url_owner):
-    return None
-
-
-@pytest.fixture
-def url_owner(user):
-    return user
-
-
-#
-# Test helpers
-#
-
 def pytest_generate_tests(metafunc):
     cls = metafunc.cls
     if cls is not URLBaseTester and isinstance(cls, type) and issubclass(cls, URLBaseTester):
@@ -107,6 +93,16 @@ def pytest_generate_tests(metafunc):
             metafunc.parametrize('login_url', metafunc.cls.login_urls)
         if 'private_url' in metafunc.fixturenames:
             metafunc.parametrize('private_url', metafunc.cls.private_urls)
+
+
+@pytest.fixture
+def url_data(url_owner):
+    return None
+
+
+@pytest.fixture
+def url_owner(user):
+    return user
 
 
 @pytest.fixture

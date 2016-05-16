@@ -18,7 +18,7 @@ def index(request):
     else:
         username = request.user.username
         kwargs = {'username': username}
-        return redirect(reverse('auth:userena_profile_detail', kwargs=kwargs))
+        return redirect(reverse('auth:profile-detail', kwargs=kwargs))
 
 
 @singledispatch
