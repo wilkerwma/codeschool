@@ -41,9 +41,9 @@ def create_battles(battles_result):
 
     print("Creating the battles")
     for i in battles_result:
-        b = Battle(user = users[result],battle_result = i,code_winner="if()while()for()",time_begin=timezone.now(),time_end=timezone.now()+timezone.timedelta(2))
+        b = BattleResponse(user = users[result],battle_result = i,code_winner="if()while()for()",time_begin=timezone.now(),time_end=timezone.now()+timezone.timedelta(2))
         result+=1
-        d = Battle(user = users[result],battle_result = i,code_winner="if()while()for()",time_begin=timezone.now(),time_end=timezone.now()+timezone.timedelta(2))
+        d = BattleResponse(user = users[result],battle_result = i,code_winner="if()while()for()",time_begin=timezone.now(),time_end=timezone.now()+timezone.timedelta(2))
         battles.append(b)
         battles.append(d)
         result+=1
@@ -52,7 +52,7 @@ def create_battles_result(amount):
     global battles_result
     print("Creating the battles result")
     for i in range(int(amount/2)):
-        battles_result.append(BattleResult())
+        battles_result.append(Battle())
             
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "codeschool.settings")
@@ -60,12 +60,12 @@ if __name__ == "__main__":
 
 #    if not settings.configured:
 #        settings.configure(base,DEGUB=True)
-    from cs_ranking.models import Battle,BattleResult
+    from cs_ranking.models import BattleResponse,BattleResult
     from django.contrib.auth.models import User
     from django.utils import timezone
 #    from codeschool.settings import base
 
     seed()
-    print(Battle.objects.all())
+    print(BattleResponse.objects.all())
     print(User.objects.all())
 
