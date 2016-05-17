@@ -8,18 +8,18 @@ from cs_courses.models import Discipline, Course
 register(CourseFactory, 'other_course')
 
 
+@pytest.mark.django_db
 def test_course_metadata(course, discipline):
     assert course.name == discipline.name
     assert course.short_description == discipline.short_description
     assert course.long_description == discipline.long_description
 
 
-def test_other_course(course, other_course):
-    assert other_course.name == 'test discipline'
-    assert other_course.teacher != course.teacher
-
-
-def test_course_factory(course_factory):
-    course = course_factory(is_active=False)
-    assert course.is_active == False
-    assert course.name == 'test discipline'
+@pytest.mark.django_db
+def test_students_are_colleagues(course_factory, discipline):
+    course = course_factory.create(num_students=3)
+    s1, s2, s3 = course.students.all()
+    assert len(s1.colleagues) == 2
+    assert s2 in s1.colleagues
+    assert s3 in s1.colleagues
+    assert s1 not in s1.colleagues

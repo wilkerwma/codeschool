@@ -5,9 +5,9 @@
         <h3 class="iospec-title">{{ _(feedback.title) }}</h3>
         <div class="iospec-testcase">
             <h4>{{ _('Your response') }}</h4>
-            {% if feedback.case %}
+            {% if feedback.testcase %}
                 <code class="iospec-answer">
-                    {%- for atom in feedback.case -%}
+                    {%- for atom in feedback.testcase -%}
                         <span class="iospec-{{ atom.type }}">{{ atom }}</span>{% if atom.type == 'input' %}<br>{% endif %}
                     {%- endfor -%}
                 </code>
@@ -27,11 +27,11 @@
                 <span class="iospec-empty">{{ _('-- empty --') }}</span>
             {% endif %}
         </div>
-        {% if feedback.case.is_error %}
+        {% if feedback.testcase.is_error %}
             <div class="iospec-testcase">
                 <h4>{{ _('Error message') }}</h4>
                 <code>
-                    <pre>{% if feedback.case.error_message.strip() %}{{ _(feedback.case.error_message) }}{% else %}{{ _('Unknown error') }}{% endif %}</pre>
+                    <pre>{% if feedback.testcase.error_message.strip() %}{{ _(feedback.testcase.error_message) }}{% else %}{{ _('Unknown error') }}{% endif %}</pre>
                 </code>
             </div>
         {% endif %}

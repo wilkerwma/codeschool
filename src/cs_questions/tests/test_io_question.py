@@ -1,18 +1,12 @@
 import pytest
-import factory
-from faker import Factory
-from pytest_factoryboy import register
-from codeschool.fixtures import nodb, saving, use_db
-from cs_questions.models import CodingIoQuestion
-from codeschool.models import User
-fake = Factory.create('pt_BR')
+from cs_questions.tests.fixtures import *
 
 
 # URL tests
 @pytest.mark.django_db
-def test_question_owner_urls(coding_io_question, client):
-    pk = coding_io_question.pk
-    client.force_login(coding_io_question.owner)
+def test_question_owner_urls(io_question, client):
+    pk = io_question.pk
+    client.force_login(io_question.owner)
 
     # Detail
     response = client.get('/questions/%s/' % pk)
@@ -32,9 +26,9 @@ def test_question_owner_urls(coding_io_question, client):
 
 
 @pytest.mark.django_db
-def test_user_urls(coding_io_question, client):
-    pk = coding_io_question.pk
-    client.force_login(UserFactory.create())
+def test_user_urls(io_question, client, user):
+    pk = io_question.pk
+    client.force_login(user)
 
     # Detail
     response = client.get('/questions/%s/' % pk)

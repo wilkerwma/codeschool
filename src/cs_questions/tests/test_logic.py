@@ -1,23 +1,15 @@
 """
 Test business logic and do not touch the database.
 """
+from pytest_factoryboy import register
 from codeschool.fixtures import *
+from cs_questions.tests.fixtures import *
 from cs_questions.models import CodingIoQuestion
 
 
 @pytest.fixture
-def use_db():
-    return False
-
-
-@pytest.fixture
-def question(use_db):
-    return saving(CodingIoQuestion(
-        title='hello',
-        short_description='hello world',
-        long_description='a hello world program',
-        iospec_source='who <me>\nhello me',
-    ), use_db)
+def ioquestion():
+    return IoQuestionFactory.create()
 
 
 @pytest.fixture
@@ -62,24 +54,28 @@ def source_error():
 
 
 # Markio conversion
-def test_question_export(question, markio_source):
-    assert question.export('markio') == markio_source
+@pytest.mark.django_db
+def test_question_export(ioquestion, markio_source):
+    assert ioquestion.export('markio') == markio_source
 
 
-def test_question_import(question, markio_source):
+@pytest.mark.django_db
+def test_question_import(ioquestion, markio_source):
     imp_question = CodingIoQuestion.from_markio(markio_source, commit=False)
 
     for attr in ['title', 'short_description', 'long_description', 'timeout']:
-        assert getattr(question, attr) == getattr(imp_question, attr)
+        assert getattr(ioquestion, attr) == getattr(imp_question, attr)
 
 
+@pytest.mark.django_db
 def test_question_import_with_empty_answer_keys(markio_source):
-    question, keys = CodingIoQuestion.from_markio(markio_source,
+    ioquestion, keys = CodingIoQuestion.from_markio(markio_source,
                                                   commit=False,
                                                   return_keys=True)
     assert keys == {}
 
 
+@pytest.mark.django_db
 def test_question_import_with_answer_keys(markio_source):
     markio_source += (
         '\n'
@@ -89,7 +85,7 @@ def test_question_import_with_answer_keys(markio_source):
         '    print("hello", input("me "))\n'
         '\n'
     )
-    question, keys = CodingIoQuestion.from_markio(markio_source,
+    ioquestion, keys = CodingIoQuestion.from_markio(markio_source,
                                                   commit=False,
                                                   return_keys=True)
     assert keys.keys() == {'python'}
