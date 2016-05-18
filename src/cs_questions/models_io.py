@@ -141,6 +141,13 @@ class CodingIoQuestion(Question, models.StatusModel):
             return question, answer_keys
         return question
 
+    @classmethod
+    def from_data(cls, source):
+        """Return a new CodingIoQuestion instance from a string of Markio
+        data."""
+
+        return cls.from_markio(source.decode('utf8'))
+
     def update(self, save=True, validate=True):
         """Update and validate all answer keys."""
 

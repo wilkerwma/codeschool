@@ -16,6 +16,7 @@ from viewpack.views.childviews import (
     VerboseNamesContextMixin,
     DetailObjectContextMixin,
     TemplateResponseMixin,
+    HasUploadMixin,
     TemplateView,
     SingleObjectMixin,
     delegate_to_parent
@@ -172,6 +173,7 @@ class CRUDViewPack(SingleObjectParentMixin, TemplateResponseParentMixin, ViewPac
         return names
 
     class CreateView(VerboseNamesContextMixin,
+                     HasUploadMixin,
                      CreateView):
         pattern = r'^new/$'
 

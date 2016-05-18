@@ -10,7 +10,12 @@ from markio.constants import (PROGRAMMING_LANGUAGES_CODES,
 
 __all__ = ['parse', 'parse_string']
 markdown = mistune.Markdown(escape=True)
-blocklexer = mistune.BlockLexer()
+
+
+def mistune_parse(source):
+    """Use mistune to parse given source string."""
+
+    return mistune.BlockLexer()(source)
 
 
 def parse(file, extra=None):
@@ -46,7 +51,7 @@ def parse_string(text, extra=None):
     return parser.parse()
 
 
-def combine_keys(D, keytrans=lambda x: x, dict=dict):
+def combine_keys(D, keytrans=lambda x: x, dict=OrderedDict):
     """Combine keys in a dictionary so section like 'foo (bar)' and 'foo (baz)'
     are merged into foo: {'bar': ..., 'baz': ...}.
 
@@ -78,14 +83,27 @@ def combine_keys(D, keytrans=lambda x: x, dict=dict):
     return out
 
 
-def collect_translations(languages):
-    """
-    Return a dictionary mapping translated session names to their corresponding
-    normalized sessions for all languages on the list.
-    """
+def dom_flatten(dom_node, level=3):
+    """Flatten dom node into a markdown source."""
+
+    if isinstance(dom_node, list):
+        data = []
+        for node in dom_node:
+            if node['type'] == 'code':
+                code = '\n'.join('    ' + x for x in node['text'].splitlines())
+                data.append(code)
+            else:
+                data.append(node['text'])
+        return '\n\n'.join(data)
+    else:
+        data = []
+        for title, content in dom_node.items():
+            if title is not None:
+                data.append('#' * level + ' ' + title)
+            data.append(dom_flatten(content, level=level + 1))
+        return '\n\n'.join(data)
 
 
-#TODO: implement this!
 def normalize_i18n(x):
     """Normalize accepted lang codes to ISO format.
 
@@ -257,14 +275,11 @@ class Parser:
         Search for internationalization.
         """
 
-        def get_description(descr):
-            return '\n\n'.join(block['text'] for block in descr)
-
         descriptions = self.sections.pop('description', {})
-        self.markio.description = get_description(descriptions.get(None, []))
+        self.markio.description = dom_flatten(descriptions.get(None, []))
         for lang, descr in descriptions.items():
             lang = normalize_i18n(lang)
-            self.markio[lang].description = get_description(descr).strip()
+            self.markio[lang].description = dom_flatten(descr)
 
     def parse_tests(self):
         """Extract all test cases in iospec format.
@@ -370,7 +385,7 @@ class Parser:
         corresponding sub-ast's.
         """
         
-        mistune_ast = blocklexer(self.data)
+        mistune_ast = mistune_parse(self.data)
         dom = self.make_dom(mistune_ast)
         del dom[None]
 
@@ -381,6 +396,10 @@ class Parser:
                 'Document should start with a H1-level heading.'
             )
         if len(dom) != 1:
+            print(self.data)
+            print(mistune_ast)
+            print(dom.keys())
+            print(dom)
             self.error(
                 'Only one H1-level title is allowed in the document.'
             )

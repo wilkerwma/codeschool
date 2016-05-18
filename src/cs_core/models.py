@@ -29,9 +29,9 @@ class ProgrammingLanguage(models.Model):
         """Return the programming language object from the given ref."""
 
         try:
+            ref = default_aliases.get(ref, ref)
             return cls.objects.get(ref=ref)
         except cls.DoesNotExist:
-            ref = default_aliases.get(ref, ref)
             name = default_languages.get(ref)
             if ref is None:
                 raise

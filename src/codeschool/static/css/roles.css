@@ -52,6 +52,11 @@ button > i.material-icons.alert {
     margin-right: 0 !important;
 }
 
+.alert-button {
+    box-shadow: none;
+    min-height: 64px;
+}
+
 .alert-message .material-icons.alert {
     display: block;
 }

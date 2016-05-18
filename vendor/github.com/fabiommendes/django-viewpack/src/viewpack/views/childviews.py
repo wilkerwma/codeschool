@@ -6,6 +6,8 @@ from django.core.paginator import Paginator
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models
 from django import http
+from django.shortcuts import redirect
+from django.forms import Form, FileField
 from viewpack.utils import lazy, delegate_to_parent, get_view_name
 from viewpack.types import DetailObject, LazyBool
 from viewpack import permissions
@@ -783,3 +785,119 @@ def _check_permission_then_go(self, permission):
         return http.HttpResponseForbidden(
             "You don't have permission to %s the requested object" % permission
         )
+
+
+class UploadForm(Form):
+    file = FileField()
+
+
+class HasUploadMixin:
+    """Adds support for upload an serialized version of object from the create
+    view. Respond to multi-part POST requests and import the uploaded file into
+    a new object.
+
+    Context attributes:
+        upload_enable:
+            Enable upload functionality.
+        upload_form:
+            A form instance for the upload form.
+        upload_ask:
+            True if needs to ask for upload, False otherwise (for displaying
+            success/failure messages).
+        upload_error:
+            A message with the upload error, if it exists.
+    """
+
+    #: Enable the upload functionality (default True)
+    upload_enable = delegate_to_parent('upload_enable', True)
+
+    #: Default upload form class
+    upload_form_class = UploadForm
+
+    #: The exception class raised on import errors
+    import_object_exception = delegate_to_parent('import_object_exception',
+                                                 SyntaxError)
+
+    #: The url to redirect upon success. It accepts the format syntax in which
+    #: is called with a dictionary with {'object': imported_object}
+    upload_success_url = delegate_to_parent('upload_success_url')
+
+    def get_context_data(self, **kwargs):
+        if self.upload_enable:
+            return super().get_context_data(
+                upload_form=self.get_upload_form(),
+                upload_ask=getattr(self, 'upload_ask', True),
+                upload_error=getattr(self, 'upload_error', None),
+                upload_enable=True,
+                **kwargs
+            )
+        else:
+            return super().get_context_data(upload_enable=False, **kwargs)
+
+    def get_upload_form(self, *args, **kwargs):
+        """Return a Form instance representing an upload form."""
+
+        cls = self.get_upload_form_class()
+        return cls(*args, **kwargs)
+
+    def get_upload_form_class(self):
+        """Return the Form subclass used from upload forms."""
+
+        return self.upload_form_class
+
+    def post(self, request, *args, **kwargs):
+        if self.upload_enable and request.FILES:
+            form = self.get_upload_form(request.POST, request.FILES)
+            if form.is_valid():
+                try:
+                    self.object = self.get_object_from_files(request.FILES)
+                except self.import_object_exception as ex:
+                    self.upload_error = str(ex) or 'import error'
+                    return self.upload_failure(request, *args, **kwargs)
+                else:
+                    return self.upload_success(request, *args, **kwargs)
+        return super().post(request, *args, **kwargs)
+
+    def upload_success(self, request, *args, **kwargs):
+        """Called when import is successful."""
+
+        if self.upload_success_url is None:
+            if hasattr(self.object, 'get_absolute_url'):
+                url = self.object.get_absolute_url()
+            else:
+                raise ImproperlyConfigured(
+                    'You must either override the upload_success() method or '
+                    'define a `upload_success_url` attribute.'
+                )
+        else:
+            url = self.upload_success_url.format(object=self.object)
+        return redirect(url)
+
+    def upload_failure(self, request, *args, **kwargs):
+        """Called when import failed."""
+
+        self.upload_ask = False
+        return self.get(request, *args, **kwargs)
+
+    def get_object_from_files(self, files):
+        """Return object from the dictionary of files uploaded by the user.
+
+        By default it expects a dictionary with a single 'file' key. This
+        function reads this file and calls the `get_object_from_data()` method.
+        """
+
+        data = files['file'].read()
+        obj = self.get_object_from_data(data)
+        set_owner = getattr(self.parent, 'set_owner', lambda x, u: None)
+        set_owner(obj, self.request.user)
+        return obj
+
+    def get_object_from_data(self, data):
+        """Returns a new instance from data sent by the user.
+
+        Object is always saved on the database."""
+
+        obj = self.model.from_data(data)
+        if obj.pk is None:
+            obj.save()
+        return obj

@@ -41,6 +41,12 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
         pattern = r'(?P<pk>\d+)/responses/'
         view_name = 'response-list'
 
+    def set_owner(self, object, user):
+        """Sets the owner for the given object."""
+
+        object.owner = user
+        object.save(update_fields=['owner'])
+
 
 class QuestionCRUD(CRUDViewPack):
     """
@@ -100,3 +106,5 @@ class CodingIoQuestionViews(QuestionCRUD):
     response_model = models.CodingIoResponse
     response_fields = ['source', 'language']
     template_basename = 'cs_questions/io/'
+    upload_enable = True
+    upload_success_url = '/questions/{object.pk}/edit/'

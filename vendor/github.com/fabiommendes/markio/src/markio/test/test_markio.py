@@ -13,6 +13,12 @@ def hello():
     return markio.parse(path)
 
 
+@pytest.fixture
+def markio_example_1():
+    path = os.path.join(DIRNAME, 'markio-example-1.md')
+    return open(path).read()
+
+
 def test_pprint(hello):
     F = io.StringIO()
     hello.pprint(file=F)
@@ -76,6 +82,15 @@ def test_round_trip(hello):
 def test_hello_parsing(hello):
     assert hello.title == 'Hello Person'
     assert None not in hello.answer_key
+
+
+def test_markio_example_1_parsing(markio_example_1):
+    obj = markio.parse_string(markio_example_1)
+    assert obj.pformat().strip() == r'''
+{'author': 'Chips',
+ 'description': 'Long description\n\n### Sub-session\n\nSomething else...',
+ 'short_description': 'Short description.',
+ 'title': 'Example1'}'''.strip()
 
 
 def test_stripped_code(hello):

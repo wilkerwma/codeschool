@@ -277,7 +277,7 @@ class Markio:
         # Filter null values
         json = {k: v for (k, v) in json.items() if v}
 
-        if json['placeholder'].get(None, 0) is None:
+        if json.get('placeholder', {}).get(None, 0) is None:
             del json['placeholder'][None]
 
         if 'translations' in json:
