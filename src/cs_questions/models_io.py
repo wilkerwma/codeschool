@@ -56,28 +56,40 @@ class CodingIoQuestion(Question, models.StatusModel):
     )
     tracker = FieldTracker()
 
-    @lazy
+    @property
     def iospec(self):
+        """The IoSpec structure corresponding to the iospec_source."""
+
         return parse_iospec(self.iospec_source)
 
     @property
     def hash(self):
+        """The hash for the iospec_source string. This hash is compared to a
+        hash registered to each answer key to check if it has the most current
+        iospec data."""
+
         return md5hash(self.iospec_source + str(self.iospec_size))
+
+    @property
+    def is_answer_key_complete(self):
+        """Return True if an answer key exists for all programming languages."""
+
+        refs = self.is_answer_keys.values('language__ref', flatten=True)
+        all_refs = ProgrammingLanguage.objects.values('ref', flatten=True)
+        print(refs)
+        print(all_refs)
+        return set(all_refs) == set(refs)
 
     class Meta:
         app_label = 'cs_questions'
         verbose_name = _('input/output question')
         verbose_name_plural = _('input/output questions')
 
-    def save(self, *args, **kwds):
-        if 'iospec' in self.__dict__:
-            self.iospec_source = self.iospec.source()
-        super().save(*args, **kwds)
-
+    # Importing and exporting
     @classmethod
     def from_markio(cls, source, commit=None, return_keys=False):
-        """Creates a CodingIoQuestion object from a Markio source string and
-        saves the resulting question in the database.
+        """Creates a CodingIoQuestion object from a Markio object r source
+        string and saves the resulting question in the database.
 
         This function can run without touching the database if the markio file
         does not define any information that should be saved in an answer key.
@@ -101,8 +113,12 @@ class CodingIoQuestion(Question, models.StatusModel):
 
         import markio
 
+        if isinstance(source, markio.Markio):
+            data = source
+        else:
+            data = markio.parse_string(source)
+
         # Create question object from parsed markio data
-        data = markio.parse_string(source)
         question = CodingIoQuestion(
             title=data.title,
             author_name=data.author,
@@ -144,10 +160,40 @@ class CodingIoQuestion(Question, models.StatusModel):
     @classmethod
     def from_data(cls, source):
         """Return a new CodingIoQuestion instance from a string of Markio
-        data."""
+        data. This API is used by the HasUploadMixin in the create view."""
 
         return cls.from_markio(source.decode('utf8'))
 
+    def to_markio(self):
+        """Serializes question into a string of Markio source."""
+
+        import markio
+
+        tree = markio.Markio(
+            title=self.title,
+            author=self.author_name,
+            timeout=self.timeout,
+            short_description=self.short_description,
+            description=self.long_description,
+            tests=self.iospec_source,
+        )
+
+        for key in self.answer_keys.all():
+            tree.add_answer_key(key.source, key.language.ref)
+            tree.add_placeholder(key.placeholder, key.language.ref)
+
+        return tree.source()
+
+    def to_data(self, type=None):
+        """Render question as a Markio source. This API is used by the
+        DetailView in the CRUD interface."""
+
+        if type in (None, 'markio'):
+            return self.to_markio()
+        else:
+            return NotImplemented
+
+    # Validation
     def update(self, save=True, validate=True):
         """Update and validate all answer keys."""
 
@@ -215,29 +261,6 @@ class CodingIoQuestion(Question, models.StatusModel):
         for key in self.answer_keys.exclude(iospec_hash=self.hash):
             key.update(validate=False)
 
-    def export(self, type=None):
-        """Render question as a Markio source"""
-
-        if type not in (None, 'markio'):
-            return NotImplemented
-
-        import markio
-
-        tree = markio.Markio(
-            title=self.title,
-            author=self.author_name,
-            timeout=self.timeout,
-            short_description=self.short_description,
-            description=self.long_description,
-            tests=self.iospec_source,
-        )
-
-        for key in self.answer_keys.all():
-            tree.add_answer_key(key.source, key.language.ref)
-            tree.add_placeholder(key.placeholder, key.language.ref)
-
-        return tree.source()
-
     def get_validation_errors(self, lang=None, test_iospec=True):
         """Raise ValueError if some answer key is invalid or produce
          invalid iospec expansions.
@@ -279,6 +302,7 @@ class CodingIoQuestion(Question, models.StatusModel):
         else:
             return None
 
+    # Other API
     def get_placeholder(self, lang):
         """Return the placeholder text for the given language."""
 

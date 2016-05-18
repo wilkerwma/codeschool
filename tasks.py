@@ -24,7 +24,7 @@ def syncdb():
 
 
 @task
-def gunicorn(bind='localhost:8000', collectstatic=True):
+def gunicorn(bind='localhost:8000', collectstatic=False):
     if collectstatic:
         run('python src/manage.py collectstatic')
     os.chdir('src')
@@ -37,4 +37,3 @@ def serve(collectstatic=True):
         run('python src/manage.py collectstatic')
     os.chdir('src')
     run('gunicorn codeschool.wsgi -b unix:/tmp/gunicorn.sock --workers 13 --name codeschool-server')
-   
