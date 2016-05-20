@@ -187,7 +187,7 @@ class ViewPack(ChildViewMixin, View, metaclass=ViewPackMeta):
         return view
 
     @classmethod
-    def as_include(cls, initkwargs=None, *, name=None):
+    def as_include(cls, initkwargs=None, *, namespace=None):
         """
         Register views as an include urlpatterns
 
@@ -202,7 +202,7 @@ class ViewPack(ChildViewMixin, View, metaclass=ViewPackMeta):
                 A dictionary with the initial keyword args passed to the view
                 constructor.
         Keyword args:
-            name:
+            namespace:
                 Base name of the view. Each child view is registered by joining
                 name with the child view own name.
         """
@@ -210,7 +210,7 @@ class ViewPack(ChildViewMixin, View, metaclass=ViewPackMeta):
         app_name = get_app_name(cls)
         patterns = cls.as_include_patterns(initkwargs,
                                            app_name=app_name)
-        includes = include(URLModule(patterns, app_name), namespace=name)
+        includes = include(URLModule(patterns, app_name), namespace=namespace)
         return includes
 
     @classmethod

@@ -40,8 +40,10 @@ INSTALLED_APPS = [
     'cs_search',
     'cs_auth',
     'cs_courses',
-    'cs_questions',
     'cs_activities',
+    'cs_questions',
+    'cs_polls',
+    'cs_battles',
     'viewpack',
     'srvice',
 

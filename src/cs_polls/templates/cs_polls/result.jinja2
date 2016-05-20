@@ -1,0 +1,65 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% block content_body %}
+
+    {# Vote with alternatives #}
+    {% if poll.alternative_vote %}
+        <h2>{{ _('Winner') }}</h2>
+
+        <dl>
+            <dt>{{ _('Condorcet Winner') }}</dt>
+            <dd>{{ (poll.winner_condorcet().name)|default(_('No winner')) }}</dd>
+        </dl>
+
+        <h2>{{ _('Results') }}</h2>
+
+        <table class="mdl-data-table mdl-js-data-table results-table">
+            <tr>
+                <th>{{ _('Option') }}</th><th>{{ _('Wins') }}</th><th>{{ _('Draws') }}</th><th>{{ _('Losses') }}</th>
+            </tr>
+            {% for option in poll.options.all() %}
+                <tr>
+                    <td>{{ option.name }}</td>
+                    <td>{{ option.alternative_wins() }}</td>
+                    <td>{{ option.alternative_draws() }}</td>
+                    <td>{{ option.alternative_losses() }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+    {# Regular voting scheme #}
+    {% else %}
+        <h2>{{ _('Results') }}</h2>
+
+        <table class="mdl-data-table mdl-js-data-table results-table">
+            <tr>
+                <th>{{ _('Option') }}</th><th>{{ _('Votes') }}</th>
+            </tr>
+            {% for option in poll.options.all() %}
+                <tr>
+                    <td>{{ option.name }}</td><td>{{ option.percentage('%d%%') }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <p class="vote-count-summary"><strong>{{ gettext('Number of votes: %(number)s', number=poll.vote_count) }}</strong></p>
+{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        .results-table {
+            width: 100%;
+        }
+
+        .results-table td,
+        .results-table th {
+            text-align: left;
+        }
+        .vote-count-summary {
+            text-align: right;
+            margin-top: 20px;
+        }
+    </style>
+{% endblock %}

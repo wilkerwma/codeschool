@@ -463,6 +463,17 @@ class CodingIoResponse(QuestionResponse):
     answer_key = property(lambda x: x.feedback.answer_key)
     is_correct = property(lambda x: x.feedback.is_correct)
 
+    @property
+    def feedback(self):
+        """Correct old objects in which feedback.testcase was feedback.case."""
+
+        feedback = super().feedback
+        if not hasattr(feedback, 'testcase'):
+            feedback.testcase = feedback.case
+            del feedback.case
+            self.save()
+        return feedback
+
     def compute_feedback(self):
         """Returns a feedback object from response.
 

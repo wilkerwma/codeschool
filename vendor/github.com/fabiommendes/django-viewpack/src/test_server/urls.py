@@ -21,7 +21,8 @@ urlpatterns = [
     # Test insertion as sub-view
     url(r'^as-view/(\d+)/$', views.TestViewPack.as_view('detail')),
     url(r'^as-view/(\d+)/edit/$', views.TestViewPack.as_view('edit')),
-    url(r'^as-include/', views.TestViewPack.as_include(name='test-view')),
-    url(r'^crud/', views.TestCRUDGroup.as_include(name='crud')),
-    url(r'^subclass/', views.TestCRUDInheritanceGroup.as_include(name='subclass-crud')),
+    url(r'^as-include/', views.TestViewPack.as_include(namespace='test-view')),
+    url(r'^crud/', views.TestCRUDGroup.as_include(namespace='crud')),
+    url(r'^subclass/', views.TestCRUDInheritanceGroup.as_include(
+        namespace='subclass-crud')),
 ]

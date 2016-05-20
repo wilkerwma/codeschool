@@ -61,6 +61,7 @@ setup(
         'django>=1.9',
         'django-model-utils',
         'django-picklefield',
+        'pygments',
         'wagtail',
         'frozendict',
         'markdown',

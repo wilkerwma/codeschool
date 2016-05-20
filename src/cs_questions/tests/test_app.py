@@ -1,20 +1,19 @@
-"""
-Test business logic and do not touch the database.
-"""
-from pytest_factoryboy import register
-from codeschool.fixtures import *
-from cs_questions.tests.fixtures import *
+from codeschool.testing import *
+from cs_questions.factories import CodingIoQuestionFactory
 from cs_questions.models import CodingIoQuestion
+
+# Fixtures
+register(CodingIoQuestionFactory)
 
 
 @pytest.fixture
-def ioquestion():
-    return IoQuestionFactory.create()
+def coding_io_question():
+    return CodingIoQuestionFactory.create()
 
 
 @pytest.fixture
 def markio_source():
-    return (
+    return \
 """hello
 =====
 
@@ -32,10 +31,21 @@ a hello world program
 Tests
 -----
 
-    who <me>
+    who? <me>
     hello me
+"""
 
-""")
+
+@pytest.fixture
+def full_markio_source(markio_source):
+    return markio_source + \
+"""
+
+Answer Key (python)
+-------------------
+
+    print('hello', input('who? '))
+"""
 
 
 @pytest.fixture
@@ -53,23 +63,24 @@ def source_error():
     return 'print(hello, input());'
 
 
+# Tests ------------------------------------------------------------------------
 # Markio conversion
 @pytest.mark.django_db
-def test_question_export(ioquestion, markio_source):
-    assert ioquestion.export('markio') == markio_source
+def test_question_export(coding_io_question, full_markio_source):
+    assert coding_io_question.to_markio() == full_markio_source
 
 
 @pytest.mark.django_db
-def test_question_import(ioquestion, markio_source):
-    imp_question = CodingIoQuestion.from_markio(markio_source, commit=False)
+def test_question_import(coding_io_question, full_markio_source):
+    imp_question = CodingIoQuestion.from_markio(full_markio_source)
 
     for attr in ['title', 'short_description', 'long_description', 'timeout']:
-        assert getattr(ioquestion, attr) == getattr(imp_question, attr)
+        assert getattr(coding_io_question, attr) == getattr(imp_question, attr)
 
 
 @pytest.mark.django_db
 def test_question_import_with_empty_answer_keys(markio_source):
-    ioquestion, keys = CodingIoQuestion.from_markio(markio_source,
+    coding_io_question, keys = CodingIoQuestion.from_markio(markio_source,
                                                   commit=False,
                                                   return_keys=True)
     assert keys == {}
@@ -85,8 +96,23 @@ def test_question_import_with_answer_keys(markio_source):
         '    print("hello", input("me "))\n'
         '\n'
     )
-    ioquestion, keys = CodingIoQuestion.from_markio(markio_source,
+    coding_io_question, keys = CodingIoQuestion.from_markio(markio_source,
                                                   commit=False,
                                                   return_keys=True)
     assert keys.keys() == {'python'}
     assert keys['python'].source == 'print("hello", input("me "))'
+
+
+# URL tests --------------------------------------------------------------------
+class _TestURLS(URLBaseTester):
+    login_urls = [
+        '/questions/',
+        '/questions/{url_object.pk}/',
+        '/questions/{url_object.pk}/responses',
+    ]
+    private_urls = [
+        '/questions/{url_object.pk}/edit',
+        '/questions/{url_object.pk}/delete',
+    ]
+
+

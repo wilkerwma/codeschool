@@ -1,4 +1,8 @@
-from codeschool.fixtures import *
+from codeschool.testing import *
+from cs_auth.factories import *
+
+# Fixtures
+register(FriendshipStatusFactory)
 
 
 class TestURLs(URLBaseTester):

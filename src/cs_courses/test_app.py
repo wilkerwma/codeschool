@@ -1,11 +1,11 @@
-from cs_courses.tests.fixtures import *
+from codeschool.testing import *
+from cs_courses.factories import *
 from cs_courses.models import Discipline, Course
 
-
-#
-#  Using factory boy
-#
+#  Fixtures
 register(CourseFactory, 'other_course')
+register(DisciplineFactory)
+register(CourseFactory)
 
 
 @pytest.mark.django_db
