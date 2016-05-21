@@ -1,15 +1,16 @@
 from django.db import models
 from django.contrib.auth import models as auth_model
-# Create your models here.
+from cs_questions.models import Question
+from cs_core.models import ProgrammingLanguage
 
 class Battle(models.Model):
     """The model to associate two battles"""
     date = models.DateField(auto_now_add=True)
     invitations_user = models.ManyToManyField(auth_model.User)
     battle_winner = models.OneToOneField('BattleResponse',blank=True,null=True)
-    question = "1"
+    question = models.ForeignKey(Question,related_name="battle_question")
     type = "length"
-    language="python"   
+    language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
 
     def determine_winner(self):
         if not self.battle_winner:
@@ -43,13 +44,4 @@ class BattleResponse(models.Model):
         return "BattleResponse %s/%s - %s" % (self.battle_result.id,self.id,self.user)
 
 
-    """# Class for invitations
-class BattleResponseInvitation(models.Model):
-    challangers = models.ManyToManyField(auth_model.User)
-    battle_result = models.OneToOneField(Battle,blank=True,null=True)
-    type_battle = models.TextField(default="length")
-    status = models.TextField(default="waiting")
- 
-    def __str__(self):
-        return "%s challenge you!" % self.challange
-"""
+

@@ -3,6 +3,8 @@ from django.http import Http404,HttpResponse
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from cs_questions.models import Question
+from cs_core.models import ProgrammingLanguage
 from .models import BattleResponse,Battle
 from datetime import datetime
 
@@ -21,7 +23,8 @@ def battle_result(request,id_battle):
         battles = result_battle.battles.all()
 
         # Determine the winner of this battle result based in the type (lenght, time resolution)
-        winner = result_battle.determine_winner()
+        if not result_battle.invitation_users.all():
+            winner = result_battle.determine_winner()
         
         context = { "battles": battles,"battle_winner": winner}
 
@@ -65,15 +68,14 @@ def battle_user(request):
 # Create a new invitation
 def invitation_users(request):
     if request.method == "POST":
-
+        
         battle = Battle()
         battle.date = timezone.now()
         battle.type = request.POST.get('type')
-        battle.question = request.POST.get('question') 
+        battle.question = Question.objects.get(id=request.POST.get('questions'))
+        battle.language = ProgrammingLanguage.objects.get(pk=request.POST.get('languages'))
         battle.save()
-
         names = request.POST.get('usernames')
-        print(names)
         users = [request.user]
 
         for name in names.split(";"):
@@ -85,7 +87,9 @@ def invitation_users(request):
         create_battle_response(battle,request.user)
         return redirect(reverse('fights:battle',kwargs={'battle_pk':battle.id})) 
     else:
-        return render(request,'ranking/invitation.jinja2')
+        context = { "questions": Question.objects.all(),
+                    "languages": ProgrammingLanguage.objects.all() }
+        return render(request,'ranking/invitation.jinja2', context)
 
 # View the invitations
 def invitations(request):
@@ -106,7 +110,7 @@ def battle_invitation(request):
         elif id_battle and form_post.get('reject'):
             battle_result = Battle.objects.get(id=id_battle)
             battle_result.invitations_user.remove(request.user)
-            method_return = redirect("/battle/")
+            method_return = redirect(reverse('fights:index'))
         
     return method_return
 
