@@ -7,13 +7,14 @@ class Battle(models.Model):
     """The model to associate two battles"""
     date = models.DateField(auto_now_add=True)
     invitations_user = models.ManyToManyField(auth_model.User)
+    battle_owner = models.ForeignKey(auth_model.User,related_name="battle_owner")
     battle_winner = models.OneToOneField('BattleResponse',blank=True,null=True)
     question = models.ForeignKey(Question,related_name="battle_question")
     type = "length"
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
-
+    
     def determine_winner(self):
-        if not self.battle_winner:
+        if not self.battle_winner and self.battles.first():
             self.battle_winner = getattr(self,'winner_'+self.type)()
             self.save()
         return self.battle_winner

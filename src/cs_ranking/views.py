@@ -15,18 +15,18 @@ def index(request):
     return render(request, 'ranking/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
 
 # Controller to view result of a battle
-def battle_result(request,id_battle):
+def battle_result(request,battle_pk):
     context = {}
     try:
         # Obtain the battles of battle result
-        result_battle = Battle.objects.get(id=id_battle)
+        result_battle = Battle.objects.get(id=battle_pk)
         battles = result_battle.battles.all()
 
         # Determine the winner of this battle result based in the type (lenght, time resolution)
-        if not result_battle.invitation_users.all():
-            winner = result_battle.determine_winner()
+        context = { "battles": battles }
+        if not result_battle.invitations_user.all():
+            context["battle_winner"] = result_battle.determine_winner()
         
-        context = { "battles": battles,"battle_winner": winner}
 
     except Battle.DoesNotExist as e:
         print("Not found battle"+str(e))
@@ -68,15 +68,16 @@ def battle_user(request):
 # Create a new invitation
 def invitation_users(request):
     if request.method == "POST":
-        
         battle = Battle()
         battle.date = timezone.now()
         battle.type = request.POST.get('type')
         battle.question = Question.objects.get(id=request.POST.get('questions'))
         battle.language = ProgrammingLanguage.objects.get(pk=request.POST.get('languages'))
+        battle.battle_owner = request.user
+ 
         battle.save()
         names = request.POST.get('usernames')
-        users = [request.user]
+        users = []
 
         for name in names.split(";"):
             user = User.objects.filter(username=name.strip())
@@ -101,14 +102,14 @@ def invitations(request):
 def battle_invitation(request):
     if request.method == "POST":
         form_post = request.POST
-        id_battle = form_post.get('id_battle')
+        battle_pk = form_post.get('battle_pk')
         method_return = None
         if form_post.get('accept'):
-            battle = Battle.objects.get(id=id_battle)
+            battle = Battle.objects.get(id=battle_pk)
             create_battle_response(battle,request.user)
-            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':id_battle}))
-        elif id_battle and form_post.get('reject'):
-            battle_result = Battle.objects.get(id=id_battle)
+            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':battle_pk}))
+        elif battle_pk and form_post.get('reject'):
+            battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
             method_return = redirect(reverse('fights:index'))
         

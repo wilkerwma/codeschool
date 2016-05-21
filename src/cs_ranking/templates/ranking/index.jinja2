@@ -9,7 +9,7 @@
                 <form action="/battle/accept" method="POST">
                     {% csrf_token %}
                     {{ invitation }}
-                    <input type="hidden" value="{{ invitation.id }}" name="id_battle"></input>
+                    <input type="hidden" value="{{ invitation.id }}" name="battle_pk"></input>
                     <input type="submit" value="aceitar" name="accept"></input>
                     <input type="submit" value="rejeitar" name="reject"></input>
                 </form>
