@@ -13,7 +13,7 @@ from iospec.types import AttrDict
 from iospec import types
 from iospec.runners import IoObserver
 from iospec.util import indent
-from ejudge import builtin_mgm
+from ejudge import builtin_manager
 from ejudge import util
 from ejudge.util import real_print
 
@@ -213,13 +213,13 @@ class IntegratedLanguage(LanguageManager):
         return self.observer.flush()
 
     def run(self, inputs, **kwds):
-        builtin_mgm.update(self.builtins)
+        builtin_manager.update(self.builtins)
         try:
             self.observer.flush()
             self.observer.extend_inputs(inputs)
             result = super().run(inputs, **kwds)
         finally:
-            builtin_mgm.restore()
+            builtin_manager.restore()
 
         return remove_trailing_newline(result)
 

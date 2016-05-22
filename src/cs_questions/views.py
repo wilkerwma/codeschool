@@ -96,7 +96,13 @@ class QuestionCRUD(CRUDViewPack):
 
 @QuestionInheritanceCRUD.register
 class NumericQuestionViews(QuestionCRUD):
+    subclass_view_name = 'numeric'
     model = models.NumericQuestion
+    response_model = models.NumericResponse
+    response_fields = ['value']
+    template_basename = 'cs_questions/numeric/'
+    upload_enable = True
+    upload_success_url = '/questions/{object.pk}/edit/'
 
 
 @QuestionInheritanceCRUD.register

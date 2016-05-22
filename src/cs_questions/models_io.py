@@ -76,8 +76,6 @@ class CodingIoQuestion(Question, models.StatusModel):
 
         refs = self.is_answer_keys.values('language__ref', flatten=True)
         all_refs = ProgrammingLanguage.objects.values('ref', flatten=True)
-        print(refs)
-        print(all_refs)
         return set(all_refs) == set(refs)
 
     class Meta:
@@ -463,17 +461,11 @@ class CodingIoResponse(QuestionResponse):
     answer_key = property(lambda x: x.feedback.answer_key)
     is_correct = property(lambda x: x.feedback.is_correct)
 
-    def compute_feedback(self):
-        """Returns a feedback object from response.
-
-        This method performs the automatic grading by running the user supplied
-        code with a series of inputs and comparing the results with those of an
-        iospec template."""
-
-        return self.question.codingioquestion.grade(self)
+    def autograde(self):
+        self.feedback_data = self.question.codingioquestion.grade(self)
 
     def get_grade_from_feedback(self):
-        return self.feedback_data.grade
+        return self.feedback_data.grade * 100
 
     def html_feedback(self):
         if self.is_done:

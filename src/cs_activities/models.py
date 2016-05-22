@@ -1,7 +1,8 @@
-from codeschool import models
-from django.core.exceptions import ObjectDoesNotExist
+import decimal
+from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
+from codeschool import models
 from codeschool.jinja.filters import markdown
 
 
@@ -225,67 +226,72 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
     course = property(lambda x: getattr(x.activity, 'course', None))
 
     # Other properties
-    grade = property(lambda x: x.final_grade)
-    grade.setter(lambda x, v: setattr(x, 'final_grade', v))
-
-    # Compute grades
-    def get_response_group(self, user):
-        """sdfsdfs"""
-
     @property
-    def feedback(self):
-        """Return the feedback object for graded responses.
-
-        The default behavior is to return feedback_data."""
-
-        if self.status == self.STATUS_DONE:
-            return self.feedback_data
+    def grade(self):
+        if self.final_grade is None:
+            return self.given_grade or decimal.Decimal(0)
+        else:
+            return self.final_grade
+    grade.setter(lambda x, v: setattr(x, 'final_grade', v))
 
     class InvalidResponseError(Exception):
         """Raised by compute_response() when the response is invalid."""
 
+    # Compute grades
+    def get_response_group(self, user):
+        """Return the response group associated to this response."""
+
     def get_feedback(self, commit=True):
-        """Return the feedback to the given response.
+        """Return the feedback object associated to the given response.
 
-        If response was not graded, it calls the function `compute_feedback` to
-        compute the feedback and save it.
-
-        The result is is JSON-encoded and saved in the `feedback_data` field.
-        Users should access the `feedback` field that may expose the feedback
-        in a more convenient and structured form.
+        This method may trigger the autograde() method, if grading was not
+        performed yet. If you want to defer database access, call it with
+        commit=False to prevent saving any modifications to the response object
+        to the database.
         """
 
         if self.status == self.STATUS_PENDING:
             try:
-                data = self.compute_feedback()
-            except self.InvalidResponseError:
+                self.autograde()
+            except self.InvalidResponseError as ex:
                 self.status = self.STATUS_INVALID
+                self.feedback_data = ex
+                self.given_grade = self.final_grade = decimal.Decimal(0)
+                if commit:
+                    self.save()
+                raise
             else:
-                if data is NotImplemented:
+                if self.feedback_data is None:
                     self.status = self.STATUS_WAITING
                 else:
-                    self.feedback_data = data
-                    self.given_grade = self.get_grade_from_feedback()
+                    grade = decimal.Decimal(self.get_grade_from_feedback())
+                    self.final_grade = self.given_grade = grade
                     self.status = self.STATUS_DONE
             if commit:
-                self.save(update_fields=['status', 'feedback_data', 'grade'])
-        return self.feedback
+                self.save(update_fields=['status', 'feedback_data',
+                                         'given_grade', 'final_grade'])
+        elif self.status == self.STATUS_INVALID:
+            raise self.feedback_data
+        return self.feedback_data
 
-    def compute_feedback(self):
-        """
-        Compute the feedback object.
+    def autograde(self):
+        """This method should be implemented in subclasses."""
 
-        It must return NotImplemented for activities that require manual
-        grading. If the response is invalid, it must raise a
-        Response.InvalidResponseError.
-        """
-
-        return NotImplemented
+        raise ImproperlyConfigured(
+            'Response subclasses must implement the autograde() method and save'
+            'all relevant feedback data in the `feedback_data` attribute. This'
+            'value is pickled and saved to the database.'
+        )
 
     def get_grade_from_feedback(self):
         """Return the grade from the feedback_data attribute."""
 
-        return NotImplemented
+        raise ImproperlyConfigured(
+            'Response subclasses must implement the get_grade_from_feedback() '
+            'method that computes the grade from the feedback_data object. The'
+            'return value should be a decimal.Decimal() value in the 0-100 '
+            'range.'
+        )
 
     def __str__(self):
         tname = type(self).__name__
@@ -302,14 +308,14 @@ class Response(models.InheritableModel, models.TimeStampedStatusModel):
         """
 
         if self.is_done:
-            data = {'grade': (self.grade or 0) * 100}
+            data = {'grade': (self.grade or 0)}
 
-            if self.grade == 1:
+            if self.grade == 100:
                 return markdown(self.ok_message)
             elif not self.grade:
                 return markdown(self.wrong_message)
             else:
-                return markdown(self.partial_message % data)
+                return markdown(aself.partial_message % data)
         else:
             return markdown(_('Your response has not been graded yet!'))
 

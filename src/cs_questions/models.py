@@ -7,7 +7,7 @@ from cs_courses.models import Discipline
 from cs_activities.models import Activity, Response
 
 
-class Question(models.TimeStampedModel):
+class Question(models.TimeStampedModel, models.InheritableModel):
     """Base class for all question types"""
 
     title = models.CharField(
@@ -117,7 +117,11 @@ class QuestionActivity(Activity):
     """
     In this activity, students have to answer a single question.
     """
-    question = models.ForeignKey(Question, related_name='activities')
+    question_base = models.ForeignKey(Question, related_name='activities')
+
+    @property
+    def question(self):
+        return self.question_base.as_subclass()
 
     # Properties
     name = property(lambda x: x.question.name)
@@ -130,26 +134,59 @@ class QuestionActivity(Activity):
         create responses bounded to the given activity. These responses create
         a reference to the original response in the `parent` attribute."""
 
-        question = self.question
+        question = self.question_base
         activities = question.activities.all()
         responses = Response.objects.filter(activity__in=activities)
         unbound = question.unbound_responses.all()
         retroacted = responses.filter(parent__in=unbound)
         missing = unbound.exclude(retroacted.select_related('parent'))
 
-        print(missing)
-
 
 class QuestionResponse(Response):
-    question = models.ForeignKey(Question, blank=True, null=True)
-
     class Meta:
         abstract = True
 
-    def save(self, *args, **kwargs):
-        if self.question is None:
-            self.question = self.activity.question
-        return super().save(*args, **kwargs)
+    question_for_unbound = models.ForeignKey(
+        Question,
+        blank=True, null=True,
+        help_text='Question object reference for unbound responses. This '
+                  'should be null for activity responses.'
+    )
+
+    @property
+    def question_base(self):
+        """The base question object.
+
+        The base question is a cs_question.Question instance and therefore do
+        not implement the full interface of the real question object.
+
+        It will use either question_for_unbound or activity.question."""
+
+        return (self.question_for_unbound or
+                self.activity.questionactivity.question_base)
+
+    @question_base.setter
+    def question_base(self, value):
+        if self.activity is None:
+            self.question_for_unbound = value
+        elif self.question_base.pk != value.pk:
+            raise AttributeError(
+                'Cannot set the "question" attribute in activity-based '
+                'responses'
+            )
+
+    @property
+    def question(self):
+        """The question object instantiated as the correct Question subclass."""
+
+        return self.question_base.as_subclass()
+
+    @question.setter
+    def question(self, value):
+        if type(value) is Question:
+            self.question_base = value
+        else:
+            self.question_base = value.question_ptr
 
 
 #
@@ -178,6 +215,16 @@ class NumericResponse(QuestionResponse):
         _('Value'),
         help_text=_('Result (it must be a number)')
     )
+
+    def autograde(self):
+        self.feedback_data = self.value
+
+    def get_grade_from_feedback(self):
+        question = self.question
+        if abs(self.feedback_data - question.answer) <= question.tolerance:
+            return 100
+        else:
+            return 0
 
 
 class NumericQuestion(Question):

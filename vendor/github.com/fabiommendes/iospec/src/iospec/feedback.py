@@ -3,6 +3,7 @@ import jinja2
 from iospec.util import tex_escape
 from iospec.types import TestCase, IoTestCase, ErrorTestCase, IoSpec
 from generic import generic
+from unidecode import unidecode
 
 # Module constants
 error_titles = {
@@ -304,5 +305,6 @@ def presentation_equal(case1, case2):
     """Return True if both cases are equal after case-folding and stripping all
     whitespace"""
 
-    #TODO: implement
-    return case1 == case2
+    case1_folded = [x.normalize_presentation() for x in case1]
+    case2_folded = [x.normalize_presentation() for x in case2]
+    return case1_folded == case2_folded

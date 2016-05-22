@@ -1,12 +1,12 @@
-#
-# Common classes and fields for all Codeschool apps.
-#
-# This module imports lots of third party fields and models classes and should
-# be used as a droping replacement to django.db.models module.
-#
-# The database should not be touched here. This module should only host abstract
-# models
-#
+"""
+Common classes and fields for all Codeschool apps.
+
+This module imports lots of third party fields and models classes and should
+be used as a drop-in replacement to django.db.models module.
+
+The database should not be touched here. This module should only host abstract
+models
+"""
 import collections
 from django.utils import timezone
 from django.db.models import *
@@ -93,6 +93,14 @@ class InheritableModel(models.Model):
                     for cls in rel_class.get_subclasses():
                         classes.add(cls)
         return list(classes)
+
+    def as_subclass(self):
+        for sub in reversed(self.get_subclasses()):
+            try:
+                return getattr(self, sub.__name__.lower())
+            except AttributeError:
+                pass
+        return self
 
 
 class TimeFramedStatusModel(TimeFramedModel, StatusModel):
@@ -371,3 +379,34 @@ def add_method(func):
 
 User.add_method = add_method
 User.full_name = property(lambda s: '%s %s' % (s.first_name, s.last_name))
+
+
+# Easily copieable models
+class CopyMixin:
+    """Mixin class that implements a safe .copy() method to create copies of
+    model instances even if they are model subclasses."""
+
+    def copy(self, overrides=None, commit=True):
+        """Return a copy of the object. If commit=False, the copy is not saved
+        to the database.
+
+        The optional overrides dictionary defines which attributes should be
+        overriden in the copied object.
+        """
+
+        # Retrieve data
+        data = {
+            f.name: getattr(self, f.name)
+            for f in self._meta.fields
+            if not f.primary_key
+        }
+
+        # Save overrides
+        if overrides:
+            data.update(overrides)
+
+        # Crete object
+        new = type(self)(**data)
+        if commit:
+            new.save()
+        return new
