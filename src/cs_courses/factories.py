@@ -1,8 +1,7 @@
-from codeschool.fixtures import *
+from codeschool.factories import *
 from cs_courses.models import Discipline, Course
 
 
-@register
 class DisciplineFactory(factory.DjangoModelFactory):
     class Meta:
         model = Discipline
@@ -12,7 +11,6 @@ class DisciplineFactory(factory.DjangoModelFactory):
     long_description = factory.LazyAttribute(lambda x: fake.text())
 
 
-@register
 class CourseFactory(factory.DjangoModelFactory):
     class Meta:
         model = Course
@@ -30,6 +28,5 @@ class CourseFactory(factory.DjangoModelFactory):
                 self.register_student(user)
 
 
-@register
 class UserWithCourseFactory(UserFactory):
     course = factory.RelatedFactory(CourseFactory, 'enrolled_courses')

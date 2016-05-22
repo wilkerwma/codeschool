@@ -322,7 +322,7 @@ class CodingIoQuestion(Question, models.StatusModel):
         try:
             key = self.answer_keys.get(language=response.language)
             key.assure_is_valid(error)
-            iospec = key.iospec
+            iospec_data = key.iospec
         except CodingIoAnswerKey.DoesNotExist:
             self.update_keys()
 
@@ -333,19 +333,22 @@ class CodingIoQuestion(Question, models.StatusModel):
 
             # Check if there is only a single distinct source
             if not iospec_sources:
-                iospec = self.iospec.copy()
-                iospec.expand_inputs()
-                if not all(isinstance(x, IoTestCase) for x in iospec):
-                    raise error or CodingIoAnswerKey.ValidationError(iospec.pformat())
+                iospec_data = self.iospec.copy()
+                iospec_data.expand_inputs()
+                if not all(isinstance(x, IoTestCase) for x in iospec_data):
+                    raise (
+                        error or
+                        CodingIoAnswerKey.ValidationError(iospec_data.pformat())
+                    )
             elif len(iospec_sources) == 1:
-                iospec = parse_iospec(next(iter(iospec_sources)))
+                iospec_data = parse_iospec(next(iter(iospec_sources)))
             else:
                 raise error or CodingIoAnswerKey.ValidationError(iospec_sources)
 
         # Construct ejudge feedback object
         lang = response.language.ref
         source = response.source
-        return grade_code(source, iospec, lang=lang)
+        return grade_code(source, iospec_data, lang=lang)
 
 
 class CodingIoAnswerKey(models.Model):
@@ -434,11 +437,11 @@ class CodingIoAnswerKey(models.Model):
         self.iospec_hash = self.compute_iospec_hash()
 
         if self.source:
-            iospec = self.question.iospec.copy()
-            iospec.expand_inputs(self.question.iospec_size)
+            iospec_data = self.question.iospec.copy()
+            iospec_data.expand_inputs(self.question.iospec_size)
             source = self.source
             lang = self.language.ref
-            self.iospec = run_code(source, iospec, lang=lang)
+            self.iospec = run_code(source, iospec_data, lang=lang)
             self.is_valid = not self.iospec.has_errors()
         else:
             self.iospec_source = ''
@@ -463,7 +466,7 @@ class CodingIoResponse(QuestionResponse):
     is_correct = property(lambda x: x.feedback_data.is_correct)
 
     def autograde(self):
-        self.feedback_data = self.question.codingioquestion.grade(self)
+        self.feedback_data = self.question.grade(self)
 
     def get_grade_from_feedback(self):
         return self.feedback_data.grade * 100

@@ -3,5 +3,5 @@ from cs_activities import views
 
 
 urlpatterns = [
-    url('^', views.ActivityCRUD.as_include(name='activity'))
+    url('^', views.ActivityCRUD.as_include(namespace='activity'))
 ]

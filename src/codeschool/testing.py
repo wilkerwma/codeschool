@@ -2,39 +2,20 @@
 Functions that aids writing unit tests.
 """
 
-import pprint
-import factory
-from faker import Factory as FakerFactory
-from sulfur import Driver
 import pytest
-import pytest_selenium
-import pytest_django
+import pytest_selenium as _
+from sulfur import Driver as _sulfur_driver
+import pytest_django as _
 from pytest_factoryboy import register
 from django.forms import model_to_dict
-from codeschool.models import User
+from codeschool.factories import UserFactory, fake
 
 
-# Fake factory
-fake = FakerFactory.create()
+# Factory boy fixtures
+register(UserFactory)
 
 
-#
-# Factory boy factories
-#
-@register
-class UserFactory(factory.DjangoModelFactory):
-    class Meta:
-        model = User
-
-    first_name = factory.LazyAttribute(lambda x: fake.first_name())
-    last_name = factory.LazyAttribute(lambda x: fake.last_name())
-    username = factory.LazyAttribute(lambda x: fake.user_name())
-    email = factory.LazyAttribute(lambda x: fake.email())
-
-
-#
-# Fixtures
-#
+# Regular Fixtures
 @pytest.fixture
 def password():
     return fake.password()
@@ -64,7 +45,7 @@ def ui(selenium, live_server, sulfur_wait):
 
     The sulfur driver wraps selenium in a more convenient interface."""
 
-    return Driver(selenium, base_url=live_server.url, wait=sulfur_wait)
+    return _sulfur_driver(selenium, base_url=live_server.url, wait=sulfur_wait)
 
 
 @pytest.fixture
@@ -85,6 +66,11 @@ def dom(ui):
 
 
 def pytest_generate_tests(metafunc):
+    """This function is called to generate tests for URLBaseTester subclasses.
+    It creates a new test case for each registered URL.
+
+    It should be imported in the test module to make effect.
+    """
     cls = metafunc.cls
     if cls is not URLBaseTester and isinstance(cls, type) and issubclass(cls, URLBaseTester):
         if 'public_url' in metafunc.fixturenames:

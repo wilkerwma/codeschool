@@ -1,0 +1,49 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% block content_body %}
+    {{ poll.long_description|markdown }}
+
+    {% if has_vote_error %}
+        <div class="alert box error">
+            {{ _('You are not allowed to vote in this poll anymore.') }}
+        </div>
+    {% endif %}
+
+    <h2>{{ _('Choose your option') }}</h2>
+    <form method="POST" id="poll-form-{{ poll.pk }}">
+        {% csrf_token %}
+        {% for option in poll.list_options() %}
+            <div>
+                <p>
+                    {% if poll.alternative_vote %}
+                        <input type="number" name="option-{{ option.index }}" class="vote-option-box">
+                    {% else %}
+                        <input type="radio" name="choice" value="option-{{ option.index }}">
+                    {% endif %}
+                    {{ option.name|e}}
+                </p>
+                {% if option.description %}{{ option.description|markdown }}{% endif %}
+            </div>
+        {% endfor %}
+    </form>
+    <div class="toolbar highlight">
+        <a class="button" href="result">{{ _('Results') }}</a>
+        <button class="primary" value="send" name="button" form="poll-form-{{ poll.pk }}">
+            {{ _('Send') }}
+        </button>
+    </div>
+{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        .vote-option-box {
+            width: 50px;
+            height: 30px;
+            margin-right: 20px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}

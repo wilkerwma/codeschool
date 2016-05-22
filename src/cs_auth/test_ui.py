@@ -1,5 +1,6 @@
 import pytest
-from codeschool.fixtures import *
+from codeschool.testing import *
+from codeschool.models import User
 
 
 @pytest.mark.django_db

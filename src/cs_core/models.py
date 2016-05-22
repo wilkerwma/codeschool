@@ -13,6 +13,8 @@ default_languages = {
 
 default_aliases = {
     'gcc': 'c',
+    'g++': 'cpp',
+    'c++': 'cpp',
     'python3': 'python',
 }
 
