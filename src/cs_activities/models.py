@@ -6,7 +6,7 @@ from codeschool import models
 from codeschool.jinja.filters import markdown
 
 
-class Activity(models.InheritableModel):
+class Activity(models.CopyMixin, models.InheritableModel):
     """Represents a gradable activity inside a course. It can be scheduled to
     be done in class or as a homework assignment.
 
@@ -135,7 +135,7 @@ class SyncCodeEditItem(models.Model):
             return None
 
 
-class ResponseGroup(models.Model):
+class ResponseGroup(models.CopyMixin, models.Model):
     """Gather a group of responses of the same user together.
 
     This is useful to
@@ -150,7 +150,9 @@ class ResponseGroup(models.Model):
         """Return the response with the best grade."""
 
 
-class Response(models.InheritableModel, models.TimeStampedStatusModel):
+class Response(models.CopyMixin,
+               models.InheritableModel,
+               models.TimeStampedStatusModel):
     """
     Represents a student's response to some activity.
 

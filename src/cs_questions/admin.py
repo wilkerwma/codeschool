@@ -64,7 +64,19 @@ class CodingIoQuestionAdmin(QuestionBase):
         return obj.answer_keys.count()
     answer_keys.short_description = '# keys'
 
-admin.site.register(models.QuestionActivity)
+
+@admin.register(models.QuestionActivity)
+class QuestionActivityAdmin(admin.ModelAdmin):
+
+    def recycle_unbound_responses(self, request, qs):
+        for activity in qs:
+            activity.recycle_unbound_responses()
+    recycle_unbound_responses.short_description = _('Recycle unbound responses')
+
+    actions = ['recycle_unbound_responses']
+
+
 admin.site.register(models.CodingIoActivity)
 admin.site.register(models.NumericQuestion)
 admin.site.register(models.CodingIoAnswerKey)
+

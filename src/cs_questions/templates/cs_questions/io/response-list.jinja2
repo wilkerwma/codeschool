@@ -9,7 +9,7 @@
 {% block list_item %}
     {% set response = object %}
     <div class="mdl-shadow--4dp question-feedback">
-        <h3 class="iospec-title show">{{ response.title }} ({{ response.language.name }})
+        <h3 class="iospec-title show">{{ response.feedback_title }} ({{ response.language.name }})
             <span class="feedback-title-handle" onclick="expand(this.parentNode.parentNode)"><i class="material-icons">menu</i></span>
         </h3>
 
@@ -17,7 +17,7 @@
             {{ response.html_feedback() }}
             <h3 class="banner">{{ _('Details') }}</h3>
             <dl>
-                <dt>{{ _('Grade') }}</dt><dd>{{ (response.grade * 100)|int }}%</dd>
+                <dt>{{ _('Grade') }}</dt><dd>{{ response.grade|int }}%</dd>
                 <dt>{{ _('Date of submission') }}</dt><dd>{{ response.created }}</dd>
                 <dt>{{ _('Activity') }}</dt><dd>{{ response.activity|default('---')}}</dd>
             </dl>

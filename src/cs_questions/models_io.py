@@ -456,10 +456,11 @@ class CodingIoResponse(QuestionResponse):
     language = models.ForeignKey(ProgrammingLanguage)
 
     # Feedback properties
-    title = property(lambda x: x.feedback.title)
-    testcase = property(lambda x: x.feedback.testcase)
-    answer_key = property(lambda x: x.feedback.answer_key)
-    is_correct = property(lambda x: x.feedback.is_correct)
+    feedback = property(lambda x: x.feedback_data)
+    feedback_title = property(lambda x: x.feedback_data.title)
+    testcase = property(lambda x: x.feedback_data.testcase)
+    answer_key = property(lambda x: x.feedback_data.answer_key)
+    is_correct = property(lambda x: x.feedback_data.is_correct)
 
     def autograde(self):
         self.feedback_data = self.question.codingioquestion.grade(self)
