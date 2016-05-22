@@ -81,6 +81,7 @@ setup(
         'django-address',
         'django-userena',
         'boxed>=0.3',
+        'unidecode',
         
         # These are vendorized until stabilize
         #'django-viewpack', 
