@@ -67,7 +67,7 @@ def combine_keys(D, keytrans=lambda x: x, dict=OrderedDict):
         if the user wants to return merged OrderedDict's rather than regular
         dictionaries.
     """
-    out = {}
+    out = dict()
     for (k, v) in D.items():
         k = k.strip()
         pre, sep, tail = k.partition('(')

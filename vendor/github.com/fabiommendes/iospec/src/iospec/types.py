@@ -409,6 +409,8 @@ class IoSpec(LinearNode):
         else:
             # Expand to reach len(self) == size
             diff = size - len(self)
+            if not diff:
+                return
             pairs = [[case.priority, case] for case in self]
             total_priority = max(sum(x[0] for x in pairs), 1)
             for x in pairs:

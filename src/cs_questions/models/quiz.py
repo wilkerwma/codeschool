@@ -70,7 +70,11 @@ class QuizActivity(Activity):
         For now, users can only have one response ."""
 
         try:
-            return self.responses.get(user=user, parent__isnull=True).quizresponse
+            response = self.responses.filter(user=user, parent__isnull=True).first()
+            if response:
+                return response.quizresponse
+            else:
+                raise Response.DoesNotExist
         except Response.DoesNotExist:
             new = QuizResponse.objects.create(activity=self, user=user)
             return new

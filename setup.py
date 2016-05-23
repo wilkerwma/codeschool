@@ -83,6 +83,7 @@ setup(
         'django-userena',
         'boxed>=0.3',
         'unidecode',
+        'fake-factory',
         
         # These are vendorized until stabilize
         #'django-viewpack', 
