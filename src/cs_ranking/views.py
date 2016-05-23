@@ -43,6 +43,13 @@ def battle(request,battle_pk):
             time_now = datetime.now()
             battle_result = Battle.objects.get(id=1)
 
+            # coding = CodingIoResponse.objects.create(
+            #     question=question,
+            #     user_id=1,
+            #     language_id=1
+            # )
+            # asdfdsa = coding.is_correct
+            #
             battle = BattleResponse.objects.create(
                 user=request.user,
                 battle_code=battle_code,
@@ -86,7 +93,7 @@ def invitation_users(request):
 
         [battle.invitations_user.add(user) for user in users]
         create_battle_response(battle,request.user)
-        return redirect(reverse('fights:battle',kwargs={'battle_pk':battle.id})) 
+        return redirect(reverse('figths:battle',kwargs={'battle_pk':battle.id})) 
     else:
         context = { "questions": Question.objects.all(),
                     "languages": ProgrammingLanguage.objects.all() }
@@ -107,11 +114,11 @@ def battle_invitation(request):
         if form_post.get('accept'):
             battle = Battle.objects.get(id=battle_pk)
             create_battle_response(battle,request.user)
-            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':battle_pk}))
+            method_return = redirect(reverse('figths:battle',kwargs={'battle_pk':battle_pk}))
         elif battle_pk and form_post.get('reject'):
             battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
-            method_return = redirect(reverse('fights:index'))
+            method_return = redirect(reverse('figths:index'))
         
     return method_return
 
