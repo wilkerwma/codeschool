@@ -1,31 +1,28 @@
 from django.db import models
 from django.contrib.auth import models as auth_model
-# Create your models here.
+from cs_questions.models import Question
+from cs_core.models import ProgrammingLanguage
 
-# The model to associate two battles
-class BattleResult(models.Model):
+class Battle(models.Model):
+    """The model to associate two battles"""
     date = models.DateField(auto_now_add=True)
-    battle_winner = models.OneToOneField('Battle',blank=True,null=True)
-    type = "size"
-
-    def determine_winner(self,battles):
-        if not self.battle_winner:
-            if type == "size":
-                index_winner = self.winner_lenght(battles)
-                self.battle_winner = battles[index_winner]
-                self.save()
+    invitations_user = models.ManyToManyField(auth_model.User)
+    battle_owner = models.ForeignKey(auth_model.User,related_name="battle_owner")
+    battle_winner = models.OneToOneField('BattleResponse',blank=True,null=True)
+    question = models.ForeignKey(Question,related_name="battle_question")
+    type = "length"
+    language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
+    
+    def determine_winner(self):
+        if not self.battle_winner and self.battles.first():
+            self.battle_winner = getattr(self,'winner_'+self.type)()
+            self.save()
         return self.battle_winner
 
-    def winner_lenght(self,battles):
-        winner_index=0 # Determine the index of the win ( any number 0..len(battles)-1)
-        bigger_length = len(battles.first().code_winner)
-        for index in range(1,len(battles)):
-            code_length = len(battles[index].code_winner)
-            if  code_length < bigger_length:
-                bigger_length = code_length
-                winner_index
-        return winner_index
-
+    def winner_length(self):
+        def source_length(battle):
+            return len(battle.battle_code)
+        return min(self.battles.all(), key=source_length)
 
     def __str__(self):
         if self.battle_winner:
@@ -34,16 +31,18 @@ class BattleResult(models.Model):
             return "%s (%s)" % (self.id,str(self.date))
 
 
-#Battle class with attributes necessary to one participation for one challanger
-class Battle(models.Model):
+class BattleResponse(models.Model):
+    """BattleResponse class with attributes necessary to one participation for one challanger"""
+
     user = models.ForeignKey(auth_model.User)
     time_begin = models.DateTimeField()
     time_end = models.DateTimeField()
     battle_code = models.TextField()
 
-    battle_result = models.ForeignKey(BattleResult,related_name='battles')
+    battle_result = models.ForeignKey(Battle,related_name='battles')
 
     def __str__(self):
-        return "Battle %s/%s - %s" % (self.battle_result.id,self.id,self.user)
+        return "BattleResponse %s/%s - %s" % (self.battle_result.id,self.id,self.user)
+
 
 

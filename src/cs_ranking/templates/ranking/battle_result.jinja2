@@ -5,21 +5,23 @@
 {% block content %} 
     <h1>Resultado da Batalha</h1>
     <div>
+    {% if battle_winner %}
         <h2>Winner</h2>
             User: {{ battle_winner.user }} <br>
             Ranking position: "number" <br>
             Time: {{ (battle_winner.time_end - battle_winner.time_begin)|deltaformat }} <br>
-            Code winner: {{ battle_winner.code_winner }} <br>
-            Characters count: {{ battle_winner.code_winner|length  }}<br>
+            Code winner: {{ battle_winner.battle_code }} <br>
+            Characters count: {{ battle_winner.battle_code|length  }}<br>
         </div>
+    {% endif %}
     {% for battle in battles %}
         {% if battle.user.id != battle_winner.user.id %}
             <div id="{{battle.user.id}}">
                 User: {{ battle.user }} <br>
                 Ranking position: "number" <br>
                 Time: {{ (battle.time_end - battle.time_begin)|deltaformat }} <br>
-                Code winner: {{ battle.code_winner }} <br>
-                Characters count: {{ battle.code_winner|length  }}<br>
+                Code winner: {{ battle.battle_code }} <br>
+                Characters count: {{ battle.battle_code|length  }}<br>
         <!--    Time execution code: "in seconds"<br>
             Number of submitions: "a lot!"<br -->
             </div>
