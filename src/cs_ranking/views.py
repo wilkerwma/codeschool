@@ -3,7 +3,7 @@ from django.http import Http404,HttpResponse
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from cs_questions.models import Question
+from cs_questions.models import Question, CodingIoResponse
 from cs_core.models import ProgrammingLanguage
 from .models import BattleResponse,Battle
 from datetime import datetime
@@ -26,7 +26,6 @@ def battle_result(request,battle_pk):
         context = { "battles": battles }
         if not result_battle.invitations_user.all():
             context["battle_winner"] = result_battle.determine_winner()
-        
 
     except Battle.DoesNotExist as e:
         print("Not found battle"+str(e))
@@ -41,15 +40,15 @@ def battle(request,battle_pk):
         battle_code = form.get('code')
         if battle_code:
             time_now = datetime.now()
-            battle_result = Battle.objects.get(id=1)
+            battle_result = Battle.objects.get(id=battle_pk)
 
-            # coding = CodingIoResponse.objects.create(
-            #     question=question,
-            #     user_id=1,
-            #     language_id=1
-            # )
-            # asdfdsa = coding.is_correct
-            #
+            coding = CodingIoResponse.objects.create(
+                question=battle_result.question,
+                user_id=1,
+                language_id=battle_result.language
+            )
+            asdfdsa = coding.is_correct
+
             battle = BattleResponse.objects.create(
                 user=request.user,
                 battle_code=battle_code,
