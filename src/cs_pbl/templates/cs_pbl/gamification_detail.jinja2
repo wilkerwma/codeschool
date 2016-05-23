@@ -1,0 +1,29 @@
+{% extends "base.jinja2" %}
+
+{% block content_title %}
+  <h1> {{ _('Gamification Module') }}  <h1>
+{% endblock %}
+
+{% block content_body%}
+<p> {{ _('You can motivate your students using some of ours PBL')}} </p>
+
+  <h1><a href="badge/">{{ _('Badges') }}</a></h1>
+  <p> {{ _('Create, edit and motivate yours students')}}  </p>
+  <a class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised" href="badge/new/"> {{_( 'New Badge')}}</a>
+
+  <h1><a href="">{{ _('Actions') }}</a></h1>
+  <p> {{ _('Create, edit the actions that will be the trigger for Points and Badges')}}  </p>
+  <a class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised" href=""> {{_( 'New Action')}}</a>
+
+{% endblock%}
+
+
+{% block style%}
+{{ super() }}
+<style>
+    #content-area main > *:nth-child(odd) {
+        background-color: purple;
+    }
+</style>
+
+{%endblock%}

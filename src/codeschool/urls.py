@@ -15,18 +15,19 @@ urlpatterns = [
     url(r'^pages/', include('wagtail.wagtailcore.urls')),
 
     # RPC and JSON api
-    url(r'^srvice/', include('srvice.urls')),
+    url(r'^srvice/', include('srvice.urls', namespace='srvice')),
 
     # Authentication
     url(r'^accounts/', include('cs_auth.urls', namespace='auth')),
     url(r'^accounts/', include('userena.urls', namespace=None)),
 
     # Local apps and functionality
-    url(r'^activities/', include('cs_activities.urls')),
-    url(r'^courses/', include('cs_courses.urls')),
-    url(r'^questions/', include('cs_questions.urls')),
-    url(r'^polls/', include('cs_polls.urls')),
-    url(r'^battles/', include('cs_battles.urls')),
+    url(r'^activities/', include('cs_activities.urls', namespace='activities')),
+    url(r'^courses/', include('cs_courses.urls', namespace='courses')),
+    url(r'^questions/', include('cs_questions.urls', namespace='questions')),
+    url(r'^polls/', include('cs_polls.urls', namespace='polls')),
+    url(r'^battles/', include('cs_battles.urls', namespace='battles')),
+    url(r'^pbl/', include('cs_pbl.urls', namespace='pbl'))
 ]
 
 

@@ -1,0 +1,19 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+
+{% block content_body %}
+     <img class="badge" src="{{ badge.image }}">
+
+    {{ super() }}
+
+{% endblock %}
+
+
+{% block style %}
+    {{ super() }}
+    <style>
+    float: right;
+        img.badge {
+        }
+    </style>
+    {%endblock%}

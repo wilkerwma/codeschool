@@ -1,0 +1,17 @@
+{% extends "cs_pbl/gamification_detail.jinja2" %}
+
+{% block content_title %}
+  <h1> {{ _('Leaderboard') }}  <h1>
+{%  endblock %}
+
+{% block content_body %}
+
+<ol>
+  {% for user in user_list %}
+  <li>
+    {{ user.username }}
+  </li>
+ {% endfor %}
+</ol>
+
+{% endblock %}
