@@ -16,6 +16,10 @@ class Poll(models.Model):
     alternative_vote = models.BooleanField(default=False)
     voters = models.ManyToManyField(User, blank=True)
 
+    @property
+    def title(self):
+        return self.name
+
     @lazy
     def vote_count(self):
         return self.votes.count()

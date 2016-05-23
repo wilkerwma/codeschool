@@ -219,7 +219,7 @@ class FreeAnswerQuestion(Question):
     DATA_PLAIN = 'plain'
     DATA_RICHTEXT = 'richtext'
     DATA_CHOICES = (
-        (DATA_FILE, _('Arbitary file')),
+        (DATA_FILE, _('Arbitrary file')),
         (DATA_IMAGE, _('Image file')),
         (DATA_PDF, _('PDF file')),
         (DATA_RICHTEXT, _('Rich text input')),
@@ -298,6 +298,74 @@ class StringMatchQuestion(Question):
 
         else:
             return super().grade(response)
+
+
+# Quiz models
+class QuizActivityItem(models.ListItemModel):
+    """
+    A question in a quiz.
+    """
+
+    class Meta:
+        root_field = 'quiz'
+
+    quiz = models.ForeignKey('QuizActivity')
+    question = models.ForeignKey(Question)
+
+
+class QuizActivity(Activity):
+    """
+    Represent a quiz.
+    """
+
+    class Meta:
+        verbose_name = _('quiz activity')
+        verbose_name_plural = _('quiz activities')
+
+    GRADING_METHOD_MAX = 0
+    GRADING_METHOD_MIN = 1
+    GRADING_METHOD_AVERAGE = 2
+    GRADING_METHOD_CHOICES = (
+        (GRADING_METHOD_MAX,  _('largest grade of all responses')),
+        (GRADING_METHOD_MIN,  _('smallest grade of all responses')),
+        (GRADING_METHOD_AVERAGE,  _('mean grade')),
+    )
+    grading_method = models.IntegerField(
+        choices=GRADING_METHOD_CHOICES
+    )
+
+    items = QuizActivityItem.as_items()
+    questions = property(lambda x: list(self))
+
+    def __iter__(self):
+        return (x.question.as_subclass() for x in self.items)
+
+    def __len__(self):
+        return len(self.items)
+
+    def __getitem__(self, idx):
+        return self.items[idx].question
+
+    def __delitem__(self, idx):
+        del self.items[idx]
+
+    def add_question(self, question):
+        """Add a question to the quiz."""
+
+        item = QuizActivityItem(quiz=self, question=question)
+        item.save()
+        self.items.append(item)
+
+
+class QuizResponse(Response):
+    """
+    A response to a quiz activity.
+
+    This object coordinate all responses for the questions registered in the
+    quiz.
+    """
+    quiz = models.ForeignKey(QuizActivity)
+
 
 # Import other question types
 from cs_questions.models_io import *

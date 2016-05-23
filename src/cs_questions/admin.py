@@ -76,6 +76,15 @@ class QuestionActivityAdmin(admin.ModelAdmin):
     actions = ['recycle_unbound_responses']
 
 
+@admin.register(models.QuizActivity)
+class QuizActivityAdmin(admin.ModelAdmin):
+    class QuizActivityItemInline(admin.TabularInline):
+        model = models.QuizActivityItem
+        fields = ['question']
+
+    inlines = [QuizActivityItemInline]
+
+
 admin.site.register(models.CodingIoActivity)
 admin.site.register(models.NumericQuestion)
 admin.site.register(models.CodingIoAnswerKey)

@@ -208,7 +208,7 @@ class Lesson(models.ListItemModel):
 
 
 # Patch models
-Course.lessons = Lesson.get_descriptor()
+Course.lessons = Lesson.as_items()
 models.User.related_courses = property(
         lambda self:
             (self.enrolled_courses.all() |

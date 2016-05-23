@@ -1,6 +1,5 @@
 {% macro answer_key_edit_box(question) %}
     <div>
-        <h2>{{ _('Edit Answer Keys') }}</h2>
         <table id="answer-keys">
             <thead>
                 <tr>
@@ -44,4 +43,19 @@
             </tbody>
         </table>
     </div>
+    <style>
+        #answer-keys {
+            width: 70%;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        #answer-keys td,
+        #answer-keys th {
+            padding: 10px;
+        }
+
+        #answer-keys th {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
 {% endmacro %}

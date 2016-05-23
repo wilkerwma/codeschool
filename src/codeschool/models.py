@@ -151,6 +151,23 @@ ListItemModel = None
 
 
 class ListItemSequence(collections.MutableSequence):
+    """
+    Descriptor object that exposes the related items of a ListItemModel as a
+    sequence interface.
+
+    This descriptor should be used as a class attribute as in the example::
+
+        class Item(ListItemModel):
+            class Meta:
+                root_field = 'container'
+
+            container = models.ForeignKey('Container')
+
+
+        class Container(models.Model):
+            items = ListItemSequence.as_item(Item)
+
+    """
     def __init__(self, owner, cls, accessor=None):
         if accessor is None:
             root_field = cls._meta.root_field
@@ -160,6 +177,16 @@ class ListItemSequence(collections.MutableSequence):
         self._cls = cls
         self._owner = owner
         self._queryset = getattr(owner, accessor)
+
+    @classmethod
+    def as_items(cls, item_class):
+        """Return a descriptor object that exposes a group of ListItemModel
+        items as a Python sequence object."""
+
+        @lazy
+        def descriptor(self):
+            return cls(self, item_class)
+        return descriptor
 
     def _check(self, value):
         if not isinstance(value, self._cls):
@@ -195,7 +222,7 @@ class ListItemSequence(collections.MutableSequence):
             idx = self._norm_int_idx(idx)
             return self._queryset.get(index=idx)
         else:
-            raise NotImplementedError
+            raise KeyError(idx)
 
     def __delitem__(self, idx):
         self[idx].delete()
@@ -236,8 +263,9 @@ class ListItemModelMeta(ModelMeta):
                 root = getattr(meta, 'root_field')
                 delattr(meta, 'root_field')
             except (KeyError, AttributeError):
-                raise RuntimeError('you must define a Meta class with a '
-                                   '"root_field" attribute')
+                raise ImproperlyConfigured(
+                    'class must define a Meta class with a "root_field" '
+                    'attribute with the name of the foreign key main reference')
             else:
                 if not hasattr(meta, 'unique_together'):
                     meta.unique_together = ((root, 'index'),)
@@ -255,7 +283,7 @@ class ListItemModelMeta(ModelMeta):
 
 class ListItemModel(models.Model, metaclass=ListItemModelMeta):
     """
-    An object that is an item in a list-like query set in the foreign key.
+    An object that is an item for a list-like object related by a foreign key.
 
     Subclasses must implement a Meta inner class that defines the ``root_field``
     attribute.
@@ -281,7 +309,7 @@ class ListItemModel(models.Model, metaclass=ListItemModelMeta):
     Finally, we patch Container object to have a sequence-like object interface
     to its ListItemModel children
 
-    >>> Container.items = Item.get_descriptor()
+    >>> Container.items = ListItemSequence.as_items(Item)
 
     Now we can manipulate the items attribute of Container objects essencially
     as a list of objects.
@@ -338,19 +366,16 @@ class ListItemModel(models.Model, metaclass=ListItemModelMeta):
         return self.next(-skip)
 
     @classmethod
-    def get_descriptor(cls):
+    def as_items(cls):
         """Return a descriptor object that can be plugged into a container
         class in order to define a sequence interface to the related queryset.
         """
 
-        @lazy
-        def descr(self):
-            return ListItemSequence(self, cls)
-        return descr
+        return ListItemSequence.as_items(cls)
 
 
 # Implements codeschool.models.srvice.* namespace in which models from other
-# sub-apps can be accessed from a sigle object
+# sub-apps can be accessed from a single object
 class _CsSingletonType:
     """A simple namespace to access models from other cs_* apps"""
 
@@ -381,7 +406,7 @@ User.add_method = add_method
 User.full_name = property(lambda s: '%s %s' % (s.first_name, s.last_name))
 
 
-# Easily copieable models
+# Easily copyable models
 class CopyMixin:
     """Mixin class that implements a safe .copy() method to create copies of
     model instances even if they are model subclasses."""
