@@ -1,5 +1,5 @@
 from django.contrib import admin
-from cs_ranking import models
+from cs_battles import models
 ## Register your models here
 
 # Register model for battle

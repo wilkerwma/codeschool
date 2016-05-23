@@ -2,7 +2,7 @@ from django.conf.urls import url
 
 from . import views
 
-app_name = 'cs_ranking'
+app_name = 'cs_battles'
 urlpatterns = [
     url(r'^$', views.index, name='index'),
     url(r'^battle/(?P<battle_pk>\d+)$', views.battle, name='battle'),

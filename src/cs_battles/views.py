@@ -12,7 +12,7 @@ from datetime import datetime
 def index(request):
     all_battles = Battle.objects.all()
     invitations_user = invitations(request)
-    return render(request, 'ranking/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
+    return render(request, 'battles/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
 
 # Controller to view result of a battle
 def battle_result(request,battle_pk):
@@ -31,7 +31,7 @@ def battle_result(request,battle_pk):
         print("Not found battle"+str(e))
         raise Http404("BattleResponse not found")
 
-    return render(request,'ranking/battle_result.jinja2',context)
+    return render(request,'battles/battle_result.jinja2',context)
 
 def battle(request,battle_pk):
     if request.method == "POST":
@@ -57,10 +57,10 @@ def battle(request,battle_pk):
                 battle_result=battle_result
             )
 
-        return render(request, 'ranking/battle.jinja2')
+        return render(request, 'battles/battle.jinja2')
     else:
         print("Method GET")
-        return render(request, 'ranking/battle.jinja2')
+        return render(request, 'battles/battle.jinja2')
 
 # Define the battles of a user
 def battle_user(request):
@@ -68,7 +68,7 @@ def battle_user(request):
     battles = BattleResponse.objects.filter(user_id=user.id)
     print(battles)
     context = {"battles": battles}
-    return render(request, 'ranking/battle_user.jinja2', context)
+    return render(request, 'battles/battle_user.jinja2', context)
 
 
 # Create a new invitation
@@ -96,7 +96,7 @@ def invitation_users(request):
     else:
         context = { "questions": Question.objects.all(),
                     "languages": ProgrammingLanguage.objects.all() }
-        return render(request,'ranking/invitation.jinja2', context)
+        return render(request,'battles/invitation.jinja2', context)
 
 # View the invitations
 def invitations(request):
