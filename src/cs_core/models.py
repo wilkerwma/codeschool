@@ -1,3 +1,4 @@
+import collections
 from django.utils.translation import ugettext as __, ugettext_lazy as _
 from codeschool import models
 from codeschool.db import ask_use_db
@@ -86,7 +87,7 @@ def get_language(ref, use_db=None):
 
 
 def get_languages(use_db=None):
-    """Return a list with all languages in alphabetical order."""
+    """Return an iterator with all languages in alphabetical order."""
 
     # Get initial list
     if ask_use_db(use_db):

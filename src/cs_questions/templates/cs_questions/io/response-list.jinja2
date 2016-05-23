@@ -17,11 +17,7 @@
             {{ response.html_feedback() }}
             <h3 class="banner">{{ _('Details') }}</h3>
             <dl>
-<<<<<<< HEAD
                 <dt>{{ _('Grade') }}</dt><dd>{{ response.grade|int }}%</dd>
-=======
-                <dt>{{ _('Grade') }}</dt><dd>{{ ((response.given_grade or 0) * 100)|int }}%</dd>
->>>>>>> 6522be99a45fb0f75cd061993510e242fb436e32
                 <dt>{{ _('Date of submission') }}</dt><dd>{{ response.created }}</dd>
                 <dt>{{ _('Activity') }}</dt><dd>{{ response.activity|default('---')}}</dd>
             </dl>

@@ -2,6 +2,13 @@
 
 {% if feedback is not defined and response.status == response.STATUS_DONE %}{% set feedback = response.feedback %}{% endif %}
 
+{% block content_head %}
+    {{ super() }}
+    {% if activity %}
+        <p><a href="/activities/{{ activity.pk }}">{{ _('Go back to other questions') }}</a></p>
+    {% endif %}
+{% endblock %}
+
 {% block object_description %}
     <h2 class="banner">{{ _('Description') }}</h2>
     <article class="long-description">

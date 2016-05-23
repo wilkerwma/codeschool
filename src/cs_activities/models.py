@@ -46,7 +46,7 @@ class Activity(models.CopyMixin, models.InheritableModel):
     )
     allow_multiple_responses = models.BooleanField(default=True)
 
-    _default_material_icon = 'help_underline'
+    _default_material_icon = 'help'
 
     @property
     def material_icon(self):
@@ -253,8 +253,19 @@ class Response(models.CopyMixin,
         """
 
         if self.status == self.STATUS_PENDING:
+            self.autograde(commit)
+        elif self.status == self.STATUS_INVALID:
+            raise self.feedback_data
+        elif self.status == self.STATUS_WAITING:
+            return None
+        return self.feedback_data
+
+    def autograde(self, commit=True):
+        """Performs auto grading."""
+
+        if self.status == self.STATUS_PENDING:
             try:
-                self.autograde()
+                self._autograde_helper()
             except self.InvalidResponseError as ex:
                 self.status = self.STATUS_INVALID
                 self.feedback_data = ex
@@ -269,20 +280,21 @@ class Response(models.CopyMixin,
                     grade = decimal.Decimal(self.get_grade_from_feedback())
                     self.final_grade = self.given_grade = grade
                     self.status = self.STATUS_DONE
-            if commit:
+            if commit and self.pk:
                 self.save(update_fields=['status', 'feedback_data',
                                          'given_grade', 'final_grade'])
+            elif commit:
+                self.save()
         elif self.status == self.STATUS_INVALID:
             raise self.feedback_data
-        return self.feedback_data
 
-    def autograde(self):
+    def _autograde_helper(self):
         """This method should be implemented in subclasses."""
 
         raise ImproperlyConfigured(
-            'Response subclasses must implement the autograde() method and save'
-            'all relevant feedback data in the `feedback_data` attribute. This'
-            'value is pickled and saved to the database.'
+            'Response subclasses must implement the _autograde_helper() method '
+            'and save all relevant feedback data in the `feedback_data` '
+            'attribute. This value is pickled and saved to the database.'
         )
 
     def get_grade_from_feedback(self):

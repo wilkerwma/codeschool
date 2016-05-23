@@ -153,7 +153,8 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     def user_activities(self, user):
         """Return a list of all activities that are valid for the given user"""
 
-        return self.activities.select_subclasses()
+        activities = self.activities.filter(status=Activity.STATUS_OPEN)
+        return activities.select_subclasses()
 
     def activity_duration(self):
         """Return the default duration for an activity starting from now."""

@@ -9,7 +9,8 @@ from codeschool import models
 from codeschool.db import saving
 from codeschool.shortcuts import lazy, render_object
 from cs_core.models import ProgrammingLanguage, get_language, get_languages
-from cs_questions.models import Question, QuestionActivity, QuestionResponse
+from cs_questions.models.base import (Question, QuestionActivity,
+                                      QuestionResponse)
 
 
 class CodingIoQuestion(Question, models.StatusModel):
@@ -465,7 +466,7 @@ class CodingIoResponse(QuestionResponse):
     answer_key = property(lambda x: x.feedback_data.answer_key)
     is_correct = property(lambda x: x.feedback_data.is_correct)
 
-    def autograde(self):
+    def _autograde_helper(self):
         self.feedback_data = self.question.grade(self)
 
     def get_grade_from_feedback(self):

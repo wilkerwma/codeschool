@@ -83,6 +83,13 @@ class QuizActivityAdmin(admin.ModelAdmin):
         fields = ['question']
 
     inlines = [QuizActivityItemInline]
+    list_display = ('name', 'short_description', 'course', 'responses')
+
+    def responses(self, obj):
+        return obj.responses.filter(parent__isnull=True).count()
+    responses.short_description = _('# responses')
+
+
 
 
 admin.site.register(models.CodingIoActivity)

@@ -8,21 +8,14 @@
         </aside>
 
         <article>
-            {% for activity in user_activities -%}
-                <cs-card href="{{ activity.get_absolute_url() }}"
-                         icon="{{ activity.material_icon|default('help_outline') }}">
+            {% for activity in user_activities %}
+                <cs-card onclick="" href="{{ activity.get_absolute_url() }}" icon="{{ activity.material_icon|default('help') }}">
                     <h1>{{ activity.name }}</h1>
                     <p>{{ activity.short_description }}</p>
                 </cs-card>
-            {%- endfor %}
+            {% endfor %}
 
-            {% if role == 'student' %}
-                <cs-card icon="add_circle" faded>
-                    <h1>Aprofunde-se</h1>
-                    <p>Atividades e desafios adicionais selecionados para você
-                        :)</p>
-                </cs-card>
-            {% elif role == 'teacher' %}
+            {% if role == 'teacher' %}
                 <cs-card onclick="srvice.dialog({url: 'add-activities'})"
                          icon="add_circle" faded>
                     <h1>{{ _('Add activity') }}</h1>

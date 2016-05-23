@@ -3,20 +3,20 @@
 {% block content %}
     <section>
         {% if can_download %}
-            <a href="{% url 'question-action' question.pk 'download' %}"><i class="material-icons config-handle">file_download</i></a>
+            <a href="{% url 'object-action' object.pk 'download' %}"><i class="material-icons config-handle">file_download</i></a>
         {% endif %}
-        <h1>{{ question.title }}</h1>
-        <p id="short-description">{{ question.short_description }}</p>
+        <h1>{{ object.title }}</h1>
+        <p id="short-description">{{ object.short_description }}</p>
 
         {% block header_content %}{% endblock %}
     </section>
 
-    <div class="question-input">
+    <div class="object-input">
         <article class="long-description">
-        {{ question.long_description|markdown }}
+        {{ object.long_description|markdown }}
         </article>
 
-        <form id="question-form" method="POST">
+        <form id="object-form" method="POST">
             {% csrf_token %}
             {% if activity %}
                 <input type="hidden" name="activity" value="{{ activity.pk }}">
@@ -28,7 +28,7 @@
 
         {% if feedback or grade %}
             {% block feedback %}
-                <article class="question-feedback">
+                <article class="object-feedback">
                     <h2>{{ _('Feedback') }}</h2>
                     {% if grade == 100 %}
                         {% block feedback_positive %}
@@ -49,10 +49,10 @@
 
         <div class="toolbar highlight">
             <input
-                    class="question-input-button"
+                    class="object-input-button"
                     type="submit"
                     name="send"
-                    form="question-form"
+                    form="object-form"
                     value="{{ _('Send') }}">
         </div>
     </div>
