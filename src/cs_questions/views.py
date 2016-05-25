@@ -1,10 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
 from viewpack import CRUDViewPack, InheritanceCRUDViewPack, DispatchView
 from viewpack.permissions import can_download, can_edit
-from viewpack.views.childviews import (
-    DetailObjectContextMixin, VerboseNamesContextMixin,
-    DetailWithResponseView, ListView
-)
+from viewpack.views import DetailWithResponseView, ListView, DetailView
+from viewpack.views.mixins import (DetailObjectContextMixin,
+                                   VerboseNamesContextMixin)
 from codeschool.utils import lazy
 from codeschool.models import User
 from cs_activities.views import ActivityCRUD
@@ -180,5 +179,9 @@ class CodingIoQuestionViews(QuestionCRUD):
 # Related activities
 @ActivityCRUD.register
 class QuizActivityViews(CRUDViewPack):
+    subclass_view_name = 'quiz'
     model = models.QuizActivity
     template_basename = '/cs_questions/quiz/'
+
+    class StatisticsView(DetailView):
+        pattern = r'^(?P<pk>\d+)/statistics/'
