@@ -6,12 +6,25 @@ from codeschool import models
 from codeschool.models import User
 from django.contrib.auth.models import User
 
+
+class HasCategoryMixin:
+	CATEGORY_TRIED = 'tried'
+	CATEGORY_INCOMPLETE = 'incomplete'
+	CATEGORY_CORRECT = 'correct'
+	CATEGORY_CHOICES = [
+		(CATEGORY_TRIED, _('tried')),
+		(CATEGORY_INCOMPLETE, _('incomplete'))
+		(CATEGORY_CORRECT, _('correct'))
+	]
+	category = models.CharField(choices=CATEGORY_CHOICES)
+	
+
 #É UMA RESPONSE DA CLASSE Activity
 class Action(models.Model):
-	points = models.PositiveIntegerField()
+	points_tried = models.PositiveIntegerField(default=0)
+	points_incomplete = models.PositiveIntegerField(default=5)
+	points_correct = models.PositiveIntegerField(default=10)
 	activity = models.ForeignKey(Activity)
-	user = models.ForeignKey(models.User)
-
 
 class Badge(models.Model):
 	name = models.CharField(_('name'), max_length=200)
@@ -24,13 +37,36 @@ class GivenBadge(models.TimeStampedModel):
 	users = models.ForeignKey(models.User)
 
 class Goal(models.Model):
-
 	badge = models.ForeignKey(
 		Badge,
 		related_name='goals'
 	)
+	required_points = models.PositiveIntegerField()
 
-	activities = models.ForeignKey(
-        Activity,
-        related_name='goals',
-    )
+class GoalStep(HasCategoryMixin, models.Model):
+	goal = models.ForeignKey(Goal, related_name='steps')
+	action = models.ForeignKey(Action)
+	category = models.CharField(choices=HasCategoryMixin.CATEGORY_CHOICES, null=True, blank=True)
+
+class PblUser(models.Model):
+	users = models.OneToOneField(models.User)
+	accumulated_points = models.PositiveIntegerField()
+
+
+class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
+	action = models.ForeignKey(Action)
+	users = models.ForeignKey(PblUser)
+
+	def value(self):
+		if self.category == self.CATEGORY_CORRECT:
+			return self.action.points_correct
+		elif self.category == self.CATEGORY_INCOMPLETE:
+			return self.action.points_incomplete
+		elif self.category == self.CATEGORY_TRIED:
+			return self.action.points_tried
+		else:
+			raise ValueError('invalid category: %s' % self.category)
+
+	def __int__(self):
+		return self.value()
+	
