@@ -1,7 +1,8 @@
 from django.forms import ModelForm
+from cs_ranking.models import Battle
 
 class BattleInvitationForm(ModelForm):
     class Meta:
         model = Battle
-        fields = ['question', 'battle_owner', 'language']
+        fields = ['question', 'language']
 

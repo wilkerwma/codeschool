@@ -10,6 +10,7 @@ from datetime import datetime
 from viewpack import CRUDViewPack
 from django.views.generic.edit import ModelFormMixin
 
+from .forms import  BattleInvitationForm
 # Principal method to battles
 def index(request):
     all_battles = Battle.objects.all()
@@ -76,29 +77,42 @@ def battle_user(request):
 # Create a new invitation
 def invitation_users(request):
     if request.method == "POST":
-        battle = Battle()
-        battle.date = timezone.now()
-        battle.type = request.POST.get('type')
-        battle.question = Question.objects.get(id=request.POST.get('questions'))
-        battle.language = ProgrammingLanguage.objects.get(pk=request.POST.get('languages'))
-        battle.battle_owner = request.user
- 
-        battle.save()
-        names = request.POST.get('usernames')
-        users = []
+        # create a form instance and populate it with data from the request:
+        form = BattleInvitationForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            battle = Battle()
+            battle.date = timezone.now()
+            # battle.type = request.POST.get('type')
+            battle.type = "length"
 
-        for name in names.split(";"):
-            user = User.objects.filter(username=name.strip())
-            if len(user):
-                users.append(user[0])
+            form_question = form.questions
+            # battle.question = Question.objects.get(id=request.POST.get('questions'))
 
-        [battle.invitations_user.add(user) for user in users]
-        create_battle_response(battle,request.user)
-        return redirect(reverse('figths:battle',kwargs={'battle_pk':battle.id})) 
+            form_language = form.languages
+            battle.language = ProgrammingLanguage.objects.get(pk=request.POST.get('languages'))
+
+            battle.battle_owner = request.user
+
+            battle.save()
+            names = request.POST.get('usernames')
+            users = []
+
+            for name in names.split(";"):
+                user = User.objects.filter(username=name.strip())
+                if len(user):
+                    users.append(user[0])
+
+            [battle.invitations_user.add(user) for user in users]
+            create_battle_response(battle,request.user)
+            return redirect(reverse('fights:battle',kwargs={'battle_pk':battle.id})) 
     else:
+        form = BattleInvitationForm()
         context = { "questions": Question.objects.all(),
-                    "languages": ProgrammingLanguage.objects.all() }
-        return render(request,'battles/invitation.jinja2', context)
+                    "languages": ProgrammingLanguage.objects.all(),
+                    "form": form
+                  }
+        return render(request,'ranking/invitation.jinja2', context)
 
 # View the invitations
 def invitations(request):
@@ -116,12 +130,12 @@ def battle_invitation(request):
         if form_post.get('accept'):
             battle = Battle.objects.get(id=battle_pk)
             create_battle_response(battle,request.user)
-            method_return = redirect(reverse('figths:battle',kwargs={'battle_pk':battle_pk}))
+            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':battle_pk}))
         elif battle_pk and form_post.get('reject'):
             battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
-            method_return = redirect(reverse('figths:view_invitation'))
-        
+            method_return = redirect(reverse('fights:view_invitation'))
+
     return method_return
 
 def create_battle_response(battle,user):
