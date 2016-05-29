@@ -30,7 +30,7 @@ class Battle(models.Model):
         return min(self.battles.all(), key=source_length)
 
     def get_absolute_url(self):
-        return reverse("battles:detail",kwargs={'pk': self.pk})
+        return reverse("figths:battle",kwargs={'battle_pk': self.pk})
 
     def __str__(self):
         if self.battle_winner:

@@ -8,10 +8,10 @@
     <thead><tr><th>ID</th><th>Data</th><th>Result Battle</th></tr></thead>
     <tbody>
         {% for battle in battles %}
-        <tr onclick="location.href='/battle/{{battle.battle_result_id}}'">
+        <tr onclick="location.href='/battles/{{battle.battle_result_id}}'">
             <td> {{ battle.id }} </td>
             <td> {{ battle.time_begin|dateformat(format="short") }} ~ {{ battle.time_end|dateformat(format="short") }} </td>
-            <td>  {{ battle.battle_result }} </td>
+            <td>  {{ battle.battle }} </td>
 
         </tr>
         {% endfor %}
@@ -21,8 +21,8 @@
 {% block extra_css %}
     <link rel="stylesheet" href="../../static/cs_battles/css/battle_table.css">
 {% endblock %}
-{% block extra_js %}
+{#{% block extra_js %}
     <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
     <script src="{% static 'cs_battles/js/battle_table.js' %}"></script>
 {% endblock %}
-
+#}

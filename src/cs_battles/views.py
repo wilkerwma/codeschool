@@ -103,7 +103,8 @@ def invitation_users(request):
 def invitations(request):
     print(request.user.id)
     invitations_user = Battle.objects.filter(invitations_user=request.user.id).all()
-    return invitations_user
+    context = {'invitations': invitations_user}
+    return render(request,'battles/invitation.jinja2', context)
 
 # Accept the invitation
 def battle_invitation(request):

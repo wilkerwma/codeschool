@@ -2,6 +2,11 @@
 {% block content_title %}{{ super() }}{% endblock %}
 
 {% block content_body %}
+    {% block invitation %}
+        <a href="invitations">Invitations</a>
+        <a href="new">New invitation </a>
+        <a href="user">My battles</a><p>
+    {% endblock %}
     {{ super() }}
 {% endblock %}
 
