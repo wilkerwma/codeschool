@@ -7,6 +7,7 @@ from cs_questions.models import Question, CodingIoResponse
 from cs_core.models import ProgrammingLanguage
 from .models import BattleResponse,Battle
 from datetime import datetime
+from viewpack import CRUDViewPack
 
 # Principal method to battles
 def index(request):
@@ -133,3 +134,11 @@ def create_battle_response(battle,user):
         )
     battle.invitations_user.remove(user)
 
+class BattleCRUDView(CRUDViewPack):
+    model = Battle
+    get_absolute_url = r'^'
+    template_extension = '.jinja2'
+    template_basename = 'battles/'
+    check_permissions = False
+    raise_404_on_permission_error = False
+    
