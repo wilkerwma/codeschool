@@ -1,6 +1,6 @@
 from collections import namedtuple
 from django import http
-from srvice import srvice, Client
+import srvice
 from codeschool.decorators import login_required
 from codeschool.shortcuts import render_context, get_object_or_404, redirect
 from cs_courses import models
@@ -56,7 +56,7 @@ def course_detail(request, pk):
     )
 
 
-@srvice
+@srvice.api
 def enable_activity(request, ref, when='now', selected=()):
     js = Client()
 

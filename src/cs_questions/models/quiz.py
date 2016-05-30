@@ -108,6 +108,12 @@ class QuizActivity(Activity):
         else:
             return NotImplemented
 
+    def get_final_grade(self, user):
+        """Return the final grade for the given user."""
+
+        response = self.get_response(user)
+        return response.get_final_grade()
+
 
 class QuizResponse(Response):
     """
@@ -144,3 +150,34 @@ class QuizResponse(Response):
                 question_for_unbound=question
             ))
         )
+
+    def get_final_grade(self):
+        """
+        Compute the final grade for the quiz activity.
+        """
+
+        if self.final_grade != None:
+            return self.final_grade
+        else:
+            grades = []
+            for question in self.activity.quizactivity.questions:
+                responses = set(CodingIoResponse.objects.filter(
+                    parent=self, question_for_unbound=question
+                ).values_list('id', flat=True))
+                responses |= set(NumericResponse.objects.filter(
+                    parent=self, question_for_unbound=question
+                ).values_list('id', flat=True))
+
+                responses = Response.objects.filter(id__in=responses)
+                if responses:
+                    grade = max(responses.values_list('final_grade', flat=True))
+                    grades.append(grade)
+                else:
+                    grades.append(0)
+
+            min_grade = min(grades)
+            del grades[grades.index(min_grade)]
+
+            self.final_grade = self.given_grade = sum(grades) / len(grades)
+            self.save()
+            return self.final_grade

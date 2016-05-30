@@ -29,7 +29,7 @@ class SyncCodeActivityViews(CRUDViewPack):
     template_basename = 'cs_activities/sync-code/'
 
 
-@srvice.srvice
+@srvice.api
 def code_sync_update(request, pk=None, data=None):
     # Check permissions
     activity = models.SyncCodeActivity.objects.get(pk=pk)
@@ -45,7 +45,7 @@ def code_sync_update(request, pk=None, data=None):
             last.save(update_fields=['next'])
 
 
-@srvice.srvice
+@srvice.api
 def code_sync_remove(request, pk=None, item=None):
     # Check permissions
     activity = models.SyncCodeActivity.objects.get(pk=pk)
@@ -68,7 +68,7 @@ def code_sync_remove(request, pk=None, item=None):
         item.delete()
 
 
-@srvice.srvice
+@srvice.api
 def code_sync_get(request, pk=None, item=None, jump=None):
     # Check permissions
     activity = models.SyncCodeActivity.objects.get(pk=pk)

@@ -1,10 +1,9 @@
 from django.utils.translation import ugettext_lazy as _
 from viewpack import CRUDViewPack, InheritanceCRUDViewPack, DispatchView
 from viewpack.permissions import can_download, can_edit
-from viewpack.views.childviews import (
-    DetailObjectContextMixin, VerboseNamesContextMixin,
-    DetailWithResponseView, ListView
-)
+from viewpack.views import DetailWithResponseView, ListView, DetailView
+from viewpack.views.mixins import (DetailObjectContextMixin,
+                                   VerboseNamesContextMixin)
 from codeschool.utils import lazy
 from codeschool.models import User
 from cs_activities.views import ActivityCRUD
@@ -61,22 +60,26 @@ class QuestionDetailView(DetailObjectContextMixin,
     def get_response(self, form):
         """Return the response object from a valid response form."""
 
+        register = lambda user, r: None
         params = self.request.GET
-        response = form.save(commit=False)
-        response.user = self.request.user
-        response.question = self.question
-        response.autograde()
 
         # Quiz activity responses
         if 'activity' in params:
             pk = params['activity']
             activity = models.Activity.objects.get_subclass(pk=pk)
-            activity.register_response(self.request.user, response)
+            register = activity.register_response
+            if activity.status != activity.STATUS_OPEN:
+                raise RuntimeError('quiz does not accept responses.')
 
         # Question activities responses
         elif 'activity' in params:
             raise NotImplementedError
 
+        response = form.save(commit=False)
+        response.user = self.request.user
+        response.question = self.question
+        response.autograde()
+        register(self.request.user, response)
         return response
 
     def form_valid(self, form):
@@ -180,5 +183,10 @@ class CodingIoQuestionViews(QuestionCRUD):
 # Related activities
 @ActivityCRUD.register
 class QuizActivityViews(CRUDViewPack):
+    subclass_view_name = 'quiz'
     model = models.QuizActivity
     template_basename = '/cs_questions/quiz/'
+
+    class StatisticsView(DetailView):
+        pattern = r'^(?P<pk>\d+)/statistics/'
+

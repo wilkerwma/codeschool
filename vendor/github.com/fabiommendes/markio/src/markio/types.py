@@ -53,16 +53,123 @@ class pdict(collections.MutableMapping):
         return dict(self._data)
 
 
-class Markio:
+class MetaAttribute:
     """
-    Base node for the Markio AST.
+    Base class for the _meta attribute of AST classes.
     """
+    def __init__(self,
+                 i18n_attributes=(),
+                 programming_attributes=(),
+                 full_mappings=()):
+        self.i18n_attributes = set(i18n_attributes)
+        self.programming_attributes = set(programming_attributes)
+        self.full_mappings = set(full_mappings)
+
+    @classmethod
+    def from_class(cls, cls_obj):
+        """
+        Create an instance from a ``class Meta`` definition.
+        """
+
+        kwargs = {}
+        for attr in dir(cls_obj):
+            if attr.startswith('_'):
+                continue
+            kwargs[attr] = getattr(cls_obj, attr)
+        return cls(**kwargs)
+
+    def copy(self):
+        """
+        Return a copy of itself.
+        """
+
+        return type(self)(**self.__dict__)
+
+
+    def update(self, cls_obj=None, **kwargs):
+        """Update with the given attributes."""
+
+        if cls_obj is not None:
+            for attr in dir(cls_obj):
+                if attr.startswith('_'):
+                    continue
+                value = getattr(cls_obj, attr)
+                kwargs.setdefault(attr, value)
+
+        for attr, new in kwargs.items():
+            try:
+                old = getattr(self, attr)
+            except AttributeError:
+                raise TypeError('meta has no %r attribute' % attr)
+
+            if isintance(old, set):
+                old.update(new)
+            else:
+                setattr(self, attr, new)
+
+
+class RootMeta(type):
+    """
+    Metaclass for the Root AST types.
+    """
+    def __new__(cls, name, bases, ns):
+        meta = ns.pop('Meta', None)
+        new = type.__new__(name, bases, ns)
+        if bases:
+            base = new._get_base(bases)
+            new._meta = base.meta.copy()
+            new._meta.update(meta)
+        else:
+            new._meta = MetaAttribute.from_class(meta)
+        return new
+
+    def _get_base(cls):
+        """Return the main base class for the RootMeta type."""
+
+        for base in reversed(cls.mro()[1:]):
+            if issubclass(base, Root):
+                return base
+        else:
+            raise RuntimeError
+
+
+class Root(metaclass=RootMeta):
+    """Root node for all Markio-like files."""
+
     class __Literal(str):
         """A string-like object whose repr() is equal to str()"""
 
         def __repr__(self):
             return str(self)
 
+    class Meta:
+        #: A set of valid simple attributes for the object.
+        i18n_attributes = set()
+
+        #: programming language fields
+        programming_attributes = set()
+
+        #: i18n + programming language fields
+        full_mappings = set()
+
+
+class DescriptionRoot(Root):
+    class Meta:
+        i18n_attributes = {
+            'title', 'author', 'slug', 'tags',
+            'short_description', 'long_description'}
+
+
+class Markio(DescriptionRoot):
+    """
+    Base node for the Markio AST.
+    """
+    
+    class Meta:
+        i18n_attributes = {'timeout', 'example', 'tests'}
+        programming_attributes = {'answer_key'}
+        full_mappings = {'placeholder'}
+        
     _valid_attrs = {
         # Basic values
         'title', 'author', 'slug', 'tags', 'timeout', 'short_description',
@@ -70,6 +177,9 @@ class Markio:
         # Sections
         'description', 'example', 'tests',
     }
+
+    _full_mappings = {'placeholder'}
+    _programming_attributes = {'answer_key'}
 
     def __init__(self, title=None, **kwds):
         parent = kwds.pop('parent', None)
@@ -85,7 +195,8 @@ class Markio:
         self.placeholder = {None: None}
         self.translations = {}
         self.meta = {}
-        self._parent =  parent
+        self.extra = {}
+        self._parent = parent
 
     def __getattr__(self, attr):
         if attr not in self._valid_attrs:

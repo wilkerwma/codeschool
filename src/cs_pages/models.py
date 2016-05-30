@@ -44,7 +44,6 @@ class CodeBlock(blocks.StructBlock):
         icon = 'code'
 
     def render(self, value):
-        # Put imports here for now to delay a dependency
         from pygments import highlight
         from pygments.formatters import get_formatter_by_name
         from pygments.lexers import get_lexer_by_name

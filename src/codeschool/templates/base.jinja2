@@ -168,12 +168,16 @@
 
     <!-- Javascript in the end of file -->
     {% block javascript %}
-        {% compress js %}
+        {#% compress js %#}
             <script src="{% static 'bower_components/material-design-lite/material.min.js' %}"></script>
-            <script src="{% static 'js/srvice.js' %}"></script>
+            <script src="{% static 'js/srvice/json.js' %}"></script>
+            <script src="{% static 'js/srvice/commands.js' %}"></script>
+            <script src="{% static 'js/srvice/util.js' %}"></script>
+            <script src="{% static 'js/srvice/core.js' %}"></script>
+            <script src="{% static 'js/srvice/dialog.js' %}"></script>
             <script src="{% static 'js/main.js' %}"></script>
             <script src="{% static 'js/plugins.js' %}"></script>
-        {% endcompress %}
+        {#% endcompress %#}
     {% endblock %}
 
     {% if google_analytics|default(False) %}

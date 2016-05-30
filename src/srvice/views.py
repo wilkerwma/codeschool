@@ -1,3 +1,258 @@
+import io
+import inspect
+import functools
+import traceback
+from json import loads
+from django import http
+from django.core import exceptions
+from django.views.generic import View
 from django.shortcuts import render
+from srvice import json
+from srvice.client import Client
+__all__ = ['BadResponseError', 'SrviceView', 'SrviceAPIView',
+           'SrviceProgramView', 'SrviceHtmlView', 'SrviceJsView']
 
-# Create your views here.
+
+class BadResponseError(Exception):
+    """Exception raised when an srvice API would return an error response
+    object."""
+
+    def __init__(self, *args, **kwds):
+        super().__init__(args)
+        for (k, v) in kwds.items():
+            setattr(self, k, v)
+
+    @property
+    def response(self):
+        for arg in self.args:
+            if isinstance(arg, http.HttpResponse):
+                return arg
+        else:
+            return http.HttpResponseServerError()
+
+
+class SrviceView(View):
+    """
+    Wraps a srvice API/Program/etc into a view.
+
+    Users should more conveniently use the :func:`srvice.program` or
+    :func:`srvice.api decorators`.
+
+
+    Args:
+        function:
+            (required) The function handle that implements the given API.
+        login_required:
+            If True, the API will only be available to logged in users.
+        perms_required:
+            The list of permissions a user can use in order gain access to the
+            API. A non-empty list implies login_required.
+    """
+
+    # Class constants and attributes
+    valid_content_types = {
+        'application/json',
+        'application/javascript',
+        'text/x-json'
+    }
+    function = None
+    action = None
+    login_required = None
+    perms_required = None
+
+    # Constructor
+    def __init__(self, function, action='api', login_required=False,
+                 perms_required=None, **kwds):
+        self.function = function
+        self.action = action
+        self.login_required = login_required
+        self.perms_required = perms_required
+        super().__init__(**kwds)
+
+    def get_data(self, request):
+        """
+        Decode and return data sent from the client.
+        """
+
+        try:
+            data_bytes = request.body
+            payload = json.loads(data_bytes.decode('utf8'))
+        except Exception as ex:
+            raise BadResponseError(http.HttpResponseServerError(ex))
+        return payload
+
+    def process_data(self, request, data):
+        """
+        Execute the API function and return a dictionary with the results.
+        """
+
+        error = result = program = None
+        args = data.get('args', ()),
+        kwargs = data.get('kwargs', {})
+        out = {}
+
+        try:
+            out.update(self.execute(request, *args, **kwargs))
+        except Exception as ex:
+            out['error'] = self.wrap_error(ex, ex.__traceback__)
+
+        return out
+
+    def wrap_error(self, ex, tb=None, wrap_permission_errors=False):
+        """
+        Wraps an exception raised during the execution of an API function.
+        """
+
+        if not wrap_permission_errors and isinstance(ex, PermissionError):
+            response = http.HttpResponseForbidden(ex)
+            raise BadResponseError(response)
+
+        error = {
+            'error': type(ex).__name__,
+            'message': str(ex)
+        }
+        if DEBUG:
+            file = io.StringIO()
+            traceback.print_tb(tb or ex.__traceback__, file=file)
+            error['traceback'] = file.getvalue()
+        return error
+
+    def execute(self, request, *args, **kwargs):
+        """
+        Execute API action.
+
+        Any exceptions are wrapped into an error dictionary and sent back in
+        the final response.
+        """
+
+        return {'result': self.function(request, *args, **kwargs)}
+
+    def check_credentials(self, request):
+        """
+        Assure that user has the correct credentials to the process.
+
+        Must raise a BadResponseError if credentials are not valid.
+        """
+
+        if self.login_required or self.perms_required:
+            if request.user is None:
+                response =  http.HttpResponseForbidden('login required')
+                raise BadResponseError(response)
+        if self.perms_required:
+            user = request.user
+            for perm in self.perms_required:
+                if not user.has_perm(perm):
+                    msg = 'user does not have permission: %s' % perm
+                    response = http.HttpResponseForbidden(msg)
+                    raise BadResponseError(response)
+        # TODO: check csrf token
+
+    def get_payload(self, data):
+        """
+        Return the payload that will be sent back to the client.
+
+        The default implementation simply converts data to JSON.
+        """
+
+        result = data.get('result')
+        program = data.get('program')
+        error = data.get('error')
+
+        # Encode result value
+        if result is not None:
+            try:
+                result = json.dumps(result)
+            except Exception as ex:
+                response = http.HttpResponseServerError(ex)
+                raise BadResponseError(response)
+        if program is not None:
+            try:
+                program = json.dumps(program)
+            except Exception as ex:
+                response = http.HttpResponseServerError(ex)
+                raise BadResponseError(response)
+        if error is not None:
+            try:
+                error = json.dumps(error)
+            except Exception as ex:
+                response = http.HttpResponseServerError(ex)
+                raise BadResponseError(response)
+
+        # Manually construct the JSON payload
+        payload = ['{']
+        if result:
+            payload.append('"result":%s,' % result)
+        if program:
+            payload.append('"program":%s,' % program)
+        if error:
+            payload.append('"error":%s,' % error)
+        if payload[-1].endswith(','):
+            payload[-1] = payload[-1][:-1]
+        payload.append('}')
+        payload = ''.join(payload)
+        return payload
+
+    def get_content_type(self):
+        """Content type of the resulting message.
+
+        For JSON, it returns 'application/json'."""
+
+        return 'application/json'
+
+    def post(self, request, *args, **kwargs):
+        """Process the given request, call handler and return result."""
+
+        try:
+            self.check_credentials(request)
+            data = self.get_data(request)
+            out = self.process_data(request, data)
+            payload = self.get_payload(out)
+            content_type = self.get_content_type()
+        except BadResponseError as ex:
+            return ex.response
+
+        return http.HttpResponse(payload, content_type=content_type)
+
+    def get(self, request, *args, **kwargs):
+        return http.HttpResponseForbidden(
+            'this api-point does not allow GET AJAX requests.'
+        )
+
+class SrviceAPIView(SrviceView):
+    """
+    View to functions registered with the @api decorator.
+    """
+
+
+class SrviceProgramView(SrviceView):
+    """
+    View to functions registered with the @program decorator.
+    """
+
+    def execute(self, request, *args, **kwargs):
+        out = {}
+        client = Client(request)
+        try:
+            out['result'] = self.function(client, *args, **kwargs)
+        except Exception as ex:
+            out['error'] = self.wrap_error(ex, ex.__traceback__)
+        out['program'] = client.compile()
+        return out
+
+
+class SrviceResponseView(SrviceView):
+    """
+    View to functions that return response objects.
+    """
+
+
+class SrviceJsView(SrviceResponseView):
+    """
+    View to functions registered with the @js decorator.
+    """
+
+
+class SrviceHtmlView(SrviceResponseView):
+    """
+    View to functions registered with the @html decorator.
+    """

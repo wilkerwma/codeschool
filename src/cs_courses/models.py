@@ -60,6 +60,21 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     current_lesson_start = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(_('is active'), default=False)
 
+    # Discipline properties
+    name = property(lambda s: s.discipline.name)
+    short_description = property(lambda s: s.discipline.short_description)
+    long_description = property(lambda s: s.discipline.long_description)
+
+    def __str__(self):
+        return '%s (%s)' % (self.discipline.name, self.teacher.first_name)
+
+    def to_file(self):
+        """Serialize object in a Markdown format."""
+
+    @classmethod
+    def from_file(self, file):
+        """Load course from file."""
+
     def register_student(self, student):
         """
         Register a new student in the course.
@@ -114,14 +129,6 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
         return (self.activities.filter(status=Activity.STATUS.draft) |
                 (self.activities.filter(status=Activity.STATUS.open) &
                  self.activities.filter(end__lt=timezone.now()))).select_subclasses()
-
-    # Use information from discipline
-    name = property(lambda s: s.discipline.name)
-    short_description = property(lambda s: s.discipline.short_description)
-    long_description = property(lambda s: s.discipline.long_description)
-
-    def __str__(self):
-        return '%s (%s)' % (self.discipline.name, self.teacher.first_name)
 
     def get_absolute_url(self):
         return url_reverse('course-detail', args=(self.pk,))
