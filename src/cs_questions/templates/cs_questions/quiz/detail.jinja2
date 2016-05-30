@@ -19,8 +19,7 @@
         </ul>
     </article>
 
+    <h2 class="banner">{{ _('Results') }}</h2>
+    <p>{{ _('Final grade:') }} {{ quiz.get_final_grade(user)|int }}%</p>
 
-    <div class="toolbar highlight">
-        <button class="mdl-button mdl-js-button" form="{{ form_name }}">{{ _('Send') }}</button>
-    </div>
 {% endblock %}

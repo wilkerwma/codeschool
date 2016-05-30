@@ -31,18 +31,18 @@ def json_function(function):
 
     return decorated
 
+import srvice
 
-@json_function
-def stats_view(request, pk):
+
+@srvice.api
+def stats_view(request, *args, **kwargs):
     """Return a dictionary with the number of votes for each alternative."""
 
-    from codeschool.dbg import console
-    console()
-
-    return {'d': request.GET}
+    return {'args': args, 'kwargs': kwargs}
 
 
 urlpatterns = [
     url('^(?P<pk>\d+)/stats/$', stats_view),
+    url('^api/$', stats_view.as_view()),
     url('^', views.PollCRUD.as_include(namespace='poll')),
 ]

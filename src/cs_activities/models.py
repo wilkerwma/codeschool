@@ -94,7 +94,7 @@ class Activity(models.CopyMixin, models.InheritableModel):
 class SyncCodeActivity(Activity):
     """
     In this activity, the students follow a piece of code that someone
-    edits and is automatically updated in all of student machines. It keeps
+    edit and is automatically updated in all of student machines. It keeps
     track of all modifications that were saved by the teacher.
     """
 
