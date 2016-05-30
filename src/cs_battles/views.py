@@ -38,7 +38,6 @@ def battle_result(request,battle_pk):
 
 def battle(request,battle_pk):
     if request.method == "POST":
-        print("Method POST")
         form = request.POST
         battle_code = form.get('code')
         if battle_code:
@@ -62,14 +61,12 @@ def battle(request,battle_pk):
 
         return render(request, 'battles/battle.jinja2')
     else:
-        print("Method GET")
-        return render(request, 'battles/battle.jinja2')
+        return render(request, 'ranking/battle.jinja2')
 
 # Define the battles of a user
 def battle_user(request):
     user = request.user
     battles = BattleResponse.objects.filter(user_id=user.id)
-    print(battles)
     context = {"battles": battles}
     return render(request, 'battles/battle_user.jinja2', context)
 
@@ -116,7 +113,6 @@ def invitation_users(request):
 
 # View the invitations
 def invitations(request):
-    print(request.user.id)
     invitations_user = Battle.objects.filter(invitations_user=request.user.id).all()
     context = {'invitations': invitations_user}
     return render(request,'battles/invitation.jinja2', context)

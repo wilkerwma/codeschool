@@ -6,3 +6,7 @@ class BattleInvitationForm(ModelForm):
         model = Battle
         fields = ['question', 'language']
 
+class BattleForm(ModelForm):
+    class Meta:
+        model = Battle
+        fields = ['battle_code']
