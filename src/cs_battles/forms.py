@@ -1,7 +1,7 @@
 from django.forms import ModelForm
-from cs_battles.models import Battle
+from cs_battles.models import BattleResponse
 
 class BattleForm(ModelForm):
     class Meta:
-        model = Battle
+        model = BattleResponse
         fields = ['source']
