@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.utils.translation import ugettext_lazy as _
 from codeschool import models
 from cs_core.models import ProgrammingLanguage
@@ -175,9 +176,11 @@ class QuizResponse(Response):
                 else:
                     grades.append(0)
 
-            min_grade = min(grades)
-            del grades[grades.index(min_grade)]
+            if grades:
+                min_grade = min(grades)
+                del grades[grades.index(min_grade)]
 
-            self.final_grade = self.given_grade = sum(grades) / len(grades)
-            self.save()
-            return self.final_grade
+                self.final_grade = self.given_grade = sum(grades) / len(grades)
+                self.save()
+                return self.final_grade
+            return Decimal(0)
