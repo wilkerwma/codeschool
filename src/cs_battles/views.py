@@ -86,11 +86,11 @@ def invitation_users(request):
             # battle.type = request.POST.get('type')
             battle.type = "length"
 
-            form_question = form.questions
-            # battle.question = Question.objects.get(id=request.POST.get('questions'))
+            form_question = form.cleaned_data['question']
+            battle.question = Question.objects.get(id=form_question.id)
 
-            form_language = form.languages
-            battle.language = ProgrammingLanguage.objects.get(pk=request.POST.get('languages'))
+            form_language = form.cleaned_data['language']
+            battle.language = ProgrammingLanguage.objects.get(pk=form_language.name)
 
             battle.battle_owner = request.user
 
