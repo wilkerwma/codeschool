@@ -8,6 +8,7 @@ from cs_core.models import ProgrammingLanguage
 from .models import BattleResponse,Battle
 from datetime import datetime
 from viewpack import CRUDViewPack
+from django.views.generic.edit import ModelFormMixin
 
 # Principal method to battles
 def index(request):
@@ -119,7 +120,7 @@ def battle_invitation(request):
         elif battle_pk and form_post.get('reject'):
             battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
-            method_return = redirect(reverse('figths:index'))
+            method_return = redirect(reverse('figths:view_invitation'))
         
     return method_return
 
@@ -127,11 +128,11 @@ def create_battle_response(battle,user):
     battle_response = battle.battles.filter(user_id=user.id)
     if not battle_response:
         battle_response = BattleResponse.objects.create(
-            user=user,
-            battle_code="",
+            user_id=user.id,
+            source="",
             time_begin=timezone.now(),
             time_end=timezone.now(),
-            battle_result=battle
+            battle=battle
         )
     battle.invitations_user.remove(user)
 
@@ -142,4 +143,12 @@ class BattleCRUDView(CRUDViewPack):
     template_basename = 'battles/'
     check_permissions = False
     raise_404_on_permission_error = False
+    exclude_fields = ['battle_owner','battle_winner' ]
     
+    class CreateMixin:
+        def form_valid(self,form):
+            self.object = form.save(commit=False)
+            self.object.battle_owner = self.request.user
+            self.object.save()
+            return super(ModelFormMixin, self).form_valid(form)
+            

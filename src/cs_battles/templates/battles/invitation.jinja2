@@ -3,7 +3,7 @@
     <h1> Your invitations for battle </h1> 
        <ul>
             {% for invitation in invitations %} 
-                <form action="/battle/accept" method="POST"> 
+                <form action="/battles/accept" method="POST"> 
                     {% csrf_token %} 
                     {{ invitation }} 
                     <input type="hidden" value="{{ invitation.id }}" name="battle_pk"></input> 

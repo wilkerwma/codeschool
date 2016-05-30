@@ -15,8 +15,8 @@ class Battle(models.Model):
     question = models.ForeignKey(CodingIoQuestion,related_name="battle_question")
     type = models.IntegerField(default=0,choices=TYPE_BATTLES)
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
-    short_description = "ha"
-    long_description = "ho"
+    short_description = property(lambda x: x.question.short_description)
+    long_description = property(lambda x: x.question.long_description)
 
     def determine_winner(self):
         if not self.battle_winner and self.battles.first():
@@ -31,7 +31,7 @@ class Battle(models.Model):
 
     def get_absolute_url(self):
         return reverse("figths:battle",kwargs={'battle_pk': self.pk})
-
+    
     def __str__(self):
         if self.battle_winner:
             return "%s (%s) winner: %s" %(self.id,str(self.date),self.battle_winner.user)
