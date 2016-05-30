@@ -10,13 +10,13 @@ from datetime import datetime
 from viewpack import CRUDViewPack
 from django.views.generic.edit import ModelFormMixin
 
-from .forms import  BattleInvitationForm
+from .forms import  BattleForm
 
 def battle(request,battle_pk):
     if request.method == "POST":
-        form = request.POST
-        battle_code = form.get('code')
-        if battle_code:
+        form = BattleForm(request.POST)
+        battle_code = form.cleaned_data['source']
+        if battle_code.is_valid():
             time_now = datetime.now()
             battle_result = Battle.objects.get(id=battle_pk)
 
