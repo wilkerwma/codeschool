@@ -71,46 +71,6 @@ def battle_user(request):
     return render(request, 'battles/battle_user.jinja2', context)
 
 
-# Create a new invitation
-def invitation_users(request):
-    if request.method == "POST":
-        # create a form instance and populate it with data from the request:
-        form = BattleInvitationForm(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            battle = Battle()
-            battle.date = timezone.now()
-            # battle.type = request.POST.get('type')
-            battle.type = "length"
-
-            form_question = form.cleaned_data['question']
-            battle.question = Question.objects.get(id=form_question.id)
-
-            form_language = form.cleaned_data['language']
-            battle.language = ProgrammingLanguage.objects.get(pk=form_language.name)
-
-            battle.battle_owner = request.user
-
-            battle.save()
-            names = request.POST.get('usernames')
-            users = []
-
-            for name in names.split(";"):
-                user = User.objects.filter(username=name.strip())
-                if len(user):
-                    users.append(user[0])
-
-            [battle.invitations_user.add(user) for user in users]
-            create_battle_response(battle,request.user)
-            return redirect(reverse('fights:battle',kwargs={'battle_pk':battle.id})) 
-    else:
-        form = BattleInvitationForm()
-        context = { "questions": Question.objects.all(),
-                    "languages": ProgrammingLanguage.objects.all(),
-                    "form": form
-                  }
-        return render(request,'ranking/invitation.jinja2', context)
-
 # View the invitations
 def invitations(request):
     invitations_user = Battle.objects.filter(invitations_user=request.user.id).all()
