@@ -11,30 +11,6 @@ from viewpack import CRUDViewPack
 from django.views.generic.edit import ModelFormMixin
 
 from .forms import  BattleInvitationForm
-# Principal method to battles
-def index(request):
-    all_battles = Battle.objects.all()
-    invitations_user = invitations(request)
-    return render(request, 'battles/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
-
-# Controller to view result of a battle
-def battle_result(request,battle_pk):
-    context = {}
-    try:
-        # Obtain the battles of battle result
-        result_battle = Battle.objects.get(id=battle_pk)
-        battles = result_battle.battles.all()
-
-        # Determine the winner of this battle result based in the type (lenght, time resolution)
-        context = { "battles": battles }
-        if not result_battle.invitations_user.all():
-            context["battle_winner"] = result_battle.determine_winner()
-
-    except Battle.DoesNotExist as e:
-        print("Not found battle"+str(e))
-        raise Http404("BattleResponse not found")
-
-    return render(request,'battles/battle_result.jinja2',context)
 
 def battle(request,battle_pk):
     if request.method == "POST":
