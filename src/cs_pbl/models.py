@@ -1,10 +1,17 @@
 from django.db import models
-from cs_activities.models import Activity
+from cs_activities.models import Activity, Response
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from codeschool import models
 from codeschool.models import User
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=Response)
+def my_handler(sender, **kwargs):
+    print(sender, kwargs)
 
 
 class HasCategoryMixin:
@@ -17,7 +24,7 @@ class HasCategoryMixin:
 		(CATEGORY_CORRECT, _('correct'))
 	]
 	category = models.CharField(choices=CATEGORY_CHOICES)
-	
+
 
 #É UMA RESPONSE DA CLASSE Activity
 class Action(models.Model):
@@ -25,6 +32,8 @@ class Action(models.Model):
 	points_incomplete = models.PositiveIntegerField(default=5)
 	points_correct = models.PositiveIntegerField(default=10)
 	activity = models.ForeignKey(Activity)
+
+
 
 class Badge(models.Model):
 	name = models.CharField(_('name'), max_length=200)
@@ -41,7 +50,8 @@ class Goal(models.Model):
 		Badge,
 		related_name='goals'
 	)
-	required_points = models.PositiveIntegerField()
+	required_points = models.PositiveIntegerField(default=0)
+	required_actions = models.ManyToManyField(Action)
 
 class GoalStep(HasCategoryMixin, models.Model):
 	goal = models.ForeignKey(Goal, related_name='steps')
@@ -69,4 +79,3 @@ class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
 
 	def __int__(self):
 		return self.value()
-	
