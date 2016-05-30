@@ -13,7 +13,7 @@ class HasCategoryMixin:
 	CATEGORY_CORRECT = 'correct'
 	CATEGORY_CHOICES = [
 		(CATEGORY_TRIED, _('tried')),
-		(CATEGORY_INCOMPLETE, _('incomplete'))
+		(CATEGORY_INCOMPLETE, _('incomplete')),
 		(CATEGORY_CORRECT, _('correct'))
 	]
 	category = models.CharField(choices=CATEGORY_CHOICES)
@@ -46,7 +46,7 @@ class Goal(models.Model):
 class GoalStep(HasCategoryMixin, models.Model):
 	goal = models.ForeignKey(Goal, related_name='steps')
 	action = models.ForeignKey(Action)
-	category = models.CharField(choices=HasCategoryMixin.CATEGORY_CHOICES, null=True, blank=True)
+	category = models.CharField(choices=HasCategoryMixin.CATEGORY_CHOICES, null=True, blank=True, max_length=20)
 
 class PblUser(models.Model):
 	users = models.OneToOneField(models.User)
