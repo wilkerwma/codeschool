@@ -84,7 +84,9 @@ setup(
         'boxed>=0.3',
         'unidecode',
         'fake-factory',
-        
+        'pygeneric',
+        'lazy',
+
         # These are vendorized until stabilize
         #'django-viewpack', 
         #'ejudge>=0.3.6',
