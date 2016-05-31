@@ -82,9 +82,13 @@ setup(
         'django-address',
         'django-userena',
         'boxed>=0.3',
+        'psutil',
+        'pexpect',
         'unidecode',
         'fake-factory',
-        
+        'pygeneric',
+        'lazy',
+
         # These are vendorized until stabilize
         #'django-viewpack', 
         #'ejudge>=0.3.6',

@@ -159,6 +159,7 @@ class QuizResponse(Response):
 
         if self.final_grade != None:
             return self.final_grade
+
         else:
             grades = []
             for question in self.activity.quizactivity.questions:
