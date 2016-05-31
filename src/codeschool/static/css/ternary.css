@@ -3,7 +3,7 @@ body.ternary {
     display: flex;
     flex-flow: column;
     justify-content: space-between;
-    background: #666 url('/static/img/bg_gray_noise.png') repeat;
+    background: #666 url('/static/img/bg/gray_noise.png') repeat;
 }
 
 .ternary .mdl-tabs__tab-bar {
