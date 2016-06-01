@@ -74,7 +74,8 @@ def create_battle_response(battle,user):
     battle_response = battle.battles.filter(user_id=user.id)
     if not battle_response:
         battle_response = BattleResponse.objects.create(
-            user_id=user.id,
+            user=user,
+            language=battle.language,
             source="",
             time_begin=timezone.now(),
             time_end=timezone.now(),
@@ -84,17 +85,25 @@ def create_battle_response(battle,user):
 
 class BattleCRUDView(CRUDViewPack):
     model = Battle
-    get_absolute_url = r'^'
+ #   get_absolute_url = r'^'
     template_extension = '.jinja2'
     template_basename = 'battles/'
     check_permissions = False
     raise_404_on_permission_error = False
     exclude_fields = ['battle_owner','battle_winner' ]
-    
+    """def get_absolute_url(self):
+        return '/battles/'#reverse("figths:battle",kwargs={'battle_pk': self.pk})
+    """
+
     class CreateMixin:
+
+        def get_success_url(self):   
+            return reverse("figths:battle",kwargs={'battle_pk': self.object.pk})
+
         def form_valid(self,form):
             self.object = form.save(commit=False)
             self.object.battle_owner = self.request.user
             self.object.save()
+            create_battle_response(self.object,self.request.user)
             return super(ModelFormMixin, self).form_valid(form)
             

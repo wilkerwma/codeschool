@@ -17,6 +17,7 @@ class Battle(models.Model):
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
     short_description = property(lambda x: x.question.short_description)
     long_description = property(lambda x: x.question.long_description)
+    
 
     def determine_winner(self):
         if not self.battle_winner and self.battles.first():
@@ -29,9 +30,7 @@ class Battle(models.Model):
             return len(battle.source)
         return min(self.battles.all(), key=source_length)
 
-    def get_absolute_url(self):
-        return reverse("figths:battle",kwargs={'battle_pk': self.pk})
-    
+
     def __str__(self):
         if self.battle_winner:
             return "%s (%s) winner: %s" %(self.id,str(self.date),self.battle_winner.user)
