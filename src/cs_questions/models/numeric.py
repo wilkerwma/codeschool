@@ -12,10 +12,7 @@ class NumericResponse(QuestionResponse):
         help_text=_('Result (it must be a number)')
     )
 
-    def _autograde_helper(self):
-        self.feedback_data = self.value
-
-    def get_grade_from_feedback(self):
+    def autograde_compute(self):
         question = self.question
         if abs(self.feedback_data - question.answer) <= question.tolerance:
             return 100

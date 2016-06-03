@@ -23,7 +23,7 @@ urlpatterns = [
 
     # Local apps and functionality
     url(r'^activities/', include('cs_activities.urls')),
-    url(r'^courses/', include('cs_courses.urls')),
+    url(r'^courses/', include('cs_courses.urls', namespace='course')),
     url(r'^questions/', include('cs_questions.urls')),
     url(r'^polls/', include('cs_polls.urls')),
     url(r'^battles/', include('cs_battles.urls', namespace='battle')),

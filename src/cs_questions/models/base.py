@@ -9,22 +9,11 @@ from cs_activities.models import Activity, Response
 
 class Question(models.CopyMixin,
                models.TimeStampedModel,
-               models.InheritableModel):
+               models.InheritableModel,
+               models.DescribableModel
+               ):
     """Base class for all question types"""
 
-    title = models.CharField(
-        _('title'),
-        max_length=200,
-    )
-    short_description = models.CharField(
-        _('short description'),
-        max_length=140,
-        help_text=_('A very brief one-phrase description used in listings.'),
-    )
-    long_description = models.TextField(
-        _('long description'),
-        help_text=_('A detailed explanation.')
-    )
     author_name = models.CharField(
         _('Author\'s name'),
         max_length=100,
@@ -75,7 +64,7 @@ class Question(models.CopyMixin,
         permissions = (("download_question", "Can download question files"),)
 
     def __str__(self):
-        return self.title
+        return self.name
 
     def get_absolute_url(self):
         return url_reverse('question-detail', args=(self.pk,))

@@ -11,23 +11,17 @@ from cs_auth.models import FriendshipStatus
 #
 # Main model classes
 #
-class Faculty(models.Model):
+class Faculty(models.DescribableModel):
     """Describes a faculty/department or any institution that is responsible for
      some given discipline"""
 
-    name = models.CharField(_('name'), max_length=200)
-    description = RichTextField(_('description'), blank=True)
 
-
-class Discipline(models.Model):
+class Discipline(models.DescribableModel):
     """A discipline represents one abstract academic discipline.
 
     Each discipline can be associated with many courses."""
 
-    name = models.CharField(_('name'), max_length=200)
     abbreviation = AutoSlugField(populate_from='name')
-    short_description = models.TextField(_('short description'))
-    long_description = RichTextField(_('long description'))
 
     def __str__(self):
         return '%s (%s)' % (self.name, self.abbreviation)
@@ -61,9 +55,16 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     is_active = models.BooleanField(_('is active'), default=False)
 
     # Discipline properties
-    name = property(lambda s: s.discipline.name)
-    short_description = property(lambda s: s.discipline.short_description)
-    long_description = property(lambda s: s.discipline.long_description)
+    name = property(lambda x: x.discipline.name)
+    short_description = property(lambda x: x.discipline.short_description)
+    long_description = property(lambda x: x.discipline.long_description)
+    short_description_html = property(lambda x:
+                                      x.discipline.short_description_html)
+    long_description_html = property(lambda x:
+                                     x.discipline.long_description_html)
+
+    # Other properties
+    owner = property(lambda x: x.teacher)
 
     def __str__(self):
         return '%s (%s)' % (self.discipline.name, self.teacher.first_name)

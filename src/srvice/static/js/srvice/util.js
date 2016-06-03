@@ -24,35 +24,7 @@ srvice$util = (function($) {
      * Variadic function call.
      */
     function varcall(func, args) {
-        // I am sure there is a better way to do this
-        //noinspection UnreachableCodeJS
-        switch(args.length) {
-            case undefined:
-                throw "args must be an array";
-            case 0:
-                return func();
-            case 1:
-                return func(args[0]);
-            case 2:
-                return func(args[0], args[1]);
-            case 3:
-                return func(args[0], args[1], args[2]);
-            case 4:
-                return func(args[0], args[1], args[2], args[3]);
-            case 5:
-                return func(args[0], args[1], args[2], args[3], args[4]);
-            case 6:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5]);
-            case 7:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6]);
-            case 8:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);
-            case 9:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]);
-            case 10:
-                return func(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[10]);
-        }
-        throw "not implemented: maximum of 10 variadic arguments";
+        return func.apply(this, args);
     }
 
     function jsoncall(method, json) {
@@ -66,6 +38,7 @@ srvice$util = (function($) {
             }
             return varcall(method, args);
         }
+
         // Execute with a single object argument
         else {
             return method(json);

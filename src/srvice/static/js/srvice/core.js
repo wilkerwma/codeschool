@@ -20,10 +20,11 @@ var srvice = (function($) {
 
          srvice('some-remote-api*', arg1, arg2, arg3, ...):
             This will call the remote api function with the given arguments and
-            return the result. In order to use positional arguments, it is
-            advisable to put an asterisk in the end of the api function name.
-            The asterisk forces the result to be interpreted as a positional
-            call even if arg1 is a dictionary.
+            return the result. An asterisk in the end of the api function name
+            tells that it expect positional arguments only. This is required if
+            you want to pass a single positional argument that is an object in
+            order to avoid srvice to interpret it as a dictionary of named
+            arguments.
 
          This function returns a promise object and callback functions can be
          attached to it using the .then(), .done(), .fail(), etc methods::
@@ -35,11 +36,6 @@ var srvice = (function($) {
                 .then(function(result) {
                         // do something else
                     });
-
-         srvice also defines an additional method .value() that can be called to
-         return the value of the computation in a synchronous fashion. This kind
-         of code should be avoided, but it is nevertheless available in case it
-         is necessary.
 
          In Django, api functions are registered using the @srvice.api
          decorator to a function. These functions always receive a request as
@@ -59,127 +55,116 @@ var srvice = (function($) {
          adapted, and re-raised there.
 
         */
-        return srvice_call(arguments, {});
+        return srvice_call(arguments, {
+            program: false,
+            converter: function(x) { return x.result }
+        });
     }
 
-    srvice.run = function(api) {
-        /**
-         The run() function calls a remote function marked with a
-         ``@srvice.program`` decorator in Django. These "programs" encode a
-         series of operations that should be carried out in the client.
 
-         A program is defined in Django using the decorator:
+    /**
+     The synchronous version of the srvice() function.
 
-         .. code:: python
-             import srvice
+     This function accepts the same signature but immediately returns the
+     result. Synchronous AJAX functions should never be used in production
+     since they lock the client until the request is completed, degrading its
+     experience.
 
-             @srvice.program
-             def program(client, arg1, arg2, ...):
-                 if client.request.user is None:
-                     raise PermissionError
-
-                 client.alert("this will trigger a js alert in the client!")
-                 client.jquery('div').hide()
-                 client.js('console.log("foo bar")')
-                 return None
-
-         The client in python object exposes all functions that exist in the
-         srvice object in javascript.
-         */
-
-        var args = Array.prototype.slice.call(arguments, 1);
-        args = normalizeArgs(args, api);
-
-        return srvice.rpc({
-            api: api,
-            args: args[0],
-            kwargs: args[1],
-            async: true,
-            program: true,
-            method: 'program'
-        });
-    };
-
-    srvice.js = function(api) {
-        /**
-         Execute the javascript source code in the given API point in an
-         isolated namespace.
-
-         In Django, functions are registered using the @srvice.js decorator::
-
-         .. code:: python
-            import srvice
-
-            @srvice.js
-            def js_maker(request, arg1, arg2, arg3, ...):
-                return string_of_javascript_code()
-
-         */
-        var args = Array.prototype.slice.call(arguments, 1);
-        args = normalizeArgs(args, api);
-
-        return srvice.rpc({
-            api: api,
-            args: args[0],
-            kwargs: args[1],
-            async: true,
+     This function exists for debug purposes only.
+     */
+    srvice.sync = function() {
+        return srvice_call(arguments, {
+            async: false,
             program: false,
-            method: 'js'
+            converter: function(x) { return x.result }
         });
     };
 
 
+    /**
+     The run() function calls a remote function marked with a
+     ``@srvice.program`` decorator in Django. These "programs" encode a
+     series of operations that should be carried out in the client.
+
+     A program is defined in Django using the decorator:
+
+     .. code:: python
+         import srvice
+
+         @srvice.program
+         def program(client, arg1, arg2, ...):
+             if client.request.user is None:
+                 raise PermissionError
+
+             client.alert("this will trigger a js alert in the client!")
+             client.jquery('div').hide()
+             client.js('console.log("foo bar")')
+             return None
+
+     The client in python object exposes all functions that exist in the
+     srvice object in javascript.
+     */
+    srvice.run = function() {
+        return srvice_call(arguments, {srvice: 'program'});
+    };
+
+
+    /**
+     Execute the javascript source code in the given API point in an
+     isolated namespace.
+
+     In Django, functions are registered using the @srvice.js decorator::
+
+     .. code:: python
+        import srvice
+
+        @srvice.js
+        def js_maker(request, arg1, arg2, arg3, ...):
+            return string_of_javascript_code()
+
+     */
+    srvice.js = function() {
+        return srvice_call(arguments, {
+            method: 'js',
+            converter: function (x) {x.js_data}
+        }).then(processProgram);
+    };
+
+
+    /**
+     Retrieve HTML data from a registered srvice template by passing the
+     given arguments.
+
+     In Django, functions are registered using the @srvice.html decorator::
+
+     .. code:: python
+        import srvice
+
+        @srvice.html
+        def js_maker(request, arg1, arg2, arg3, ...):
+            return string_of_html_source()
+
+    */
     srvice.html = function(api) {
-        /**
-         Retrieve HTML data from a registered srvice template by passing the
-         given arguments.
-
-         In Django, functions are registered using the @srvice.html decorator::
-
-         .. code:: python
-            import srvice
-
-            @srvice.html
-            def js_maker(request, arg1, arg2, arg3, ...):
-                return string_of_html_source()
-
-         */
-
-        var args = Array.prototype.slice.call(arguments, 1);
-        args = normalizeArgs(args, api);
-
-        return srvice.rpc({
-            api: api,
-            args: args[0],
-            kwargs: args[1],
-            async: true,
-            program: false,
-            method: 'html'
+        return srvice_call(arguments, {
+            srvice: 'html',
+            converter: function (x) {x.html_data}
         });
     };
 
 
-    srvice.htmlTo = function(api, selector) {
-        /**
-         Similar to srvice.html. However, the second argument is a CSS selector
-         for the elements that will receive the resulting html code.
-         */
-        var args = Array.prototype.slice.call(arguments, 2);
-        args = normalizeArgs(args, api);
+    /**
+     Similar to srvice.html. However, the second argument is a CSS selector
+     for the elements that will receive the resulting html code.
+     */
+    srvice.htmlTo = function() {
+        var selector = arguments[2];
+        arguments.splice(1, 1);
 
-        value = srvice.rpc({
-            api: api,
-            args: args[0],
-            kwargs: args[1],
-            async: true,
-            program: false,
-            method: 'html'
+        return srvice.html.apply(this, arguments).then(function(html) {
+            $(selector).html(html);
         });
 
-        value.success(function(html) {
-            $(selector).html(html);
-        })
-        return value;
     };
 
 
@@ -213,6 +198,9 @@ var srvice = (function($) {
          timeout:
             Maximum amount of time (in seconds) to wait for a server response.
             Default to 30.0.
+         converter:
+            A function that process the resulting JSON result and convert it
+            to the desired value.
          */
 
         // Initialize parameters
@@ -224,7 +212,9 @@ var srvice = (function($) {
             program: true,
             errors: true,
             timeout: 5,
-            method: 'POST'
+            method: 'POST',
+            srvice: 'api',
+            converter: function(x) { return x }
         }, args);
 
         // Check consistency
@@ -233,87 +223,46 @@ var srvice = (function($) {
         }
 
         // Create the payload
-        var payload = {api: args.api, args: args.args, kwargs: args.kwargs};
-        payload = json.dumps(payload);
+        var payload = json.dumps({
+            api: args.api,
+            args: args.args,
+            kwargs: args.kwargs,
+            srvice: args.srvice
+        });
 
         // Create ajax promise object
         var promise = $.ajax({
             url: args.api,
             data: payload,
             type: args.method,
-            dataType: 'json'
+            dataType: 'json',
+            async: args.async,
+            converters: {
+                "text json": function (x) {
+                    var data = json.loads(x);
+                    args.errors && processErrors(data.errors);
+                    args.program && processProgram(data.program);
+                    return args.converter(data);
+                }
+            }
         });
 
-        // Register program processor
-        if (args.program) {
-            promise.done(function(result) {
-                if (result.program) {
-                    processProgram(result.program);
-                }
-            });
-        }
-
-        // Register error processor
-        if (args.errors) {
-            promise.done(function(result) {
-                if (result.errors) {
-                    processErrors(result.errors);
-                }
-            });
-        }
-
-        return promise;
+        return (args.async)? promise: promise.responseJSON;
     };
 
-
-    /**
-     * Execution of JSON encoded actions.
-     */
-    var exec_simple_raw = {eval: eval};
-    var exec_simple = {alert: alert};
-
-    // Main entry point for execution/processing of JSON data
-    function exec_action(json) {
-        var result;
-        var action = json.action;
-
-        // Dispatch method call
-        var raw = exec_simple_raw[action];
-        var simple = exec_simple[action];
-
-        if (raw !== undefined) {
-            result = raw(json.data);
+    function processProgram(program) {
+        if (program !== undefined) {
+            var fn = Function(program);
+            fn();
         }
-        else if (simple !== undefined) {
-            result = simple(json.decode(json.data));
-        }
-        // Try actions dispatch or jquery dispatch if method isn't found
-        else {
-            var method = actions[action.replace("-", "_")];
-            json = json.decode(json);
-
-            if (method !== undefined) {
-                return method(json)
-            } else {
-                return actions.jquery(json);
-            }
-        }
-
-        // Process result
-        return (result !== undefined)? encode(result): null;
     }
 
 
-    ////////////////////////////////////////////////////////////////////////////
-    //                              ???????                                   //
-    ////////////////////////////////////////////////////////////////////////////
-    srvice.go = function(url, replace) {
-        if (replace) {
-            window.location.replace(url);
-        } else {
-            window.location.href = url;
+    function processErrors(error) {
+        if (error !== undefined) {
+
         }
-    };
+    }
 
     // Auxiliary function used to normalize input arguments to many srvice
     // methods.
@@ -345,12 +294,11 @@ var srvice = (function($) {
             kwargs: kwargs
         }, options));
 
-        promise.value = function() {
-
-        };
         return promise;
     }
 
+    // Support CSRF protection for AJAX requests in Django.
+    // This recipe was taken from Django's documentation.
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -366,12 +314,12 @@ var srvice = (function($) {
         }
         return cookieValue;
     }
-    var csrftoken = getCookie('csrftoken');
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
+
     function sameOrigin(url) {
         // test that a given url is a same-origin URL
         // url could be relative or scheme relative or absolute
@@ -391,15 +339,17 @@ var srvice = (function($) {
                 // Send the token to same-origin, relative URLs only.
                 // Send the token only if the method warrants CSRF protection
                 // Using the CSRFToken value acquired earlier
-                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
         }
     });
 
 
+    // Configure srvice function and register it in jQuery.
     $.srvice = srvice;
-    srvice.serverUri = '/srvice';
+    srvice.srviceURI = '/api/';
     srvice.do = srvice$actions;
+    srvice.json = json;
     return srvice;
 })(jQuery);
 

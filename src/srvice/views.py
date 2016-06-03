@@ -2,13 +2,12 @@ import io
 import inspect
 import functools
 import traceback
-from json import loads
 from django import http
 from django.core import exceptions
 from django.views.generic import View
 from django.shortcuts import render
 from srvice import json
-from srvice.client import Client
+from srvice.client import Client, js_compile
 __all__ = ['BadResponseError', 'SrviceView', 'SrviceAPIView',
            'SrviceProgramView', 'SrviceHtmlView', 'SrviceJsView']
 
@@ -55,10 +54,16 @@ class SrviceView(View):
         'application/javascript',
         'text/x-json'
     }
+    srvice = None
     function = None
     action = None
     login_required = None
     perms_required = None
+
+    @property
+    def DEBUG(self):
+        from django.conf import settings
+        return settings.DEBUG
 
     # Constructor
     def __init__(self, function, action='api', login_required=False,
@@ -71,7 +76,7 @@ class SrviceView(View):
 
     def get_data(self, request):
         """
-        Decode and return data sent from the client.
+        Decode and return data sent by the client.
         """
 
         try:
@@ -87,7 +92,7 @@ class SrviceView(View):
         """
 
         error = result = program = None
-        args = data.get('args', ()),
+        args = data.get('args', ())
         kwargs = data.get('kwargs', {})
         out = {}
 
@@ -111,7 +116,7 @@ class SrviceView(View):
             'error': type(ex).__name__,
             'message': str(ex)
         }
-        if DEBUG:
+        if self.DEBUG:
             file = io.StringIO()
             traceback.print_tb(tb or ex.__traceback__, file=file)
             error['traceback'] = file.getvalue()
@@ -136,8 +141,9 @@ class SrviceView(View):
 
         if self.login_required or self.perms_required:
             if request.user is None:
-                response =  http.HttpResponseForbidden('login required')
+                response = http.HttpResponseForbidden('login required')
                 raise BadResponseError(response)
+
         if self.perms_required:
             user = request.user
             for perm in self.perms_required:
@@ -218,10 +224,13 @@ class SrviceView(View):
             'this api-point does not allow GET AJAX requests.'
         )
 
+
 class SrviceAPIView(SrviceView):
     """
     View to functions registered with the @api decorator.
     """
+
+    srvice = 'api'
 
 
 class SrviceProgramView(SrviceView):
@@ -229,14 +238,23 @@ class SrviceProgramView(SrviceView):
     View to functions registered with the @program decorator.
     """
 
+    srvice = 'program'
+
+    def get_client(self):
+        """
+        Return a new Client instance.
+        """
+
+        return Client(self.request)
+
     def execute(self, request, *args, **kwargs):
         out = {}
-        client = Client(request)
+        self.client = self.get_client()
         try:
-            out['result'] = self.function(client, *args, **kwargs)
+            out['result'] = self.function(self.client, *args, **kwargs)
         except Exception as ex:
             out['error'] = self.wrap_error(ex, ex.__traceback__)
-        out['program'] = client.compile()
+        out['program'] = js_compile(self.client)
         return out
 
 
@@ -245,14 +263,30 @@ class SrviceResponseView(SrviceView):
     View to functions that return response objects.
     """
 
+    data_variable = None
+
+    def execute(self, request, *args, **kwargs):
+        out = {}
+        try:
+            key = self.data_variable
+            return {key: self.function(request, *args, **kwargs)}
+        except Exception as ex:
+            return {'error': self.wrap_error(ex, ex.__traceback__)}
+
 
 class SrviceJsView(SrviceResponseView):
     """
     View to functions registered with the @js decorator.
     """
 
+    srvice = 'js'
+    data_variable = 'js_data'
+
 
 class SrviceHtmlView(SrviceResponseView):
     """
     View to functions registered with the @html decorator.
     """
+
+    srvice = 'html'
+    data_variable = 'html_data'

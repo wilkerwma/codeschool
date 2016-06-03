@@ -16,9 +16,7 @@ def index(request):
     if isinstance(request.user, AnonymousUser):
         return redirect(reverse('auth:login'))
     else:
-        username = request.user.username
-        kwargs = {'username': username}
-        return redirect(reverse('auth:profile-detail', kwargs=kwargs))
+        return redirect(reverse('course:list'))
 
 
 @singledispatch
@@ -64,7 +62,7 @@ def render_object(object, template_name=None, context=None, object_context_name=
 def render_none(object, template_name=None, context=None,
                 object_context_name=None):
     """
-    super-like end point for generic render implementations.
+    Super-like end point for generic render implementations.
     """
 
     # Prepare context

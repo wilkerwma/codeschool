@@ -20,12 +20,12 @@ How does it work?
 Srvice uses JSON to communicate between client and server. Even making some
 "extensions" to JSON, this implies that there is a limitation in what kind of
 objects can be transmitted from the client to the server and vice-versa. First
-we extend JSON so all objects/dictionaries that have a "@type" key are handled
+we extend JSON so all objects/dictionaries that have a "@" key are handled
 as some kind of specialized python or javascript object. For instance, datetime
 objects are encoded as::
 
     {
-        '@type': 'datetime',
+        '@': 'datetime',
         'data': 1232434342,      // number of seconds since Unix time
         'timezone': 120,         // number of minutes after UTC
     }
@@ -142,7 +142,7 @@ def make_view(view_cls, func, **kwargs):
 
     def as_view(**initkwargs):
         initkwargs.update(kwargs)
-        view = SrviceAPIView.as_view(function=func, **initkwargs)
+        view = view_cls.as_view(function=func, **initkwargs)
         return view
 
     func.as_view = as_view
@@ -163,7 +163,7 @@ def api(func, **kwargs):
             if n <= 1:
                 return 1
             else:
-                return fib(n - 1) + fib(n - 2)
+                return fib(request, n - 1) + fib(request, n - 2)
 
     On urls.py::
 
@@ -214,15 +214,15 @@ def program(func, **kwargs):
 
     This function can be used as a decorator or as a regular function call::
 
-        @srvice.program('server-fat')
-        def fat(client, n):
+        @srvice.program
+        def fat(request, client, n):
             result = 1
             for i in range(1, n + 1):
                 result *= i
             client.alert('Factorial of %s = %s' % (n, result))
             return result
 
-        srvice.program(fat, name='server-fibonacci')
+
     """
 
     return make_view(SrviceProgramView, func, **kwargs)

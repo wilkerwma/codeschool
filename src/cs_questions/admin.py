@@ -6,11 +6,11 @@ from cs_questions import models
 
 class QuestionBase(admin.ModelAdmin):
     date_hierarchy = 'created'
-    list_display = ('title', 'short_description', 'owner', 'discipline')
+    list_display = ('name', 'short_description', 'owner', 'discipline')
     list_filter = ('discipline', 'owner', 'created', 'modified')
     fieldsets = [
         (None, {
-            'fields': (('title', 'author_name'),
+            'fields': (('name', 'author_name'),
                        'discipline',
                        ('owner', 'is_active'),
                        'short_description', 'long_description',),
@@ -24,7 +24,7 @@ class QuestionBase(admin.ModelAdmin):
     save_as = True
     save_on_top = True
     search_fields = (
-        'title',
+        'name',
         'author_name',
         'short_description',
         'comment',
