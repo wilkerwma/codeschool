@@ -1,4 +1,4 @@
-{% extends "cs_courses/base.jinja2" %}
+{% extends "viewpack/crud/base.jinja2" %}
 
 {% block content %}
     <section class="content-cards">
@@ -8,7 +8,7 @@
         </aside>
 
         <article>
-            {% for activity in user_activities %}
+            {% for activity in activities %}
                 <cs-card onclick="" href="{{ activity.get_absolute_url() }}" icon="{{ activity.material_icon|default('help') }}">
                     <h1>{{ activity.name }}</h1>
                     <p>{{ activity.short_description }}</p>
@@ -16,10 +16,15 @@
             {% endfor %}
 
             {% if role == 'teacher' %}
-                <cs-card onclick="srvice.dialog({url: 'add-activities'})"
+                <cs-card onclick="srvice.dialog({url: 'add-activity'})"
                          icon="add_circle" faded>
                     <h1>{{ _('Add activity') }}</h1>
                     <p>{{ _('Click here to add new activities to your course') }}.</p>
+                </cs-card>
+            {% else %}
+                <cs-card href="/questions/" icon="add_circle" faded>
+                    <h1>{{ _('Extra questions') }}</h1>
+                    <p>{{ _('Click here to practice with additional questions in your course') }}.</p>
                 </cs-card>
             {% endif %}
         </article>

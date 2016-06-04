@@ -38,7 +38,6 @@ srvice$dialog = (function($) {
                 async: true
             }).then(function (data) {
                 $(content).html((html || '') + data);
-                console.log(data);
                 action(dialog);
             });
 

@@ -64,6 +64,7 @@ class NamedModel(models.Model):
         _('name'),
         max_length=100
     )
+    title = property(lambda x: x.name)
 
     def __str__(self):
         return self.name

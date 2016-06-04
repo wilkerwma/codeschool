@@ -1,96 +1,56 @@
 from collections import namedtuple
 from django import http
+from django.utils.translation import ugettext_lazy as _
 import srvice
+from viewpack import CRUDViewPack, view
 from codeschool.decorators import login_required
 from codeschool.shortcuts import render_context, get_object_or_404, redirect
 from cs_courses import models
 from cs_activities.models import Activity
 
 
-@login_required
-def course_index(request):
-    courses = (request.user.enrolled_courses.all() |
-               request.user.owned_courses.all() |
-               request.user.courses_as_staff.all()).distinct()
+class CourseViewPack(CRUDViewPack):
+    """
+    Views for Course models, including a CRUD interface.
+    """
 
-    open_courses = models.Course.objects\
-        .filter(is_active=True)\
-        .exclude(pk__in=courses)
+    model = models.Course
+    template_extension = '.jinja2'
+    template_basename = 'cs_courses/'
+    check_permissions = False
+    raise_404_on_permission_error = True
+    context_data = {
+        'content_color': "#10A2A4",
+        'object_name': _('poll'),
+    }
+    fields = ['discipline', 'start', 'end', 'students', 'staff', 'is_active']
 
-    if request.method == 'POST':
-        if request.POST['action'] == 'subscribe':
-            course = models.Course.objects.get(pk=request.POST['course'])
-            course.register_student(request.user)
+    class DetailViewMixin:
+        def get_context_data(self, **kwargs):
+            user = self.request.user
+            course = self.object
+            return super().get_context_data(
+                role=course.get_user_role(user),
+                activities=course.get_user_activities(user),
+                **kwargs
+            )
 
-    return render_context(
-        request, 'cs_courses/course-index.jinja2',
-        courses=courses,
-        open_courses=open_courses,
-    )
+    @view(pattern=r'^(?P<pk>\d+)/add-activity/$')
+    def add_activity(self, request, pk):
+        course = get_object_or_404(models.Course, pk=pk)
 
+        if not course.can_edit(request.user):
+            return http.HttpResponseForbidden()
 
-@login_required
-def discipline_detail(request, id):
-    raise NotImplementedError
+        T = namedtuple('ActivityType', ['name', 'url'])
+        activity_types = \
+            [T(tt._meta.verbose_name.title(), tt.__name__.lower())
+             for tt in Activity.get_subclasses()]
 
-
-@login_required
-def course_detail(request, pk):
-    course = get_object_or_404(models.Course, pk=pk)
-
-    if request.method == 'POST':
-        if request.POST['action'] == 'cancel-subscription':
-            if request.user != course.teacher:
-                course.students.remove(request.user)
-                return redirect('../')
-            else:
-                raise RuntimeError('teachers cannot unsubscribe of their own '
-                                   'courses')
-
-    return render_context(
-        request, 'cs_courses/course-detail.jinja2',
-        course=course,
-        role=course.role(request.user),
-        user_activities=course.user_activities(request.user),
-
-    )
-
-
-@srvice.api
-def enable_activity(request, ref, when='now', selected=()):
-    js = Client()
-
-    if selected:
-        js.refresh()
-
-        course = get_object_or_404(models.Course, pk=ref)
-        duration = course.activity_duration()
-
-        if course.teacher != request.user:
-            raise PermissionError
-
-        for pk in selected:
-            activity = Activity.objects.get_subclass(pk=pk)
-            activity.reschedule_now(duration, update=True)
-    return js
-
-
-@login_required
-def add_activities(request, pk):
-    course = get_object_or_404(models.Course, pk=pk)
-
-    if request.user != course.teacher:
-        return http.HttpResponseForbidden()
-
-    T = namedtuple('ActivityType', ['name', 'url'])
-    activity_types = \
-        [T(tt._meta.verbose_name.title(), tt.__name__.lower())
-         for tt in Activity.get_subclasses()]
-
-    return render_context(
-        request, 'cs_courses/add-activities.jinja2',
-        course=course,
-        past_activities = course.past_activities,
-        pending_activities = course.pending_activities,
-        activity_types=activity_types,
-    )
+        return render_context(
+            request, 'cs_courses/add-activity.jinja2',
+            course=course,
+            past_activities = course.past_activities.all(),
+            pending_activities = course.pending_activities.all(),
+            activity_types=activity_types,
+        )

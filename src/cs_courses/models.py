@@ -2,7 +2,6 @@ from django.utils import timezone
 from django.core.urlresolvers import reverse as url_reverse
 from django.utils.translation import ugettext_lazy as _
 from autoslug import AutoSlugField
-from wagtail.wagtailcore.fields import RichTextField
 from codeschool import models
 from cs_activities.models import Activity
 from cs_auth.models import FriendshipStatus
@@ -27,11 +26,31 @@ class Discipline(models.DescribableModel):
         return '%s (%s)' % (self.name, self.abbreviation)
 
 
+class CourseQueryset(models.QuerySet):
+    def auth(self, user, role=None):
+        """
+        Filter to only courses that the given user can see.
+
+        An optional role can be added so only courses in which the user is
+        related with the specific role are considered. Valid roles are
+        'teacher', 'student' or 'staff'.
+        """
+
+        qs = self.none()
+
+        if role is None or role in ['student', 'can_view']:
+            qs |= user.enrolled_courses.all()
+        if role is None or role in ['staff', 'can_view']:
+            qs |= user.courses_as_staff.all()
+        if role is None or role in ['teacher', 'can_edit']:
+            qs |= self.filter(teacher=user)
+        return qs.distinct()
+
+
 class Course(models.DateFramedModel, models.TimeStampedModel):
     """One specific occurrence of a course for a given teacher in a given
     period."""
 
-    # Fields
     discipline = models.ForeignKey(
         Discipline,
         related_name='courses'
@@ -53,6 +72,7 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     current_lesson_index = models.PositiveIntegerField(default=0, blank=True)
     current_lesson_start = models.DateField(blank=True, null=True)
     is_active = models.BooleanField(_('is active'), default=False)
+    objects = CourseQueryset.as_manager()
 
     # Discipline properties
     name = property(lambda x: x.discipline.name)
@@ -116,25 +136,29 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
     @property
     def past_activities(self):
         return (
-            self.activities.filter(status=Activity.STATUS.concluded) |
+            self.activities.filter(status=Activity.STATUS_CLOSED) |
             self.activities.filter(end__lt=timezone.now())
         ).select_subclasses()
 
     @property
     def open_activities(self):
-        return (self.activities.timeframed.all() &
-                self.activities.filter(status=Activity.STATUS.open)).select_subclasses()
+        return (
+            self.activities.timeframed.all() &
+            self.activities.filter(status=Activity.STATUS_OPEN)
+        ).select_subclasses()
 
     @property
     def pending_activities(self):
-        return (self.activities.filter(status=Activity.STATUS.draft) |
-                (self.activities.filter(status=Activity.STATUS.open) &
-                 self.activities.filter(end__lt=timezone.now()))).select_subclasses()
+        return (
+            self.activities.filter(status=Activity.STATUS_DRAFT) |
+            (self.activities.filter(status=Activity.STATUS_OPEN) &
+             self.activities.filter(end__lt=timezone.now()))
+        ).select_subclasses()
 
     def get_absolute_url(self):
         return url_reverse('course-detail', args=(self.pk,))
 
-    def role(self, user):
+    def get_user_role(self, user):
         """Return a string describing the most priviledged role the user
         as in the course. The possible values are:
 
@@ -158,14 +182,19 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
             return 'student'
         return 'visitor'
 
-    def user_activities(self, user):
-        """Return a list of all activities that are valid for the given user"""
+    def get_user_activities(self, user):
+        """
+        Return a sequence of all activities that are still open for the user.
+        """
 
         activities = self.activities.filter(status=Activity.STATUS_OPEN)
         return activities.select_subclasses()
 
     def activity_duration(self):
-        """Return the default duration for an activity starting from now."""
+        """
+        Return the default duration (in minutes) for an activity starting from
+        now.
+        """
 
         return 120
 
@@ -179,6 +208,12 @@ class Course(models.DateFramedModel, models.TimeStampedModel):
 
     def next_date(self, date=None):
         """Return the date of the next available time slot."""
+
+    def can_view(self, user):
+        return True
+
+    def can_edit(self, user):
+        return user == self.teacher
 
 
 class TimeSlot(models.Model):

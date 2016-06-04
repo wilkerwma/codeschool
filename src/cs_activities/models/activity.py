@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ObjectDoesNotExist
+from model_utils.managers import InheritanceQuerySet
 from codeschool import models
 from cs_activities.models import GradingMethod
 
@@ -22,13 +23,29 @@ def grading_method_best():
     return GradingMethod.best().pk
 
 
+class ActivityQueryset(InheritanceQuerySet):
+    def auth(self, user, role=None):
+        """
+        Filter only activities that the user can see.
+        """
+
+        # Filter by course
+        courses = Course.objects.auth(user, role)
+        course_ids = courses.values_list('id', flat=True)
+        qs = self.filter(course__in=courses)
+
+        # Filter by explicit student association
+        return qs.distinct()
+
+
 class Activity(models.CopyMixin,
                models.InheritableModel,
-               models.DescribableModel):
+               models.DescribableModel,
+               models.TimeFramedModel):
     """
     Represents a gradable activity inside a course. Activities may not have an
     explicit grade, but yet may provide points to the students via the
-    gamification features of Codeschool.
+    gamefication features of Codeschool.
 
     Activities can be scheduled to be done in the class or as a homework
     assignment.
@@ -121,6 +138,8 @@ class Activity(models.CopyMixin,
     #: object has control to the given activity and define which users have
     #: permissions to access and edit it.
     target_object = GenericForeignKey('target_content_type', 'target_id')
+
+    objects = ActivityQueryset.as_manager()
 
     @property
     def course_(self):
