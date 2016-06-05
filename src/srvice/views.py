@@ -67,11 +67,12 @@ class SrviceView(View):
 
     # Constructor
     def __init__(self, function, action='api', login_required=False,
-                 perms_required=None, **kwds):
+                 perms_required=None, ignore_url_args=False, **kwds):
         self.function = function
         self.action = action
         self.login_required = login_required
         self.perms_required = perms_required
+        self.ignore_url_args = ignore_url_args
         super().__init__(**kwds)
 
     def get_data(self, request):
@@ -94,6 +95,14 @@ class SrviceView(View):
         error = result = program = None
         args = data.get('args', ())
         kwargs = data.get('kwargs', {})
+        if not self.ignore_url_args:
+            print(args, kwargs, self.args, self.kwargs)
+            if self.args:
+                args = self.args + tuple(args)
+            if self.kwargs:
+                for k, v in self.kwargs.items():
+                    kwargs.setdefault(k, v)
+
         out = {}
 
         try:

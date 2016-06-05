@@ -16,7 +16,7 @@
             {% endfor %}
 
             {% if role == 'teacher' %}
-                <cs-card onclick="srvice.dialog({url: 'add-activity'})"
+                <cs-card onclick="srvice.run('add-activity')"
                          icon="add_circle" faded>
                     <h1>{{ _('Add activity') }}</h1>
                     <p>{{ _('Click here to add new activities to your course') }}.</p>

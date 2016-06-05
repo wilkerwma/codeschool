@@ -169,8 +169,35 @@ class Client:
     def __call__(self, selector):
         return self.jQuery(selector)
 
+    # Delegate some attributes to the request object
+    COOKIES = property(lambda x: x.request.COOKIES)
+    FILES = property(lambda x: x.request.FILES)
+    GET = property(lambda x: x.request.GET)
+    POST = property(lambda x: x.request.POST)
+    META = property(lambda x: x.request.META)
+    LANGUAGE_CODE = property(lambda x: x.request.LANGUAGE_CODE)
+    user = property(lambda x: x.request.user)
+
     @property
     def function(self):
+        """
+        This implements the idiom to define simple functions with a
+        javascript-like syntax::
+
+            client.function('x', 'y')[
+                'var z = x + y',
+                'return x * z + y',
+            ]
+
+        This syntax abuses Python's own getitem syntax to define simple
+        javascript functions in a slightly more convenient way than resorting
+        to making a single string of source code.
+
+        Argument names should be passed as strings to the self.function object
+        and square brackets should contain strings with lines of javascript
+        source code. You may put the whole body of the function inside a single
+        string or separate each line as in the example above.
+        """
         return JsFunctionDef(self)
 
     def _next_var_name(self):
