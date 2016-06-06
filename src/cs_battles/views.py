@@ -14,6 +14,7 @@ from .forms import  BattleForm
 
 def battle(request,battle_pk):
     if request.method == "POST":
+        message = ""
         form = BattleForm(request.POST)
         if form.is_valid():
             battle_code = form.cleaned_data['source']
@@ -34,8 +35,15 @@ def battle(request,battle_pk):
             battle_response.autograde()
             battle_response.save()
             battle_is_corret = battle_response.is_correct
+            if battle_is_corret:
+                message = "Sua questão está certa"
+            else:
+                message = "Está errada"
 
-        return render(request, 'battles/battle.jinja2')
+        context = {
+            'message':message,
+        }
+        return render(request, 'battles/result.jinja2', context)
     else:
         return render(request, 'battles/battle.jinja2')
 
