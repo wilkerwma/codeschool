@@ -18,21 +18,22 @@ def battle(request,battle_pk):
         if form.is_valid():
             battle_code = form.cleaned_data['source']
             time_now = datetime.now()
-            battle_result = Battle.objects.get(id=battle_pk)
-            coding = CodingIoResponse.objects.create(
-                question=battle_result.question,
-                user_id=1,
-                language_id=battle_result.language
-            )
-            asdfdsa = coding.is_correct
+            battle = Battle.objects.get(id=battle_pk)
 
-            battle = BattleResponse.objects.create(
-                user=request.user,
-                battle_code=battle_code,
+            battle_response = BattleResponse.objects.create(
+                question=battle.question,
+                user_id=1, #TODO apply for any user
+                language=battle.language,
+
+                # user=request.user,
+                battle=battle,
+                source=battle_code,
                 time_begin=time_now,
                 time_end=time_now,
-                battle_result=battle_result
             )
+            battle_response.autograde()
+            battle_response.save()
+            battle_is_corret = battle_response.is_correct
 
         return render(request, 'battles/battle.jinja2')
     else:
@@ -93,8 +94,8 @@ class BattleCRUDView(CRUDViewPack):
 
     class CreateMixin:
 
-        def get_success_url(self):   
-            return reverse("figths:battle",kwargs={'battle_pk': self.object.pk})
+        def get_success_url(self):
+            return reverse("cs_battles:battle",kwargs={'battle_pk': self.object.pk})
 
         def form_valid(self,form):
             self.object = form.save(commit=False)
@@ -108,7 +109,7 @@ class BattleCRUDView(CRUDViewPack):
             object = super().get_object(queryset)
             object.determine_winner()
             return object
-             
+
         def get_context_data(self, **kwargs):
                 return super().get_context_data(
                     all_battles=self.object.battles.all(),**kwargs)

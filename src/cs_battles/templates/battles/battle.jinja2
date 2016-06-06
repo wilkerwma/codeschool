@@ -15,13 +15,13 @@ Battle
 <div>
     Coloque seu código aqui
 </div>
-<div id="editor">
+<ace-editor id="editor" mode="python">
     def hello():
     print("Olha Eu aqui")
 
     if __name__ == "__main__":
     def hello()
-</div>
+</ace-editor >
 
 <div>
     <button id="button-submit">Submit</button>
@@ -38,22 +38,11 @@ Battle
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" type="text/javascript" charset="utf-8"></script>
 
-<script>
+<script >
 $(document).ready(function(){
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/eclipse");
-    editor.getSession().setMode("ace/mode/python");
-
-    $("select").change(function(){
-        var ace_mode = "ace/mode/";
-        var lang = document.getElementById('lang').value;
-        ace_mode_text = ace_mode.concat(lang);
-
-        editor.getSession().setMode(ace_mode_text);
-    });
 
     $("#button-submit").click(function(){
-        $("#code")[0].setAttribute('value', editor.getValue());
+        $("#code")[0].setAttribute('value', $("#editor")[0].getValue());
         $("#form")[0].submit();
     });
 });
