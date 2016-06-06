@@ -17,12 +17,13 @@ def battle(request,battle_pk):
         message = ""
         form = BattleForm(request.POST)
         if form.is_valid():
-            battle_code = form.cleaned_data['source']
+            battle_code = request.POST.get("code")
             time_now = datetime.now()
             battle = Battle.objects.get(id=battle_pk)
 
             battle_response = battle.battles.filter(user_id=request.user.id).first()
             battle_response.source = battle_code
+            print("AAAAA: ", battle_code)
             battle_response.question = battle.question
             battle_response.language=battle.language
             battle_response.time_end = time_now
@@ -83,7 +84,6 @@ def create_battle_response(battle,user):
             time_begin=timezone.now(),
             time_end=timezone.now(),
             battle=battle,
-            language_id=1, #TODO Adapter to any language
         )
     battle.invitations_user.remove(user)
 
