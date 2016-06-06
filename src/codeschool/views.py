@@ -16,7 +16,7 @@ def index(request):
     if isinstance(request.user, AnonymousUser):
         return redirect(reverse('auth:login'))
     else:
-        return redirect(reverse('course:list'))
+        return redirect('/courses/')
 
 
 @singledispatch

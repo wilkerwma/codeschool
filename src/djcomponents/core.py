@@ -3,8 +3,9 @@ from functools import partial
 from django.forms import widgets
 from django.forms.utils import flatatt
 from django.utils.html import escape, escapejs
+from django.views import generic
 DEBUG = True
-__all__ = ['Widget', 'AtomicWidget', 'TemplateRenderMixin']
+__all__ = ['Widget', 'AtomicWidget', 'TemplateMixin']
 
 
 def attr_property(attr):
@@ -251,28 +252,42 @@ class AtomicWidget(Widget):
         raise TypeError('%s widgets have no children' % name)
 
 
-class TemplateRenderMixin:
+class TemplateMixin:
     """
-    Mixin that dsf
+    Mixin that enable template based rendering of widgets.
     """
+
     template_name = None
+    template_engine = None
 
-    def render(self, template_name=None, **kwargs):
+    # We use some methods from generic views
+    get_template_names = generic.TemplateView.get_template_names
+    get_context_data = generic.TemplateView.get_context_data
+
+    def render(self, template_name=None, template_engine=None,
+               context=None, request=None):
         """
-        Use template defined by "template_name" or "self.template_name" to
-        render the widget.
+        Render template into string.
+
+        It is possible to override the default template and template engine by
+        passing them as parameters.
         """
 
-        context = self.render_context()
-        template_name = template_name or self.template_name
-        return render_to_string(template_name, context,
-                                request=self.request, **kwargs)
+        context = self.get_context_data(**context)
+        template_name = template_name or self.get_template_names()
+        template_engine = template_engine or template_engine
+        return render_to_string(
+            template_name,
+            context,
+            request=self.request,
+            template_engine=template_engine,
+        )
 
-    def render_context(self):
-        raise NotImplementedError(
-            'Subclasses must implement the render_context() function that'
-            'return a context dictionary that should be passed to the '
-            'template.')
+
+class TemplateWidget(TemplateMixin, Widget):
+    """
+    A widget that is rendered by a template.
+    """
 
 
 def tag_name(tag):

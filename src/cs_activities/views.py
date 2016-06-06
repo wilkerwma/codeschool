@@ -29,6 +29,13 @@ class SyncCodeActivityViews(CRUDViewPack):
     template_basename = 'cs_activities/sync-code/'
 
 
+@ActivityCRUD.register
+class FileDownloadActivityViews(CRUDViewPack):
+    model = models.FileDownloadActivity
+    subview_name = 'file'
+    template_basename = 'cs_activities/file/'
+
+
 @srvice.api
 def code_sync_update(request, pk=None, data=None):
     # Check permissions

@@ -1,0 +1,45 @@
+- model: auth.user
+  pk: 1
+  fields:
+    username: root
+    first_name: root
+    email: root@linux.com
+    is_superuser: true
+    is_staff: true
+    password: pbkdf2_sha256$24000$5szR73LBDa8p$u66TdMNHImdjhZ5iHqxWn6vqhBPsoahmtE1c8509Iog=
+
+- model: auth.user
+  pk: 2
+  fields:
+    username: john
+    first_name: John
+    last_name: Lennon
+    email: john@beatles.com
+    password: pbkdf2_sha256$24000$rYnPGHns1vls$3A6woGTIBTA0sIF7Oxb/lnwRboYDxyiV49K5XzkckeA=
+
+- model: auth.user
+  pk: 3
+  fields:
+    username: paulmc
+    first_name: Paul
+    last_name: McCartney
+    email: paul@hotmail.com
+    password: pbkdf2_sha256$24000$7X4SZ4nPVk3S$2MKqJ5Agn45hbY/+3OkKQUXu60ADlv89FDuECroxmi8=
+
+- model: auth.user
+  pk: 4
+  fields:
+    username: ringo
+    first_name: Ringo
+    last_name: Starr
+    email: ringo@ringo.com
+    password: pbkdf2_sha256$24000$wbfc1xCMEA3U$T3VDIwJiuse/wn6QkGW5HwUQaNZKYO88ZNtKRVw2+/w=
+
+- model: auth.user
+  pk: 5
+  fields:
+    username: george77
+    first_name: George
+    last_name: Harrison
+    email: george@apple.com
+    password: pbkdf2_sha256$24000$C36XPTWQIVek$0it+O04+BMIXIvZfkJOMCSEV8X+oVH3O0ODUhaG1Fbg=

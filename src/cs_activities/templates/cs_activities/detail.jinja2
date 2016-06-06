@@ -12,48 +12,10 @@
     </section>
 
     <div class="object-input">
-        <article class="long-description">
-        {{ object.long_description|markdown }}
-        </article>
-
-        <form id="object-form" method="POST">
-            {% csrf_token %}
-            {% if activity %}
-                <input type="hidden" name="activity" value="{{ activity.pk }}">
-            {% endif %}
-            {% block question_input %}
-                <table class="form">{{ form.as_table() }}</table>
-            {% endblock %}
-        </form>
-
-        {% if feedback or grade %}
-            {% block feedback %}
-                <article class="object-feedback">
-                    <h2>{{ _('Feedback') }}</h2>
-                    {% if grade == 100 %}
-                        {% block feedback_positive %}
-                            <p>
-                              <strong>Parabéns!</strong>
-                              Sua resposta está correta e foi registrada.
-                            </p>
-                        {% endblock %}
-                    {% else %}
-                        {% block feedback_error %}
-                            {{ feedback.as_html() }}
-                            <p><strong>Aproveitamento: </strong> {{ grade }}%</p>
-                        {% endblock %}
-                    {% endif %}
-                </article>
-            {% endblock %}
-        {% endif %}
-
-        <div class="toolbar highlight">
-            <input
-                    class="object-input-button"
-                    type="submit"
-                    name="send"
-                    form="object-form"
-                    value="{{ _('Send') }}">
-        </div>
+        {% block content_body %}
+            <article class="long-description">
+            {{ object.long_description|markdown }}
+            </article>
+        {% endblock %}
     </div>
 {% endblock %}

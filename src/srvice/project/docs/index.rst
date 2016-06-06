@@ -1,5 +1,6 @@
-Welcome to codeschool's documentation!
-=======================================
+================================================================================
+Welcome to srvice's documentation!
+================================================================================
 
 .. include:: warning.rst
 
@@ -10,7 +11,6 @@ Welcome to codeschool's documentation!
 
    Installation instructions <install.rst>
    API documentation <apidoc.rst>
-   Javscript Documentation <jsdoc.rst>
    License <license.rst>
 
 Indices and tables
