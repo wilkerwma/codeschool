@@ -17,10 +17,10 @@ class Battle(models.Model):
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
     short_description = property(lambda x: x.question.short_description)
     long_description = property(lambda x: x.question.long_description)
-    
+
     @property
     def is_active(self):
-        return (self.battles.first() and not self.battle_winner 
+        return (self.battles.first() and not self.battle_winner
             and not self.invitations_user.all())
 
     def determine_winner(self):
@@ -33,7 +33,7 @@ class Battle(models.Model):
         def source_length(battle):
             return len(battle.source)
         return min(self.battles.all(), key=source_length)
-    
+
     def winner_time(self):
         def source_time(battle):
             return battle.time_end - battle.time_end
@@ -52,6 +52,6 @@ class BattleResponse(CodingIoResponse):
     time_begin = models.DateTimeField()
     time_end = models.DateTimeField()
     battle = models.ForeignKey(Battle,related_name='battles')
-    
+
     def __str__(self):
         return "%s - BattleResponse - User:  %s" % (self.id,self.user)

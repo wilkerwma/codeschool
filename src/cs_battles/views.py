@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from cs_questions.models import Question, CodingIoResponse
 from cs_core.models import ProgrammingLanguage
-from .models import BattleResponse,Battle
+from .models import BattleResponse, Battle
 from datetime import datetime
 from viewpack import CRUDViewPack
 from django.views.generic.edit import ModelFormMixin
@@ -61,11 +61,11 @@ def battle_invitation(request):
         if form_post.get('accept'):
             battle = Battle.objects.get(id=battle_pk)
             create_battle_response(battle,request.user)
-            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':battle_pk}))
+            method_return = redirect(reverse('cs_battles:battle',kwargs={'battle_pk':battle_pk}))
         elif battle_pk and form_post.get('reject'):
             battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
-            method_return = redirect(reverse('fights:view_invitation'))
+            method_return = redirect(reverse('cs_battles:view_invitation'))
 
     return method_return
 
@@ -78,7 +78,8 @@ def create_battle_response(battle,user):
             source="",
             time_begin=timezone.now(),
             time_end=timezone.now(),
-            battle=battle
+            battle=battle,
+            language_id=1, #TODO Adapter to any language
         )
     battle.invitations_user.remove(user)
 
