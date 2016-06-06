@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('cs_courses', '0001_initial'),
         ('cs_core', '0001_initial'),
-        ('cs_activities', '0011_auto_20160421_1618'),
+        ('cs_activities', '0002_auto_20160504_1329_squashed_0017_auto_20160601_0908'),
         ('cs_activities', '0001_initial'),
     ]
 

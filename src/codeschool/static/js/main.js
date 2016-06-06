@@ -1,3 +1,17 @@
+// Utility functions
+function bindPaperTabs(element) {
+    var tabs = element.querySelector('paper-tabs');
+    var pages = element.querySelector('iron-pages');
+    tabs.selected = tabs.selected && 0;
+    pages.selected = pages.selected && 0;
+
+    tabs.addEventListener('iron-select', function() {
+        pages.selected = tabs.selected;
+    })
+}
+
+
+
 $.fn.submitWith = function(data) {
     var select;
     form = this[0];

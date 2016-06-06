@@ -41,7 +41,8 @@ class ViewPackMeta(type(View)):
             if isinstance(obj, type) and issubclass(obj, View):
                 view_cls = obj
 
-                # Create subclass using mixin
+                # Create subclass using mixin. We check if there is a mixin
+                # either in SomeNameViewMixin or SomeNameMixin attributes.
                 basename = attr[:-4] if attr.endswith('View') else attr
                 if hasattr(self, basename + 'Mixin'):
                     mixin_name = basename + 'Mixin'
@@ -86,7 +87,14 @@ class ViewPackMeta(type(View)):
             # Process methods marked with a @view decorator
             elif (isinstance(obj, types.FunctionType) and
                       getattr(obj, 'is_view', False)):
-                pass
+
+                if hasattr(obj, 'as_view'):
+                    obj = obj.as_view()
+                    view_name = get_view_name(obj)
+                    attr = '_%s__%s' % (self.__name__, view_name)
+                    setattr(self, attr, obj)
+
+            # Objects that have an as_view() method are also accepted
 
             else:
                 continue
@@ -271,7 +279,9 @@ class ViewPack(ChildViewMixin, View, metaclass=ViewPackMeta):
         if self.dispatch_to is not None:
             return self.dispatch_to_child(self.dispatch_to, request)
 
-        raise NotImplementedError
+        raise ImproperlyConfigured(
+            'Class must be initialized with the dispatch_to attribute set.'
+        )
 
     def dispatch_to_child(self, view_name, request):
         """

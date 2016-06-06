@@ -69,6 +69,11 @@ class InheritanceCRUDViewPack(CRUDViewPack,
 
     #: Type used for dispatch.
     subclass_view_type = delegate_to_parent('subclass_view_type')
+
+    #: A dictionary mapping each model to their respective view pack
+    #: class.
+    registry = None
+
     DetailViewMixin = DispatchViewMixin
     UpdateViewMixin = DispatchViewMixin
     DeleteViewMixin = DispatchViewMixin
@@ -97,7 +102,7 @@ class InheritanceCRUDViewPack(CRUDViewPack,
                 except:
                     return x.model.__name__.lower()
 
-            L = self.parent.get_pack_list()
+            L = self.parent.get_subpack_list()
             L = [(get_name(x), x) for x in L]
             return super().get_context_data(name_view_list=L, **kwargs)
 
@@ -168,17 +173,28 @@ class InheritanceCRUDViewPack(CRUDViewPack,
         # Search by type
         #for child_cls in self.
 
-    def get_pack_list(self):
-        """Return a list with all registered subclass views objects.
+    def get_subpack_list(self):
+        """
+        Return a list with all registered subclass views objects.
 
         Each view is initialized as if it would have been if executed with the
-        dispatch method."""
+        dispatch method.
+        """
 
         L = []
         for child_cls in self.registry.values():
             child = self.init_subclass_view(child_cls)
             L.append(child)
         return L
+
+    def get_subpack_models(self):
+        """
+        Return a list with all (subclass_view_name, model) items.
+        """
+        return [
+            (pack.subclass_view_name, model)
+            for (model, pack) in self.registry.items()
+        ]
 
     @classmethod
     def register(cls, viewpack=None, *, model=None, as_fallback=False, force=False):

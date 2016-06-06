@@ -1,9 +1,12 @@
 from django.conf.urls import url, include
-from . import views
+from cs_courses import views
+
+
+def course_description(request, pk):
+    course = get_object_or_404(models.Course, pk=pk)
+    return http.HttpResponse(course.long_description_html)
 
 urlpatterns = [
-    url('^$', views.course_index, name='course-list'),
-    url('^(\d+)/$', views.course_detail, name='course-detail'),
-    url('^discipline/(\d+)/$', views.discipline_detail, name='discipline-detail'),
-    url('^(\d+)/add-activities/$', views.add_activities, name='course-add-activities'),
+    url(r'^', views.CourseViewPack.as_include()),
 ]
+

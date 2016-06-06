@@ -169,7 +169,7 @@ class CodingIoQuestion(Question, models.StatusModel):
         import markio
 
         tree = markio.Markio(
-            title=self.title,
+            title=self.name,
             author=self.author_name,
             timeout=self.timeout,
             short_description=self.short_description,
@@ -466,10 +466,8 @@ class CodingIoResponse(QuestionResponse):
     answer_key = property(lambda x: x.feedback_data.answer_key)
     is_correct = property(lambda x: x.feedback_data.is_correct)
 
-    def _autograde_helper(self):
+    def autograde_compute(self):
         self.feedback_data = self.question.grade(self)
-
-    def get_grade_from_feedback(self):
         return self.feedback_data.grade * 100
 
     def html_feedback(self):

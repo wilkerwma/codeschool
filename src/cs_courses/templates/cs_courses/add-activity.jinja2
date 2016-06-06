@@ -1,0 +1,95 @@
+<h2>{{ _('Available activities') }}</h2>
+
+<div id="activity-tabs">
+    <paper-tabs selected="0">
+        <paper-tab href="#pending-activity-panel">{{ _('Pending activities') }}</paper-tab>
+        <paper-tab href="#past-activity-panel">{{ _('Past activities') }}</paper-tab>
+        <paper-tab href="#new-activity-panel">{{ _('New') }}</paper-tab>
+    </paper-tabs>
+
+    <iron-pages selected="0">
+        <div id="pending-activity-panel">
+            {% if pending_activities %}
+                <selectable-actions data-id="{{ course.pk }}">
+                    <paper-menu multi>
+                    {% for activity in pending_activities %}
+                        <paper-item data-id="{{ activity.pk }}">{{ activity.name }}</paper-item>
+                    {% endfor %}
+                    </paper-menu>
+
+                    <nav>
+                        <paper-button
+                                action="cs-courses.enable-activity"
+                                action-data="{when: 'now'}">
+                            Reabrir agora
+                        </paper-button>
+
+                        <paper-button
+                                action="cs-courses.enable-activity"
+                                action-data="{when: 'next'}">
+                            Reabrir na próxima aula
+                        </paper-button>
+
+                        <paper-button single action="cs-courses.edit-activity">
+                            Editar
+                        </paper-button>
+                    </nav>
+                </selectable-actions>
+            {% else %}
+                <p class="no-content">Nenhuma atividade encontrada</p>
+            {% endif %}
+        </div>
+
+        <div id="past-activity-panel">
+            {% if past_activities %}
+                <selectable-actions data-id="{{ course.pk }}">
+                    <paper-menu multi>
+                    {% for activity in past_activities %}
+                        <paper-item data-id="{{ activity.pk }}">{{ activity.name }}</paper-item>
+                    {% endfor %}
+                    </paper-menu>
+
+                    <nav>
+                        <paper-button
+                                requires-selection
+                                action="cs-courses.enable-activity"
+                                action-data="{when: 'now'}">
+                            Reabrir agora
+                        </paper-button>
+
+                        <paper-button
+                                requires-selection
+                                action="cs-courses.enable-activity"
+                                action-data="{when: 'next'}">
+                            Reabrir na próxima aula
+                        </paper-button>
+
+                        <paper-button requires-single action="cs-courses.edit-activity">
+                            Editar
+                        </paper-button>
+                    </nav>
+                </selectable-actions>
+            {% else %}
+                <p class="no-content">Nenhuma atividade encontrada</p>
+            {% endif %}
+        </div>
+
+        <div id="new-activity-panel">
+            {% for tt in activity_types %}
+                <div>{{ tt.name }}
+                    <paper-fab
+                            mini
+                            icon="add"
+                            onclick="srvice.dialog({
+                                action: 'open',
+                                url: './add-{{ tt.url }}'
+                            })">
+                    </paper-fab></div>
+            {% endfor %}
+        </div>
+    </iron-pages>
+</div>
+
+<script>
+    bindPaperTabs($('#activity-tabs')[0]);
+</script>

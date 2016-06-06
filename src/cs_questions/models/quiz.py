@@ -37,7 +37,7 @@ class QuizActivity(Activity):
         (GRADING_METHOD_MIN,  _('smallest grade of all responses')),
         (GRADING_METHOD_AVERAGE,  _('mean grade')),
     )
-    grading_method = models.IntegerField(
+    quiz_grading_method = models.IntegerField(
         choices=GRADING_METHOD_CHOICES
     )
     language = models.ForeignKey(ProgrammingLanguage, blank=True, null=True)
@@ -45,6 +45,7 @@ class QuizActivity(Activity):
     # Derived attributes
     items = QuizActivityItem.as_items()
     questions = property(lambda x: list(x))
+    num_questions = property(lambda x: len(x.items))
 
     def __iter__(self):
         return (x.question.as_subclass() for x in self.items)
@@ -65,7 +66,7 @@ class QuizActivity(Activity):
         item.save()
         self.items.append(item)
 
-    def get_response(self, user):
+    def get_user_response(self, user):
         """Return a response object for the given user.
 
         For now, users can only have one response ."""
@@ -83,7 +84,7 @@ class QuizActivity(Activity):
     def register_response(self, user, response, commit=True):
         """Register a question response to the given user."""
 
-        self.get_response(user).register_response(response, commit)
+        self.get_user_response(user).register_response(response, commit)
 
     def iter_tagged_questions(self, tag='answered', user=None):
         """Iterate over tuples of (question, question) where tag is some property
@@ -103,17 +104,20 @@ class QuizActivity(Activity):
         """
 
         if tag == 'answered':
-            response = self.get_response(user)
+            response = self.get_user_response(user)
             for question in self.questions:
-                yield (question, response.has_answered(question))
+                yield (question, response.is_answered(question))
         else:
             return NotImplemented
 
     def get_final_grade(self, user):
         """Return the final grade for the given user."""
 
-        response = self.get_response(user)
+        response = self.get_user_response(user)
         return response.get_final_grade()
+
+    #def select_responses(self):
+    #    return super().select_responses().filter(parent__isnull=True)
 
 
 class QuizResponse(Response):
@@ -124,12 +128,16 @@ class QuizResponse(Response):
     quiz.
     """
 
+    num_questions = property(lambda x: x.quiz.num_questions)
+
     @property
     def quiz(self):
         return self.activity.quizactivity
 
     def register_response(self, response, commit=True):
-        """Register a question response to itself."""
+        """
+        Register a question response to itself.
+        """
 
         assert isinstance(response, QuestionResponse), response
         response.parent = self
@@ -137,8 +145,10 @@ class QuizResponse(Response):
         if commit:
             response.save()
 
-    def has_answered(self, question):
-        """Return True if question has been answered in the quiz."""
+    def is_answered(self, question):
+        """
+        Return True if question has been answered in the quiz.
+        """
 
         # TODO: make QuestionResponse concrete
         return (
@@ -152,6 +162,35 @@ class QuizResponse(Response):
             ))
         )
 
+    def autograde_compute(self):
+        grades = []
+        print('regrading', self.user.username)
+
+        for question in self.quiz.questions:
+            responses = set(CodingIoResponse.objects.filter(
+                parent=self, question_for_unbound=question
+            ).values_list('id', flat=True))
+            responses |= set(NumericResponse.objects.filter(
+                parent=self, question_for_unbound=question
+            ).values_list('id', flat=True))
+
+            responses = Response.objects.filter(id__in=responses)
+            if responses:
+                grade = max(responses.values_list('final_grade', flat=True))
+                grades.append(grade)
+            else:
+                grades.append(Decimal(0))
+
+        if grades:
+            print(grades)
+            min_grade = min(grades)
+            del grades[grades.index(min_grade)]
+
+            grade = sum(grades) / (self.num_questions - 1)
+            print(grade, self.num_questions, self.status)
+            return grade
+        return Decimal(0)
+
     def get_final_grade(self):
         """
         Compute the final grade for the quiz activity.
@@ -159,28 +198,4 @@ class QuizResponse(Response):
 
         if self.final_grade != None:
             return self.final_grade
-        else:
-            grades = []
-            for question in self.activity.quizactivity.questions:
-                responses = set(CodingIoResponse.objects.filter(
-                    parent=self, question_for_unbound=question
-                ).values_list('id', flat=True))
-                responses |= set(NumericResponse.objects.filter(
-                    parent=self, question_for_unbound=question
-                ).values_list('id', flat=True))
-
-                responses = Response.objects.filter(id__in=responses)
-                if responses:
-                    grade = max(responses.values_list('final_grade', flat=True))
-                    grades.append(grade)
-                else:
-                    grades.append(0)
-
-            if grades:
-                min_grade = min(grades)
-                del grades[grades.index(min_grade)]
-
-                self.final_grade = self.given_grade = sum(grades) / len(grades)
-                self.save()
-                return self.final_grade
-            return Decimal(0)
+        return 0

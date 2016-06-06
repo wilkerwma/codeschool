@@ -8,7 +8,7 @@
         </aside>
 
         <article>
-            {% for course in courses -%}
+            {% for course in course_list.auth(user) -%}
                 <cs-card href="{{ course.pk }}" icon="help">
                     <h1>{{ course.name }}</h1>
                     <p>{{ course.short_description }}</p>

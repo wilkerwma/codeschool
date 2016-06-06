@@ -6,6 +6,7 @@ import numbers
 import collections
 import base64
 import json as _json
+import datetime
 NoneType = type(None)
 
 
@@ -153,3 +154,19 @@ def _(data):
 @decode.register(bytes)
 def _(data):
     return data['data']
+
+
+# Dates
+@encode.register(datetime.date)
+def _(date):
+    return {
+        '@': 'date',
+        'year': date.year,
+        'month': date.month,
+        'day': date.day
+    }
+
+
+@decode.register(datetime.date, 'date')
+def _(data):
+    return datetime.date(data['year'], data['month'], data['day'])

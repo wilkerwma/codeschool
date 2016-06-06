@@ -149,7 +149,7 @@ var srvice$json = (function($) {
             Load javascript object from a JSON encoded string.
          */
 
-        var encoded = JSON.parse(data);
+        var encoded = $.parseJSON(data);
         return decode(encoded);
     }
 
