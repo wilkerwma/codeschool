@@ -7,6 +7,25 @@
         <a href="new">New invitation </a>
         <a href="user">My battles</a><p>
     {% endblock %}
-    {{ super() }}
-{% endblock %}
+    {% block show_list %}
+        <table id="battles">
+            <thead>
+                <tr>
+                    <th>Número</th><th>Question</th><th>Descrição</th><th>Vencedor</th><th>Tipo</th><th>Usuários para concluir</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for battle in object_list  %}
+                <tr onclick="location.href='{{battle.pk}}'">
+                    <td>{{battle.pk}}</td><td>{{battle.short_description}}</td><td>{{battle.question}}</td>
+                    <td>
+                    {% if battle.battle_winner%}{{ battle.battle_winner.user }} {% else %} - {% endif %}
+                    </td><td>{{ battle.type }}</td><td>{{ battle.invitations_user.all()|length }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endblock %}
 
+    <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+{% endblock %}

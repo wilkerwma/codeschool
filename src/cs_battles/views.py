@@ -19,7 +19,6 @@ def battle(request,battle_pk):
         if battle_code.is_valid():
             time_now = datetime.now()
             battle_result = Battle.objects.get(id=battle_pk)
-
             coding = CodingIoResponse.objects.create(
                 question=battle_result.question,
                 user_id=1,
@@ -85,15 +84,11 @@ def create_battle_response(battle,user):
 
 class BattleCRUDView(CRUDViewPack):
     model = Battle
- #   get_absolute_url = r'^'
     template_extension = '.jinja2'
     template_basename = 'battles/'
     check_permissions = False
     raise_404_on_permission_error = False
     exclude_fields = ['battle_owner','battle_winner' ]
-    """def get_absolute_url(self):
-        return '/battles/'#reverse("figths:battle",kwargs={'battle_pk': self.pk})
-    """
 
     class CreateMixin:
 
@@ -106,6 +101,7 @@ class BattleCRUDView(CRUDViewPack):
             self.object.save()
             create_battle_response(self.object,self.request.user)
             return super(ModelFormMixin, self).form_valid(form)
+
     class DetailViewMixin:
         def get_object(self,queryset=None):
             object = super().get_object(queryset)
