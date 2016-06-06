@@ -10,7 +10,8 @@ from django.dispatch import receiver
 
 
 @receiver(post_save, sender=Response)
-def my_handler(sender, **kwargs):
+def my_handle(sender, **kwargs):
+    GivenPoints.give_points(self.users)
     print(sender, kwargs)
 
 
@@ -18,21 +19,22 @@ class HasCategoryMixin:
 	CATEGORY_TRIED = 'tried'
 	CATEGORY_INCOMPLETE = 'incomplete'
 	CATEGORY_CORRECT = 'correct'
+	CATEGORY_CORRECT_AT_FIRST_TRY = 'correct_at_first_try'
 	CATEGORY_CHOICES = [
 		(CATEGORY_TRIED, _('tried')),
 		(CATEGORY_INCOMPLETE, _('incomplete')),
-		(CATEGORY_CORRECT, _('correct'))
+		(CATEGORY_CORRECT, _('correct')),
+		(CATEGORY_CORRECT_AT_FIRST_TRY, _('correct_at_first_try'))
 	]
 	category = models.CharField(choices=CATEGORY_CHOICES)
 
 
-#É UMA RESPONSE DA CLASSE Activity
 class Action(models.Model):
 	points_tried = models.PositiveIntegerField(default=0)
 	points_incomplete = models.PositiveIntegerField(default=5)
 	points_correct = models.PositiveIntegerField(default=10)
+	points_correct_at_first_try = models.PositiveIntegerField(default=12)
 	activity = models.ForeignKey(Activity)
-
 
 
 class Badge(models.Model):
@@ -79,3 +81,6 @@ class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
 
 	def __int__(self):
 		return self.value()
+
+	def give_points(users):
+		users.accumulated_points = value(self)
