@@ -21,17 +21,12 @@ def battle(request,battle_pk):
             time_now = datetime.now()
             battle = Battle.objects.get(id=battle_pk)
 
-            battle_response = BattleResponse.objects.create(
-                question=battle.question,
-                user_id=1, #TODO apply for any user
-                language=battle.language,
+            battle_response = battle.battles.filter(user_id=request.user.id).first()
+            battle_response.source = battle_code
+            battle_response.question = battle.question
+            battle_response.language=battle.language
+            battle_response.time_end = time_now
 
-                # user=request.user,
-                battle=battle,
-                source=battle_code,
-                time_begin=time_now,
-                time_end=time_now,
-            )
             battle_response.autograde()
             battle_response.save()
             battle_is_corret = battle_response.is_correct
