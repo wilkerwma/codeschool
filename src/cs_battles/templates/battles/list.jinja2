@@ -11,16 +11,17 @@
         <table id="battles">
             <thead>
                 <tr>
-                    <th>Número</th><th>Question</th><th>Descrição</th><th>Vencedor</th><th>Tipo</th><th>Usuários para concluir</th>
+                    <th>Ativo</th><th>Número</th><th>Question</th><th>Descrição</th><th>Tipo</th>
                 </tr>
             </thead>
             <tbody>
             {% for battle in object_list  %}
-                <tr onclick="location.href='{{battle.pk}}'">
-                    <td>{{battle.pk}}</td><td>{{battle.short_description}}</td><td>{{battle.question}}</td>
-                    <td>
-                    {% if battle.battle_winner%}{{ battle.battle_winner.user }} {% else %} - {% endif %}
-                    </td><td>{{ battle.type }}</td><td>{{ battle.invitations_user.all()|length }}</td>
+                <tr onclick="location.href='{{battle.pk}}'"  >
+                    <td>{% if battle.is_active or battle.is_active == None %}X{% else %}O{% endif %}</td>
+                    <td>{{battle.pk}}</td>
+                    <td>{{battle.question}}</td>
+                    <td>{{battle.short_description}}</td>
+                    <td>{{ battle.type }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -37,5 +38,12 @@
 
     {% block extra_css %}
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+        <style>
+            #battles tr:hover{
+                cursor: pointer;
+                background: white;
+                color: black;
+            }
+        </style>
     {% endblock %}
 {% endblock %}

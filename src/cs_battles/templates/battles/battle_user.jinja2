@@ -5,12 +5,13 @@
 {% block content %} 
 <h1>Resultado da Batalha</h1>
     <table id="battles">
-        <thead><tr><th>ID</th><th>Data</th><th>Result Battle</th></tr></thead>
+        <thead><tr><th>ID</th><th>Date Begin</th><th>Date Finish</th><th>Result Battle</th></tr></thead>
         <tbody>
             {% for battle in battles %}
             <tr onclick="location.href='/battles/{{battle.battle_id}}';">
                 <td> {{ battle.id }} </td>
-                <td> {{ battle.time_begin|dateformat(format="short") }} ~ {{ battle.time_end|dateformat(format="short") }} </td>
+                <td> {{ battle.time_begin|dateformat(format="short") }} </td>
+                <td> {{ battle.time_end|dateformat(format="short") }} </td>
                 <td>  {{ battle.battle }} </td>
             </tr>
             {% endfor %}
@@ -24,5 +25,12 @@
     {% endblock %}
     {% block extra_css %}
         <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+        <style>
+            #battles tr:hover{
+                cursor: pointer;
+                background: white;
+                color: black;
+            }
+        </style>
     {% endblock %}
 {% endblock %}

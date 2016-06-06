@@ -36,7 +36,7 @@ def battle(request,battle_pk):
 
         return render(request, 'battles/battle.jinja2')
     else:
-        return render(request, 'ranking/battle.jinja2')
+        return render(request, 'battles/battle.jinja2')
 
 # Define the battles of a user
 def battle_user(request):

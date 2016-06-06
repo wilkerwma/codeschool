@@ -13,14 +13,18 @@ class Battle(models.Model):
     battle_owner = models.ForeignKey(auth_model.User,related_name="battle_owner")
     battle_winner = models.OneToOneField('BattleResponse',blank=True,null=True,related_name="winner")
     question = models.ForeignKey(CodingIoQuestion,related_name="battle_question")
-    type = models.TextField(default=0,choices=TYPE_BATTLES)
+    type = models.CharField(default="length",choices=TYPE_BATTLES,max_length=20)
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
     short_description = property(lambda x: x.question.short_description)
     long_description = property(lambda x: x.question.long_description)
     
+    @property
+    def is_active(self):
+        return (self.battles.first() and not self.battle_winner 
+            and not self.invitations_user.all())
+
     def determine_winner(self):
-        if (self.battles.first() and not self.battle_winner 
-            and not self.invitations_user.all() ):
+        if self.is_active:
             self.battle_winner = getattr(self,'winner_'+self.type)()
             self.save()
         return self.battle_winner
@@ -37,7 +41,7 @@ class Battle(models.Model):
 
     def __str__(self):
         if self.battle_winner:
-            return "(%s) %s Winner: %s" % (self.id,self.battle_winner.user,self.short_description)
+            return "(%s) %s Winner: %s" % (self.id,self.short_description,self.battle_winner.user)
         else:
             return "(%s) %s" % (self.id,self.short_description)
 
