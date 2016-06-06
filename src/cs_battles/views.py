@@ -15,8 +15,8 @@ from .forms import  BattleForm
 def battle(request,battle_pk):
     if request.method == "POST":
         form = BattleForm(request.POST)
-        battle_code = form.cleaned_data['source']
-        if battle_code.is_valid():
+        if form.is_valid():
+            battle_code = form.cleaned_data['source']
             time_now = datetime.now()
             battle_result = Battle.objects.get(id=battle_pk)
             coding = CodingIoResponse.objects.create(
