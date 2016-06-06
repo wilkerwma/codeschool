@@ -3,27 +3,21 @@
     <h1>Resultado da Batalha</h1>
     {% if object.battle_winner %}
         <div>
-           <h2>Winner</h2>
-            User: {{ object.battle_winner.user }} <br>
-            Ranking position: "number" <br>
-            Time: {{ (object.battle_winner.time_end - object.battle_winner.time_begin)|deltaformat }} <br>
-            Code winner: {{ object.battle_winner.source }} <br>
-            Characters count: {{ object.battle_winner.source|length  }}<br>
+           <h2><a href="#{{object.id}}">Winner {{ object.battle_winner.user }} </a><br>
         </div>
     {% endif %}
-    {{ object.battles.all() }}
-    {% for battle_result in object.battles.all() %}
-        {% if battle_result.user.id != object.battle_winner.user.id %}
-            <div id="{{battle_result.user.id}}">
-                User: {{ battle_result.user }} <br>
-                Ranking position: "number" <br>
-                Time: {{ (battle_result.time_end - battle_result.time_begin)|deltaformat }} <br>
-                Code winner: {{ battle_result.battle_result_code }} <br>
-                Characters count: {{ battle_result.source|length  }}<br>
-                <!--    Time execution code: "in seconds"<br>
-                Number of submitions: "a lot!"<br -->
-            </div>
-        {% endif %}
+    {% for battle_result in all_battles %}
+        <div id="{{battle_result.user.id}}">
+            User: {{ battle_result.user }} <br>
+            Ranking position: "number" <br>
+            Time: {{ (battle_result.time_end - battle_result.time_begin)|deltaformat }} <br>
+            Characters count: {{ battle_result.source|length  }}<br>
+            <!--    Time execution code: "in seconds"<br>
+            Number of submitions: "a lot!"<br -->
+            Code winner: 
+            <br><formated>{{ battle_result.source }} <formated><br>
+        </div>
+        <p>
     {% endfor %}
 
 {% endblock %}

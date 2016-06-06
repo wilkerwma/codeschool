@@ -7,20 +7,20 @@ from cs_questions.models import CodingIoQuestion, CodingIoResponse
 
 class Battle(models.Model):
     """The model to associate many battles"""
-    TYPE_BATTLES = ( (0,"length"),(1,"time") )
+    TYPE_BATTLES = ( ("length","length"),("time","time") )
     date = models.DateField(auto_now_add=True)
     invitations_user = models.ManyToManyField(auth_model.User)
     battle_owner = models.ForeignKey(auth_model.User,related_name="battle_owner")
     battle_winner = models.OneToOneField('BattleResponse',blank=True,null=True,related_name="winner")
     question = models.ForeignKey(CodingIoQuestion,related_name="battle_question")
-    type = models.IntegerField(default=0,choices=TYPE_BATTLES)
+    type = models.TextField(default=0,choices=TYPE_BATTLES)
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
     short_description = property(lambda x: x.question.short_description)
     long_description = property(lambda x: x.question.long_description)
     
-
     def determine_winner(self):
-        if not self.battle_winner and self.battles.first():
+        if (self.battles.first() and not self.battle_winner 
+            and not self.invitations_user.all() ):
             self.battle_winner = getattr(self,'winner_'+self.type)()
             self.save()
         return self.battle_winner
@@ -29,13 +29,17 @@ class Battle(models.Model):
         def source_length(battle):
             return len(battle.source)
         return min(self.battles.all(), key=source_length)
-
+    
+    def winner_time(self):
+        def source_time(battle):
+            return battle.time_end - battle.time_end
+        return min(self.battles.all(),key=source_time)
 
     def __str__(self):
         if self.battle_winner:
-            return "%s (%s) winner: %s" %(self.id,str(self.date),self.battle_winner.user)
+            return "(%s) %s Winner: %s" % (self.id,self.battle_winner.user,self.short_description)
         else:
-            return "%s (%s)" % (self.id,str(self.date))
+            return "(%s) %s" % (self.id,self.short_description)
 
 
 class BattleResponse(CodingIoResponse):

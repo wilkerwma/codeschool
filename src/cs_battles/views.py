@@ -106,4 +106,13 @@ class BattleCRUDView(CRUDViewPack):
             self.object.save()
             create_battle_response(self.object,self.request.user)
             return super(ModelFormMixin, self).form_valid(form)
-            
+    class DetailViewMixin:
+        def get_object(self,queryset=None):
+            object = super().get_object(queryset)
+            object.determine_winner()
+            return object
+             
+        def get_context_data(self, **kwargs):
+                return super().get_context_data(
+                    all_battles=self.object.battles.all(),**kwargs)
+
