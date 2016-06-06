@@ -7,41 +7,18 @@ from cs_questions.models import Question, CodingIoResponse
 from cs_core.models import ProgrammingLanguage
 from .models import BattleResponse,Battle
 from datetime import datetime
+from viewpack import CRUDViewPack
+from django.views.generic.edit import ModelFormMixin
 
-# Principal method to battles
-def index(request):
-    all_battles = Battle.objects.all()
-    invitations_user = invitations(request)
-    return render(request, 'battles/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
-
-# Controller to view result of a battle
-def battle_result(request,battle_pk):
-    context = {}
-    try:
-        # Obtain the battles of battle result
-        result_battle = Battle.objects.get(id=battle_pk)
-        battles = result_battle.battles.all()
-
-        # Determine the winner of this battle result based in the type (lenght, time resolution)
-        context = { "battles": battles }
-        if not result_battle.invitations_user.all():
-            context["battle_winner"] = result_battle.determine_winner()
-
-    except Battle.DoesNotExist as e:
-        print("Not found battle"+str(e))
-        raise Http404("BattleResponse not found")
-
-    return render(request,'battles/battle_result.jinja2',context)
+from .forms import  BattleForm
 
 def battle(request,battle_pk):
     if request.method == "POST":
-        print("Method POST")
-        form = request.POST
-        battle_code = form.get('code')
-        if battle_code:
+        form = BattleForm(request.POST)
+        battle_code = form.cleaned_data['source']
+        if battle_code.is_valid():
             time_now = datetime.now()
             battle_result = Battle.objects.get(id=battle_pk)
-
             coding = CodingIoResponse.objects.create(
                 question=battle_result.question,
                 user_id=1,
@@ -59,50 +36,21 @@ def battle(request,battle_pk):
 
         return render(request, 'battles/battle.jinja2')
     else:
-        print("Method GET")
         return render(request, 'battles/battle.jinja2')
 
 # Define the battles of a user
 def battle_user(request):
     user = request.user
     battles = BattleResponse.objects.filter(user_id=user.id)
-    print(battles)
     context = {"battles": battles}
     return render(request, 'battles/battle_user.jinja2', context)
 
 
-# Create a new invitation
-def invitation_users(request):
-    if request.method == "POST":
-        battle = Battle()
-        battle.date = timezone.now()
-        battle.type = request.POST.get('type')
-        battle.question = Question.objects.get(id=request.POST.get('questions'))
-        battle.language = ProgrammingLanguage.objects.get(pk=request.POST.get('languages'))
-        battle.battle_owner = request.user
- 
-        battle.save()
-        names = request.POST.get('usernames')
-        users = []
-
-        for name in names.split(";"):
-            user = User.objects.filter(username=name.strip())
-            if len(user):
-                users.append(user[0])
-
-        [battle.invitations_user.add(user) for user in users]
-        create_battle_response(battle,request.user)
-        return redirect(reverse('figths:battle',kwargs={'battle_pk':battle.id})) 
-    else:
-        context = { "questions": Question.objects.all(),
-                    "languages": ProgrammingLanguage.objects.all() }
-        return render(request,'battles/invitation.jinja2', context)
-
 # View the invitations
 def invitations(request):
-    print(request.user.id)
     invitations_user = Battle.objects.filter(invitations_user=request.user.id).all()
-    return invitations_user
+    context = {'invitations': invitations_user}
+    return render(request,'battles/invitation.jinja2', context)
 
 # Accept the invitation
 def battle_invitation(request):
@@ -113,12 +61,12 @@ def battle_invitation(request):
         if form_post.get('accept'):
             battle = Battle.objects.get(id=battle_pk)
             create_battle_response(battle,request.user)
-            method_return = redirect(reverse('figths:battle',kwargs={'battle_pk':battle_pk}))
+            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':battle_pk}))
         elif battle_pk and form_post.get('reject'):
             battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
-            method_return = redirect(reverse('figths:index'))
-        
+            method_return = redirect(reverse('fights:view_invitation'))
+
     return method_return
 
 def create_battle_response(battle,user):
@@ -126,10 +74,41 @@ def create_battle_response(battle,user):
     if not battle_response:
         battle_response = BattleResponse.objects.create(
             user=user,
-            battle_code="",
+            language=battle.language,
+            source="",
             time_begin=timezone.now(),
             time_end=timezone.now(),
-            battle_result=battle
+            battle=battle
         )
     battle.invitations_user.remove(user)
+
+class BattleCRUDView(CRUDViewPack):
+    model = Battle
+    template_extension = '.jinja2'
+    template_basename = 'battles/'
+    check_permissions = False
+    raise_404_on_permission_error = False
+    exclude_fields = ['battle_owner','battle_winner' ]
+
+    class CreateMixin:
+
+        def get_success_url(self):   
+            return reverse("figths:battle",kwargs={'battle_pk': self.object.pk})
+
+        def form_valid(self,form):
+            self.object = form.save(commit=False)
+            self.object.battle_owner = self.request.user
+            self.object.save()
+            create_battle_response(self.object,self.request.user)
+            return super(ModelFormMixin, self).form_valid(form)
+
+    class DetailViewMixin:
+        def get_object(self,queryset=None):
+            object = super().get_object(queryset)
+            object.determine_winner()
+            return object
+             
+        def get_context_data(self, **kwargs):
+                return super().get_context_data(
+                    all_battles=self.object.battles.all(),**kwargs)
 

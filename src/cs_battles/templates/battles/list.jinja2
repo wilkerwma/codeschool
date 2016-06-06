@@ -1,0 +1,49 @@
+{% extends "viewpack/crud/list-base.jinja2" %}
+{% block content_title %}{{ super() }}{% endblock %}
+
+{% block content_body %}
+    {% block invitation %}
+        <a href="invitations">Invitations</a>
+        <a href="new">New invitation </a>
+        <a href="user">My battles</a><p>
+    {% endblock %}
+    {% block show_list %}
+        <table id="battles">
+            <thead>
+                <tr>
+                    <th>Ativo</th><th>Número</th><th>Question</th><th>Descrição</th><th>Tipo</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for battle in object_list  %}
+                <tr onclick="location.href='{{battle.pk}}'"  >
+                    <td>{% if battle.is_active or battle.is_active == None %}X{% else %}O{% endif %}</td>
+                    <td>{{battle.pk}}</td>
+                    <td>{{battle.question}}</td>
+                    <td>{{battle.short_description}}</td>
+                    <td>{{ battle.type }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endblock %}
+
+
+    {% block extra_js %}
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript">
+            $("#battles").DataTable();
+        </script>
+    {% endblock %}
+
+    {% block extra_css %}
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+        <style>
+            #battles tr:hover{
+                cursor: pointer;
+                background: white;
+                color: black;
+            }
+        </style>
+    {% endblock %}
+{% endblock %}
