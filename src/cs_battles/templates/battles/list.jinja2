@@ -27,5 +27,15 @@
         </table>
     {% endblock %}
 
-    <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+
+    {% block extra_js %}
+        <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript">
+            $("#battles").DataTable();
+        </script>
+    {% endblock %}
+
+    {% block extra_css %}
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css">
+    {% endblock %}
 {% endblock %}
