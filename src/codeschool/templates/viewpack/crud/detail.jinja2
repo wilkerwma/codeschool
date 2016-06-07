@@ -1,0 +1,41 @@
+{% extends 'viewpack/crud/detail-base.jinja2' %}
+
+{% if has_actions is not defined %}
+    {% set can_see_responses = can_see_responses|default(true) %}
+    {% set has_actions = can_edit or can_download or can_see_responses %}
+{% endif %}
+
+{% block content_head %}
+    <action-handle expand-on-hover>
+        {% if has_actions %}
+            <h1 class="action-handle-title">{{ _('Actions') }}</h1>
+            {% if can_edit %}<menu-item href="./edit" icon="edit">{{ _('Edit') }}</menu-item>{% endif %}
+            {% if can_download %}<menu-item href="./download" icon="file_download">{{ _('Download') }}</menu-item>{% endif %}
+            {% if can_see_responses %}<menu-item href="./responses" icon="playlist_add_check">{{ _('Responses') }}</menu-item>{% endif %}
+        {% endif %}
+
+        <!-- Detail box -->
+        <h1 class="action-handle-title">{{ _('Details') }}</h1>
+        {% block object_detail_dl %}
+            <dl>
+                {% for (name, value) in detail_items %}
+                    {% block detail_item scoped %}
+                        <dt>{{ name }}</dt>
+                        <dd>{{ value }}</dd>
+                    {% endblock %}
+                {% endfor %}
+            </dl>
+        {% endblock %}
+    </action-handle>
+    {{ super() }}
+
+{% endblock %}
+
+{% block object_description %}
+    <h2>{{ _('Description') }}</h2>
+    <div>{{ object.long_description|markdown }}</div>
+{% endblock %}
+
+{% block content_body %}
+    {{ self.object_description() }}
+{% endblock %}

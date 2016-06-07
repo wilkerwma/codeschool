@@ -1,0 +1,1 @@
+Codeschool is a learning environment focused on programming.

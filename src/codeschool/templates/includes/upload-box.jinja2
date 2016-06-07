@@ -1,0 +1,35 @@
+{% macro upload_box(form, ask=True, error=None) %}
+    {% if ask %}
+        <div class="box file">
+            <form method="POST" enctype="multipart/form-data" id="import-form">
+                {% csrf_token %}
+                <div class="alert-message">
+                    <p>
+                        <strong>{{ _('Import object') }}</strong><br>
+                        {{ form }}
+                    </p>
+                    <button type="submit" class="alert-button" form="import-form" style="background: none">
+                        <i class="material-icons alert">file_upload</i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    {% elif error %}
+        <div class="box error">
+            <div class="alert-message">
+                <i class="material-icons alert">error</i>
+                <p>{{ error }}</p>
+            </div>
+            <form class="toolbar" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form }}
+                <input type="submit" value={{ _("Import") }}>
+            </form>
+        </div>
+    {% else %}
+        <div class="box success alert-message">
+            <i class="material-icons alert">done</i>
+            <p>{{ _('Import was successful') }}</p>
+        </div>
+    {% endif %}
+{% endmacro %}

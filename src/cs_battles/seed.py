@@ -1,3 +1,12 @@
+### Comentarios:
+# Talvez devessemos trocar este modulo por um modulo de factories usando o
+# FactoryBoy. Por enquanto estou usando as factories apenas no contexto de testes,
+# mas cabe em outros lugares como popular bancos de dados iniciais.
+#
+# Veja como fazer em codeschool/factories.py
+###
+
+
 # Determine the seeds to test data
 import django
 from django.conf import settings
@@ -26,6 +35,8 @@ def seed():
 
     for b in battles:
         b.save()
+
+
 def create_users(amount):
     global users
     last_index = User.objects.order_by("-id")[0].id
@@ -60,7 +71,7 @@ if __name__ == "__main__":
 
 #    if not settings.configured:
 #        settings.configure(base,DEGUB=True)
-    from cs_ranking.models import BattleResponse,BattleResult
+    from cs_battles.models import BattleResponse,Battle
     from django.contrib.auth.models import User
     from django.utils import timezone
 #    from codeschool.settings import base

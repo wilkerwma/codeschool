@@ -1,0 +1,70 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--
+    Codeschool side bar navegation element.
+
+    It automatically style <ul> elements inside direct direct child elements.
+    All children are treated as block elements.
+-->
+<dom-module id="cs-nav">
+    <template>
+        <div id="content">
+            <content></content>
+        </div>
+
+        <img id="dingbat" src="dingbat.svg">
+    </template>
+
+    <style>
+        :host {
+            display: none;
+            background: #eee;
+            padding: 20px 20px 20px 30px;
+            flex-grow: 1;
+            min-width: 180px;
+            max-width: 250px;
+            color: #222;
+        }
+
+        ::content * {
+            font: 23px 'Amatic SC', cursive !important;
+            font-weight: bold;
+        }
+
+        ::content p {
+            margin-bottom: 5px;
+        }
+
+        ::content ul {
+            font-size: 19px !important;
+            list-style: none;
+            padding-left: 20px;
+            margin-top: 0;
+        }
+
+        #dingbat {
+            margin: 35px auto;
+            display: block;
+            width: 60%;
+            max-width: 90px;
+        }
+
+        @media only screen and (min-width: 640px) {
+            :host {
+                display: block;
+            }
+        }
+
+    </style>
+
+    <script>
+        HTMLImports.whenReady(
+                CsFootElement = Polymer({
+                    is: 'cs-nav',
+                    properties: {},
+                    ready: function () {
+                    }
+                })
+        );
+    </script>
+</dom-module>
+

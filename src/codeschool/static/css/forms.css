@@ -1,0 +1,127 @@
+/* Input elements */
+.mdl-button,
+button,
+a.button,
+input[type=button],
+input[type=submit],
+input[type=reset] {
+    border-radius: 0px;
+    border: 0;
+    background: #00a7a7;
+    color: white;
+    text-transform: none;
+    font-weight: 400;
+}
+
+.mdl-button.flat,
+button.flat,
+a.button.flat,
+input[type=button].flat,
+input[type=submit].flat,
+input[type=reset].flat {
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    text-transform: inherit;
+    font-weight: bold;
+}
+
+textarea,
+select,
+input[type=text],
+input[type=number],
+input[type=password],
+input[type=email] {
+    padding: 5px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+}
+
+select {
+    background: #eee;
+}
+
+textarea {
+    resize: both;
+}
+
+/* Form table layout */
+.form tr,
+form tr{
+    display: flex;
+    flex-flow: column;
+}
+
+.form td,
+.form th,
+form td,
+form th {
+    padding: 8px;
+    vertical-align: top;
+}
+
+.form th,
+form th {
+    font-weight: 500;
+    color: #444;
+    text-align: left;
+    padding-bottom: 0;
+    min-width: 150px;
+}
+
+.form td,
+form td {
+    padding-top: 0;
+    width: 100%;
+}
+
+.form textarea,
+form table textarea {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 600px;
+}
+
+@media all and (min-width: 600px) {
+    .form tr,
+    form tr {
+        display: table-row;
+    }
+
+    .form th,
+    form th {
+        text-align: right;
+        padding-bottom: 8px;
+    }
+
+    .form td,
+    form td {
+        padding-top: 8px;
+    }
+}
+
+/* Form actions */
+.form ul.errorlist,
+form ul.errorlist {
+    margin: 0;
+    padding: 0;
+    font-size: 85%;
+    color: #ba2121;
+}
+
+.form ul.errorlist li,
+form ul.errorlist li {
+    display: block;
+}
+
+.form .helptext,
+form .helptext {
+    font-size: 85%;
+    color: darkgrey;
+}
+
+.form span.helptext,
+form span.helptext {
+    display: block;
+}
+

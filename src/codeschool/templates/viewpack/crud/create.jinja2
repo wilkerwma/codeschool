@@ -1,0 +1,12 @@
+{% extends "viewpack/crud/create-base.jinja2" %}
+
+{% block content_head %}
+    {{ super() }}
+    {% if upload_enable %}
+        <p>{{ _('You can add a new object by filling up the form bellow or by importing a file.') }}</p>
+        {% from "includes/upload-box.jinja2" import upload_box with context %}
+        {{ upload_box(upload_form, upload_ask|default(true), upload_error|default(false)) }}
+    {% else %}
+        <p>{{ _('Please fill up the form bellow.') }}</p>
+    {% endif %}
+{% endblock %}

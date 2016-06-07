@@ -1,0 +1,39 @@
+{% extends "base.jinja2" %}
+{% block title %}Code winner{% endblock %}
+{% block content %}
+    This is the battles, participe too<p>
+ <!--   <a href="invitation" >See the chalanges</a><p> -->
+        Invitations <a href="invitation">New invitation </a>
+        <ul>
+            {% for invitation in invitations %}
+                <form action="/battle/accept" method="POST">
+                    {% csrf_token %}
+                    {{ invitation }}
+                    <input type="hidden" value="{{ invitation.id }}" name="id_battle"></input>
+                    <input type="submit" value="aceitar" name="accept"></input>
+                    <input type="submit" value="rejeitar" name="reject"></input>
+                </form>
+            {% endfor %}
+        </ul>
+                    
+        <a href="user">My battles</a><br>
+<table id="battles">
+    <thead><tr><th>ID</th><th>Data</th><th>Vencedor</th></tr></thead>
+    <tbody>
+    {% for battle in battles %}
+        <tr onclick="location.href='/battle/{{ battle.id }}'" >
+            <td> {{battle.id }}</td>
+            <td> {{battle.date}}</td>
+            <td> {% if battle.battle_winner %} {{ battle.battle_winner }} {% else %} A determinar {% endif %} </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="../../static/cs_ranking/css/battle_table.css">
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+<script src="{% static 'cs_ranking/js/battle_table.js' %}"></script>
+{% endblock %}

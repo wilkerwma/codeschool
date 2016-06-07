@@ -1,3 +1,7 @@
+# IDE
+.idea/
+db/
+
 # Cached builds
 __pycache__/
 *.pyc
@@ -6,6 +10,8 @@ __pycache__/
 *.so
 *.dll
 *.egg
+*.sqlite3
+*.sqlite3.bak
 *.egg-info/
 
 # Build directories
@@ -16,3 +22,7 @@ dist/
 # Temporary files
 *.*~
 *.swp
+.cache/
+src/.cache/
+collect/
+src/codeschool/bower/

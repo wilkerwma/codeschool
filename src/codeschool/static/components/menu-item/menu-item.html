@@ -1,0 +1,60 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+
+<dom-module id="menu-item">
+    <template>
+        <div id="parent">
+            <a id="link" href="{{ href }}">
+                <span><content></content></span>
+                <i id="icon" class="material-icons">{{ icon }}</i>
+            </a>
+        </div>
+    </template>
+
+    <style>
+        :host {
+            display: block;
+            padding: 0;
+        }
+
+        #link {
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #parent:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        #link > * {
+            display: block;
+        }
+
+    </style>
+
+    <script>
+        HTMLImports.whenReady(
+            AceEditorElement = Polymer({
+                is: 'menu-item',
+                properties: {
+                    icon: {
+                        type: String,
+                        reflectToAttribute: true
+                    },
+                    href: {
+                        type: String,
+                        reflectToAttribute: true
+                    },
+                    disabled: {
+                        type: Boolean,
+                        value: false,
+                        reflectToAttribute: true
+                    }
+                }
+            })
+        );
+    </script>
+</dom-module>
+

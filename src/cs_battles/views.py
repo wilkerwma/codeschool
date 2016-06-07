@@ -23,7 +23,6 @@ def battle(request,battle_pk):
 
             battle_response = battle.battles.filter(user_id=request.user.id).first()
             battle_response.source = battle_code
-            print("AAAAA: ", battle_code)
             battle_response.question = battle.question
             battle_response.language=battle.language
             battle_response.time_end = time_now
@@ -43,8 +42,8 @@ def battle(request,battle_pk):
     else:
         return render(request, 'battles/battle.jinja2')
 
-# Define the battles of a user
 def battle_user(request):
+    """Define the battles of a user"""
     user = request.user
     battles = BattleResponse.objects.filter(user_id=user.id)
     context = {"battles": battles}
@@ -71,7 +70,6 @@ def battle_invitation(request):
             battle_result = Battle.objects.get(id=battle_pk)
             battle_result.invitations_user.remove(request.user)
             method_return = redirect(reverse('cs_battles:view_invitation'))
-
     return method_return
 
 def create_battle_response(battle,user):

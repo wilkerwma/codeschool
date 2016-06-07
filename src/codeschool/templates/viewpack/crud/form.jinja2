@@ -1,0 +1,13 @@
+{% extends "viewpack/crud/form-base.jinja2" %}
+
+{% block content_body %}
+    <div class="toolbar highlight top">
+        {{ self.form_actions() }}
+    </div>
+
+    {{ self.form() }}
+
+    <div class="toolbar highlight">
+        {{ self.form_actions() }}
+    </div>
+{% endblock %}

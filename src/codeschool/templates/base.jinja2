@@ -1,0 +1,196 @@
+{%- if globals %}
+    {%- if not content_color %}{% set content_color = globals['content_color'] %}{% endif %}
+    {%- if not object_name %}{% set object_name = globals['object_name'] %}{% endif %}
+    {%- if not form_name %}{% set form_name = globals['form_name'] %}{% endif %}
+{%- endif %}
+<!DOCTYPE html>
+<html lang="pt-br" class="no-js">
+<head>
+    {% block meta %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="description" content="{{ page_description|default('Codeschool - learn through coding') }}">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
+    {% endblock %}
+    <title>
+        {%- block title %}
+            {% if page %}
+                {%- if page.seo_title %}{{ page.seo_title }}{% else %}{{ page.title }}{% endif -%}
+            {% else %}
+                {{- title|default('Codeschool') -}}
+            {% endif %}
+        {% endblock %}
+        {%- block title_suffix %}
+            {% if title_suffix %}{{ title_suffix|markdown }}{% endif %}
+        {% endblock %}</title>
+
+    <!-- CSS and styles -->
+    {% block style %}
+        {% compress css %}
+            <link rel="stylesheet" href="{% static 'bower_components/dialog-polyfill/dialog-polyfill.css' %}">
+            <link rel="stylesheet" href="{% static 'bower_components/material-design-lite/material.min.css' %}">
+            <link rel="stylesheet" href="{% static 'css/normalize.css' %}">
+            <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
+            <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+            <link rel="stylesheet" href="{% static 'css/roles.css' %}">
+            <link rel="stylesheet" href="{% static 'css/content.css' %}">
+            <link rel="stylesheet" href="{% static 'css/ternary.css' %}">
+            <link rel="stylesheet" href="{% static 'css/dialogs.css' %}">
+            <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        {% endcompress %}
+        {% if content_color %}
+            <style>
+                #content-area main > *:nth-child(odd) {
+                    background-color: {{ content_color }};
+                }
+            </style>
+        {% endif %}
+    {% endblock %}
+
+    <!-- Javascript -->
+    {% block javascript_header %}
+        {% compress js %}
+            <script src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}"></script>
+            <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
+            <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+            <script src="{% static 'bower_components/dialog-polyfill/dialog-polyfill.js' %}"></script>
+        {% endcompress %}
+    {% endblock %}
+
+    <!-- Web components -->
+    {% block webcomponents %}
+        <link rel="import" href="{% static 'components/main.min.html' %}">
+    {% endblock %}
+</head>
+
+<body class="{% block body_class %}fullbleed layout vertical{% if body_class %} {{ body_class }}{% endif %}{% endblock %}" unresolved>
+    <!--[if le IE 9]>
+        <p class="browserupgrade">
+            You are using an <strong>outdated</strong> browser. Please
+            <a href="http://browsehappy.com/">upgrade your browser</a> to
+            improve your experience.
+        </p>
+    <![endif]-->
+
+    {% block body %}
+    <div id="cs-body">
+        <cs-head id="cs-head" {% if user.first_name %} username="{{ user.first_name }}"{% endif %}>
+            <a href="#" class="disabled-link">Opções</a>
+            <a href="#" class="disabled-link">Avisos</a>
+            <a href="/courses/">Cursos</a>
+            <a href="/accounts/login/">Login</a>
+        </cs-head>
+
+        <div id="content-area">
+            <cs-nav id="cs-nav">
+                {% block nav_sections %}
+                    {% if not disable_courses_section %}
+                        <nav>
+                            <p><a href="/courses/">{{ _('Courses') }}</a></p>
+                            <ul>
+                                <li><a href="/questions/">{{ _('List of questions') }}</a></li>
+                                {% for course in user.related_courses %}
+                                    <li><a href="/courses/{{ course.pk }}">{{ course.name }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                    {% if not disable_profile_section and user is defined %}
+                        <nav>
+                            <p><a href="/accounts/{{ user.username }}/">{{ _('Profile') }}</a></p>
+                            <ul>
+                                <li><a href="/accounts/{{ request.user.username }}/edit">{{ _('Edit') }}</a></li>
+                                <li class="disabled-link">Amigos</li>
+                                <li class="disabled-link">Configurações</li>
+                            </ul>
+                        </nav>
+                    {% endif %}
+                {% endblock %}
+            </cs-nav>
+
+            <main>
+                {% block content %}
+                    <section>
+                        {% block content_head %}
+                            <h1>{% block content_title %}{{ content_title }}</h1>{% endblock %}
+                        {% endblock %}
+                    </section>
+
+                    {% block content_sessions %}
+                        <section>
+                            {% block content_body %}
+                                {{ content_body|markdown }}
+                            {% endblock %}
+                        </section>
+                    {% endblock %}
+                {% endblock %}
+            </main>
+        </div>
+
+        <cs-foot id="cs-foot">
+            <div>
+                <p>Amigos (em construção)</p>
+                <ul>
+                    <li>Fulano fez isso</li>
+                    <li>Cicrano fez aquilo</li>
+                    <li>Beltrano fez aquio outro</li>
+                </ul>
+            </div>
+
+            <div>
+                <p>Agenda (em construção)</p>
+                <ul>
+                    <li>Prova dia X</li>
+                    <li>Trabalho para dia Y</li>
+                    <li>Estudar XY</li>
+                </ul>
+            </div>
+
+            <div>
+                <p>Notícias (em construção)</p>
+                <ul>
+                    <li>Adicionou notas</li>
+                    <li>Mensagem do prof. CB</li>
+                    <li>Não haverá prova dia XXX</li>
+                </ul>
+            </div>
+        </cs-foot>
+    </div>
+    {% endblock %}
+
+    {% block hidden_content %}
+        <dialog id="dialog" class="dialog mdl-dialog">
+            <i id="dialog-close" onclick="this.parentNode.close()" class="material-icons">close</i>
+            <div id="dialog-content">{% block dialog_content %}{% endblock %}</div>
+        </dialog>
+    {% endblock %}
+
+    <!-- Javascript in the end of file -->
+    {% block javascript %}
+        {#% compress js %#}
+            <script src="{% static 'bower_components/material-design-lite/material.min.js' %}"></script>
+            <script src="{% static 'js/srvice/json.js' %}"></script>
+            <script src="{% static 'js/srvice/commands.js' %}"></script>
+            <script src="{% static 'js/srvice/util.js' %}"></script>
+            <script src="{% static 'js/srvice/core.js' %}"></script>
+            <script src="{% static 'js/srvice/dialog.js' %}"></script>
+            <script src="{% static 'js/srvice/actions.js' %}"></script>
+            <script src="{% static 'js/main.js' %}"></script>
+            <script src="{% static 'js/plugins.js' %}"></script>
+        {#% endcompress %#}
+    {% endblock %}
+
+    {% if google_analytics|default(False) %}
+        <!-- Google Analytics -->
+        <script>
+            (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+            function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+            e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+            e.src='https://www.google-analytics.com/analytics.js';
+            r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+            ga('create','{{ google_analytics_site_id|default('codeschool') }}','auto');ga('send','pageview');
+        </script>
+    {% endif %}
+</body>
+</html>

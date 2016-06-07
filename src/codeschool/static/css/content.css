@@ -1,0 +1,74 @@
+#content-area main > * {
+    background-color: white;
+    color: black;
+    padding: 10px;
+}
+
+#content-area main > *:nth-child(odd) {
+    background-color: #fcaf3e;
+    color: white;
+}
+
+
+@media only screen and (min-width: 640px) {
+    #content-area main > * {
+        padding: 20px 20px 20px 30px;
+    }
+
+    #content-area {
+        display: flex;
+        flex-direction: row-reverse;
+        width: 100%;
+    }
+
+    #content-area main {
+        flex-grow: 7;
+    }
+
+    #content-area a {
+        color: black;
+    }
+
+    #content-area *.disabled-link {
+        color: darkgray;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    #content-area main > * {padding-left: 40px;}
+}
+
+
+/* Content cards */
+.content-cards > aside > p {display: none}
+
+@media only screen and (min-width: 640px) {
+    .content-cards > aside > p {display: block}
+
+    .content-cards {
+        display: flex;
+    }
+
+    .content-cards > aside {
+        width: 30%;
+    }
+
+    .content-cards > article {
+        margin-left: 30px;
+        flex-grow: 1;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        align-items: stretch;
+    }
+
+    .content-cards > article > * {
+        flex: 1 1 30%;
+    }
+}
+
+@media only screen and (min-width: 1000px) {
+    .content-cards > article {
+        margin-left: 60px;
+    }
+}

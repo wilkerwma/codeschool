@@ -1,0 +1,71 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+
+<dom-module id="cs-foot">
+    <template>
+        <div id="main">
+            <div id="main-content">
+                <content></content>
+            </div>
+        </div>
+
+        <div id="copyright">
+            <p>Copyright 2016 - <a
+                    href="http://github.com/fabiommendes/codeschool">Codeschool</a>
+            </p>
+            <p>Site gerenciado por Fábio M. Mendes na UnB/Gama.</p>
+        </div>
+    </template>
+
+    <style>
+        :host {
+            display: block;
+        }
+
+        #main {
+            padding: 20px;
+            background: #666 url('bg_gray_noise.png') repeat;
+            color: #ddd;
+        }
+
+        #main-content {
+            margin: 0 auto;
+        }
+
+        @media only screen and (min-width: 640px) {
+            #main-content {
+                display: flex;
+                justify-content: space-between;
+                width: 85%;
+            }
+        }
+
+        #copyright {
+            padding: 10px;
+            background: #333 url('bg_dark_noise.png') repeat;
+        }
+
+        #copyright p {
+            margin: 5px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+
+        #copyright a {
+            color: white;
+        }
+    </style>
+
+    <script>
+        HTMLImports.whenReady(
+                CsFootElement = Polymer({
+                    is: 'cs-foot',
+                    properties: {},
+                    ready: function () {
+                    }
+                })
+        );
+    </script>
+</dom-module>
+

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div id="gallery">
+        <header>
+            <h1>{{ gallery.name }}</h1>
+            <p>{{ gallery.description|markdown }}</p>
+        </header>
+        <main>
+        {% for submission in submissions %}
+            <section class="gallery-submission">
+                <header>
+                    <h1>{{ submission.name }}</h1>
+                    <p>{{ submission.date }}</p>
+                </header>
+                <main>
+                    <img src="{{ submission.image_url }}">
+                </main>
+                <footer>
+                    <p>Mostrar código <a onclick="show_code()">[+]</a></p>
+                    <pre><code class="lang-{{ submission.language }}">{{ submission.code }}</code></pre>
+                </footer>
+            </section>
+        {% endfor %}
+        </main>
+        <footer>
+            <nav>
+            {% for i in range(pagination_size) %}
+                <a href="../{{ i }}/">{{ i }}</a>
+            {% endfor %}
+            </nav>
+            <button onclick="show_submission_form()">Enviar</button>
+        </footer>
+    </div>
+
+{% endblock %}

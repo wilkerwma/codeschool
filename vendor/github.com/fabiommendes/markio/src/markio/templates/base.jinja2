@@ -1,0 +1,100 @@
+Question Name
+=============
+
+    # This section expects .ini data. The the first section is implied
+    Author: Your Name <email@server.com>
+    Timeout: 1.0
+    Tags: #begginer #basic
+
+    # You can put more sections and use either colon or an equal sign.
+    ; Semi colon comments are also accepted ;-)
+    [Custom Section]
+    key1: value1
+    key2= value2
+
+A short one-paragraph description of your question.
+
+
+Description
+-----------
+
+The long problem description.
+
+
+### Inputs
+
+It is a good idea to provide a detailed description of the problem inputs.
+
+
+### Outputs
+
+Ditto for outputs.
+
+{% if not disable_example %}
+Example
+-------
+
+    {% block example_content %}
+    # Public IoSpec test data
+    # see IoSpec documentation at http://pythonhosted.org/iospec/
+    What is your name? <John>
+    What is your age? <18>
+    Hello John!
+    {% endblock %}
+{% endif %}
+
+Tests
+-----
+
+    # This iospec block is used to create the private test cases for the online
+    # judge. Input blocks are allowed and encouraged.
+    @input
+        Mary
+        20
+
+    @input mary; 20
+    @input Long Name; 20
+
+    @input
+        $name
+        $int(0..100)
+
+Answer Key (c)
+--------------
+
+    int main() {
+        // reference solution (C)
+        printf("Hello World\n!");
+        return 0;
+    }
+
+Answer Key (python)
+--------------------
+
+    # Reference solution in Python 3
+    print('Hello World!')
+
+
+TLE Solution (c)
+----------------
+
+    main() {
+        // The time limit exceeded solution defines a robust timeout value by
+        // implementing a correct solution with a slow algorithm. The timeout
+        // will be set as the runtime of the TLE solution.
+        //
+        // This section is optional and overrides any given timeout parameter
+        // defined after the question title.
+    }
+
+
+Placeholder
+-----------
+
+    An optional placeholder comment. In most cases this is converted as a
+    block of comments in the desired computer language.
+
+Placeholder (python3)
+---------------------
+
+    # You can also specify a per-language placeholder.

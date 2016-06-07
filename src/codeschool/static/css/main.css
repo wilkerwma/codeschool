@@ -1,0 +1,88 @@
+main, nav, div, article, section, aside {
+    margin: 0;
+    padding: 0;
+}
+
+dl {
+    margin: 0;
+    padding: 20px;
+}
+
+dt {
+    float: left;
+    margin-right: 20px;
+}
+
+
+#wagtail-userbar {
+    top: 100px;
+}
+
+
+/* MDL overrides */
+.mdl-tabs.is-upgraded .mdl-tabs__tab.is-active:after,
+.mdl-tabs__tab .mdl-tabs__ripple-container .mdl-ripple {
+    background: #ffe180;
+}
+
+#cs-head,
+#cs-nav,
+#cs-foot {
+    box-shadow: 0 0 15px 1px rgba(0, 0, 0, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+#cs-head {
+    z-index: 3;
+}
+
+#cs-foot {
+    z-index: 1;
+}
+
+
+/* Background on very large screens */
+@media only screen and (min-width: 1000px) {
+    body {
+        background: url('../img/bg/swirl_pattern.png');
+        background-color: #ddd;
+    }
+
+    #cs-body {
+        background: white;
+        width: 1000px;
+        margin: 0 auto;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        box-shadow: 0 0 50px 5px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/*
+paper-item > a {
+    display: block;
+}
+
+.disabled {
+    background-color: grey !important;
+}
+
+
+#answer-keys {
+    min-width: 75%;
+    margin: 20px auto;
+    border: 2px solid darkgrey;
+    border-radius: 2px;
+}
+#answer-keys .first-col {
+    padding-right: 35%;
+}
+#answer-keys th {
+    background: darkgray;
+    color: white;
+}
+#answer-keys tr:nth-child(even) {
+    background: #eee;
+}
+*/

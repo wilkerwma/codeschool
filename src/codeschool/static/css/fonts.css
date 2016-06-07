@@ -1,0 +1,103 @@
+/** Import and normalize all fonts
+ *
+ * Codeschool uses Roboto as the primary font and Amatic SC for all the headers.
+ */
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url('../fonts/roboto.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto Mono'), local('RobotoMono-Regular'), url('../fonts/roboto-mono.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+@font-face {
+  font-family: 'Roboto Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Roboto Mono Bold'), local('RobotoMono-Bold'), url('../fonts/roboto-mono-bold.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+
+@font-face {
+  font-family: 'Amatic SC';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Amatic SC Bold'), local('AmaticSC-Bold'), url('../fonts/amatic-bold.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+
+@font-face {
+  font-family: 'Amatic SC';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Amatic SC Bold'), local('AmaticSC-Bold'), url('../fonts/amatic-bold-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url('../fonts/material-icons.woff2') format('woff2');
+}
+
+html, body {
+    font-family: Roboto, Helvetica, Arial, Tahoma, Verdana, sans-serif;
+    font-weight: 300;
+}
+
+address, ul, ol, tr, td, table, p {
+    font-weight: 300;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Amatic SC', cursive;
+    font-weight: bold;
+}
+
+h1 {font-size: 2.2em; margin: 0.5em 0px;}
+h2 {font-size: 2.0em; margin: 0.4em 0px;}
+h3 {font-size: 1.8em; margin: 0.3em 0px;}
+h4 {font-size: 1.6em; margin: 0.2em 0px;}
+h5 {font-size: 1.4em; margin: 0.1em 0px;}
+h6 {font-size: 1.2em; margin: 0.1em 0px;}
+
+@media only screen and (min-width: 1000px) {
+    h1 {font-size: 2.5em; margin: 0.5em 0px;}
+    h2 {font-size: 2.2em; margin: 0.4em 0px;}
+    h3 {font-size: 1.95em; margin: 0.3em 0px;}
+    h4 {font-size: 1.7em; margin: 0.2em 0px;}
+    h5 {font-size: 1.5em; margin: 0.1em 0px;}
+    h6 {font-size: 1.3em; margin: 0.1em 0px;}
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+.material-icons {
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+}

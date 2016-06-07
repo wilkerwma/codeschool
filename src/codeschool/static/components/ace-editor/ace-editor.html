@@ -1,0 +1,160 @@
+<!--link rel="import" href="../../bower_components/polymer/polymer.html"-->
+<script>
+    var $aceScript = null;
+    function $aceLoader() {
+        var path = '/static/bower_components/ace-builds/src-min/ace.js';
+        return $.getScript(path).then(function() {
+            ace.config.set('basePath', '/static/bower_components/ace-builds/src-min/');
+        });
+    }
+</script>
+
+<dom-module id="ace-editor">
+    <template>
+        <div id="editor"><content></content></div>
+    </template>
+
+    <style>
+        #editor {
+            height: 25em;
+            font-size: 1em;
+        }
+    </style>
+
+    <script>
+        HTMLImports.whenReady(
+            AceEditorElement = Polymer({
+                is: 'ace-editor',
+                properties: {
+                    mode: {
+                        type: String,
+                        value: 'javascript',
+                        observer: '_onModeChanged',
+                        reflectToAttribute: true
+                    },
+                    theme: {
+                        type: String,
+                        value: 'xcode',
+                        observer: '_onThemeChanged',
+                        reflectToAttribute: true
+                    },
+                    readOnly: {
+                        type: Boolean,
+                        value: false,
+                        observer: '_onReadOnlyChanged',
+                        reflectToAttribute: true
+                    },
+                    tabSize: {
+                        type: Number,
+                        value: 4,
+                        observer: '_onTabSizeChanged',
+                        reflectToAttribute: true
+                    },
+                    softTabs: {
+                        type: Boolean,
+                        value: false,
+                        observer: '_onSoftTabsChanged',
+                        reflectToAttribute: true
+                    },
+                    wrapMode: {
+                        type: Boolean,
+                        value: false,
+                        observer: '_onWrapModeChanged',
+                        reflectToAttribute: true
+                    },
+                    highlightActiveLine: {
+                        type: Boolean,
+                        value: false,
+                        observer: '_onHighlightActiveLineChanged',
+                        reflectToAttribute: true
+                    },
+                    showPrintMargin: {
+                        type: Boolean,
+                        value: false,
+                        observer: '_onShowPrintMarginChanged',
+                        reflectToAttribute: true
+                    },
+                    name: {
+                        type: String,
+                        observer: '_onNameChanged',
+                        reflectToAttribute: true
+                    },
+                    form: {
+                        type: String,
+                        observer: '_onFormChanged',
+                        readOnly: true,
+                        reflectToAttribute: true
+                    }
+                },
+
+                hostAttributes: {
+                    // Hash with default value for HTML attributes
+                },
+
+                ready: function () {
+                    var elem = this;
+                    
+                    function ready_cb() {
+                        elem.ace = ace.edit(elem.$.editor);
+                        elem.ace.resize();
+                        elem.find = elem.ace.find;
+                        elem.replace = elem.ace.replace;
+                        elem.replaceAll = elem.ace.replaceAll;
+                        elem.commands = elem.ace.commands;
+
+                        // Trigger observers to set default values
+                        elem._onModeChanged(elem.mode);
+                        elem._onThemeChanged(elem.theme);
+                        elem._onReadOnlyChanged(elem.readOnly);
+                        elem._onTabSizeChanged(elem.tabSize);
+                        elem._onSoftTabsChanged(elem.softTabs);
+                        elem._onWrapModeChanged(elem.wrapMode);
+                        elem._onHighlightActiveLineChanged(elem.highlightActiveLine);
+                        elem._onShowPrintMarginChanged(elem.showPrintMargin);
+                        elem.name && elem._onNameChanged(elem.name);
+                        elem.form && elem._onFormChanged(elem.form);
+
+                        // Connect submit event of an eventual parent form
+                        var textarea = $(elem._textarea());
+
+                        (elem.form? $('#' + elem.form): textarea.closest('form')).submit(function() {
+                            textarea.val(elem.getValue());
+                        });
+                    }
+
+                    if ($aceScript === null) {
+                        $aceScript = $aceLoader();
+                    }
+                    $aceScript.then(ready_cb);
+                },
+
+                setValue: function(value) {
+                    return this.ace.setValue(value);
+                },
+
+                getValue: function() {
+                    return this.ace.getValue();
+                },
+
+                _textarea: function() {
+                    return $(this.$.editor).find('textarea')[0];
+                },
+
+                // Observers
+                _onModeChanged:                 function(value) {this.ace && this.ace.getSession().setMode("ace/mode/" + value)},
+                _onThemeChanged:                function(value) {this.ace && this.ace.setTheme("ace/theme/" + value)},
+                _onReadOnlyChanged:             function(value) {this.ace && this.ace.setReadOnly(value)},
+                _onTabSizeChanged:              function(value) {this.ace && this.ace.getSession().setTabSize(value)},
+                _onSoftTabsChanged:             function(value) {this.ace && this.ace.getSession().setUseSoftTabs(value)},
+                _onWrapModeChanged:             function(value) {this.ace && this.ace.getSession().setUseWrapMode(value)},
+                _onHighlightActiveLineChanged:  function(value) {this.ace && this.ace.setHighlightActiveLine(value)},
+                _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)},
+                _onNameChanged:                 function(value) {this.ace && this._textarea().setAttribute('name', value)},
+                _onFormChanged:                 function(value) {this.ace && this._textarea().setAttribute('form', value)}
+            })
+        );
+    </script>
+</dom-module>
+
+
+

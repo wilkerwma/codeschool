@@ -1,0 +1,82 @@
+<link rel="import" href="../../bower_components/Sortable/Sortable.html">
+
+{#
+ This element uses a paper-menu of selectable actions together with a
+ toolbar with action buttons/links
+
+ <selectable-actions>
+    <paper-menu>
+        <paper-menu-item data-id="action1">action 1</paper-menu-item>
+        <paper-menu-item data-id="action2">action 2</paper-menu-item>
+        ...
+    <paper-menu>
+
+    <nav>
+        <button class="requires-selection">1</button>
+        <button class="requires-single">1</button>
+        <button>1</button>
+        ...
+    </nav>
+<selectable-actions>
+ #}
+
+<dom-module id="selectable-actions">
+    <template>
+        <div id="error" style="display: none"></div>
+        <content></content>
+    </template>
+
+    <script>
+        (function($) {
+            Polymer({
+                is: 'selectable-actions',
+                properties: {
+                    selected: {
+                        type: Object,
+                        reflectToAttribute: true
+                    }
+                },
+
+                ready: function() {
+                    var element = this;
+                    var ref = $(this).attr('data-id') || null;
+                    var menu = $(this).find('paper-menu')[0];
+                    var actions = $(this).find('nav [action]');
+
+                    // Create on-click handler for each button
+                    $(actions).each(function () {
+                        var action = $(this).attr('action');
+                        var data_attr = $(this).attr('data') || '';
+                        data_attr = (new Function('return ' + data_attr))();
+
+                        $(this).click(function() {
+                            if (!$(this).hasClass(element.disabledClass)) {
+
+                                var selected = $.map(menu.selectedItems, function (x) {
+                                    return $(x).attr('data-id');
+                                });
+                                var data = $.extend({
+                                    selected: selected,
+                                    ref: ref
+                                }, data_attr);
+                                $.srvice(action, data);
+                            }
+                        })
+                    });
+
+                    // Register to menu changed event
+                    menu.addEventListener('iron-select', function() {
+                        actions.removeClass(element.disabledClass);
+                        var select_size = (this.selectedItems || []).length;
+                        if (select_size === 0) {
+                            actions.filter('[requires-selection]').addClass(element.disabledClass);
+                        }
+                        if (select_size !== 1) {
+                            actions.filter('[requires-single]').addClass(element.disabledClass);
+                        }
+                    });
+                }
+            });
+        })(jQuery);
+    </script>
+</dom-module>

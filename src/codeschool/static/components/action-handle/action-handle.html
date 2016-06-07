@@ -1,0 +1,125 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<!--
+    An action handle displays an icon in a semi-transparent skin and expands to
+    its content area when clicked. This is useful to put administrative
+    actions in a non-obtrusive way in the public page.
+-->
+
+<dom-module id="action-handle">
+    <template>
+        <i id="icon" class="material-icons">{{ icon }}</i>
+        <div id="content">
+            <content></content>
+        </div>
+    </template>
+
+    <style>
+        :host {
+            float: right;
+            clear: none;
+            right: 10px;
+            top: 10px;
+            display: block;
+            position: relative;
+            z-index: 100;
+        }
+
+        #icon {
+            text-align: right;
+            display: block;
+            margin-left: auto;
+            opacity: 0.1;
+            background-color: black;
+            padding: 5px;
+            border-radius: 50%;
+        }
+
+        :host[expanded] #icon,
+        :host[expand-on-hover]:hover #icon {
+            background-color: #00a7a7;
+            opacity: 1;
+            position: absolute;
+            right: 0;
+        }
+
+        #content {
+            display: none;
+            background-color: #eee;
+            color: black;
+            padding: 0;
+            border: 1px solid #666;
+            z-index: 100;
+        }
+
+        :host[expanded] #content,
+        :host[expand-on-hover]:hover #content {
+            display: block;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            min-width: 200px;
+        }
+
+        ::content .action-handle-title {
+            margin: 0;
+            background-color: #aaa;
+            color: white;
+            padding: 5px 20px;
+            font: 15px "Roboto", sans-serif;
+            font-weight: bold;
+
+        }
+
+        ::content dl {
+            padding: 20px;
+            margin: 0;
+        }
+
+        ::content dt {
+            float: none;
+        }
+
+        ::content dd {
+            margin-left: 30px;
+        }
+    </style>
+
+    <script>
+        HTMLImports.whenReady(
+            ActionHandleElement = Polymer({
+                is: 'action-handle',
+                properties: {
+                    icon: {
+                        type: String,
+                        value: 'expand_more',
+                        reflectToAttribute: true
+                    },
+
+                    expanded: {
+                        type: Boolean,
+                        value: false,
+                        reflectToAttribute: true
+                    },
+
+                    expandOnHover: {
+                        type: Boolean,
+                        value: false,
+                        reflectToAttribute: true
+                    }
+                },
+                ready: function () {
+                    var element = this;
+
+                    this.$.icon.addEventListener('click', function() {
+                        if (!element.expandOnHover) {
+                            element.expanded = !element.expanded;
+                        }
+                    })
+                }
+            })
+        );
+    </script>
+</dom-module>
+

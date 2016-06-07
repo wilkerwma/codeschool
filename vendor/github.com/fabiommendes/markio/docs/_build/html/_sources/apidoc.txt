@@ -1,0 +1,94 @@
+=============
+API Reference
+=============
+
+Markio is very simple to use. Users may want to use the :func:`markio.parse` and
+:func:`markio.parse_string` functions
+
+    >>> import markio
+    >>> parsed = makrio.parse('hello-person.markio')
+    >>> parsed.title
+    'Hello Person'
+
+The ``parsed`` output is an instance of the :class:`markio.Markio`. See the
+documentation bellow.
+
+.. autofunction:: markio.parse
+
+.. autofunction:: markio.parse_string
+
+
+Parse trees
+===========
+
+The parse tree root node is an instance of :class:`markio.Markio`. This
+structure can be initialized either as the result of :func:`markio.parse` and
+:func:`markio.parse_string`, or it can be constructed manually as in the
+following example
+
+    >>> markio = Markio("Example question", author="Me")
+
+We can also add data by directly writing in the attributes
+
+   >>> markio.short_description = "A simple example"
+   >>> markio.description = "Long description paragraph in markdown."
+
+The "answer key" and "placeholder" sections are just a dictionaries mapping
+programming languages to their corresponding source
+
+   >>> markio.answer_key['python'] = 'print("hello world")'
+   >>> markio.placeholder['python'] = '# type you python code here'
+
+Finally, translations are accessed as indexes
+
+    >>> markio['pt_BR'].placeholder['python'] = '# digite seu código aqui'
+
+We can either pretty-print the resulting structure or generate the
+corresponding markio source
+
+   >>> markio.pprint()
+   {'answer_key': {'python': 'print("hello world")'},
+    'author': 'Me',
+    'description': 'Long description paragraph in markdown.',
+    'placeholder': {'python': '# type you python code here'},
+    'short_description': 'A simple example',
+    'title': 'Example question',
+    'translations': {'pt_BR': {'placeholder': {'python': '# digite seu código '
+                                                         'aqui'}}}}
+   >>> print(markio.source())
+   Example question
+   ================
+   <BLANKLINE>
+       Author: Me
+   <BLANKLINE>
+   A simple example
+   <BLANKLINE>
+   <BLANKLINE>
+   Description
+   -----------
+   <BLANKLINE>
+   Long description paragraph in markdown.
+   <BLANKLINE>
+   <BLANKLINE>
+   Answer Key (python)
+   -------------------
+   <BLANKLINE>
+       print("hello world")
+   <BLANKLINE>
+   <BLANKLINE>
+   Placeholder (python)
+   --------------------
+   <BLANKLINE>
+       # type you python code here
+   <BLANKLINE>
+   Placeholder (pt_BR, python)
+   ---------------------------
+   <BLANKLINE>
+       # digite seu código aqui
+
+
+Markio class API reference
+--------------------------
+
+.. autoclass:: markio.Markio
+   :members:

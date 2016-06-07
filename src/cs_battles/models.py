@@ -54,4 +54,4 @@ class BattleResponse(CodingIoResponse):
     battle = models.ForeignKey(Battle,related_name='battles')
 
     def __str__(self):
-        return "%s - BattleResponse - User:  %s" % (self.id,self.user)
+        return "BattleResponse - User:  %s" % self.user
