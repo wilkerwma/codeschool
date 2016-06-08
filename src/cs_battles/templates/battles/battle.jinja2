@@ -1,0 +1,51 @@
+{% extends "base.jinja2" %}
+{% block title %}
+Battle
+{% endblock %}
+{% block content %}
+<style type="text/css" media="screen">
+#editor {
+    height:  300px;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+</style>
+<div>
+    Coloque seu código aqui
+</div>
+<ace-editor id="editor" mode="python">
+    def hello():
+    print("Olha Eu aqui")
+
+    if __name__ == "__main__":
+    def hello()
+</ace-editor >
+
+<div>
+    <button id="button-submit">Submit</button>
+    <form method="POST" id="form">
+        {% csrf_token %}
+        <select id="lang" name="lang">
+            <option value="python" selected>Python</option>
+            <option value="javascript">JavaScript</option>
+            <option value="java">Java</option>
+        </select>
+        <input type="hidden" id="code" name="code" value="">
+    </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.3/ace.js" type="text/javascript" charset="utf-8"></script>
+
+<script >
+$(document).ready(function(){
+
+    $("#button-submit").click(function(){
+        $("#code")[0].setAttribute('value', $("#editor")[0].getValue());
+        $("#form")[0].submit();
+    });
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.jinja2" %}
+{% block content %}
+    <h1> Your invitations for battle </h1> 
+       <ul>
+            {% for invitation in invitations %} 
+                <form action="/battles/accept" method="POST"> 
+                    {% csrf_token %} 
+                    <input type="submit" value="aceitar" name="accept"></input> 
+                    <input type="submit" value="rejeitar" name="reject"></input> 
+                    {{ invitation }}
+                    <input type="hidden" value="{{ invitation.id }}" name="battle_pk"></input> 
+                </form> 
+            {% endfor %}
+        </ul>
+
+{% endblock %}

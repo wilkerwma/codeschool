@@ -20,7 +20,6 @@ users = []
 battles_result = []
 battles = []
 
-
 def seed():
     global battles_result
     create_users(10) 
@@ -72,7 +71,7 @@ if __name__ == "__main__":
 
 #    if not settings.configured:
 #        settings.configure(base,DEGUB=True)
-    from cs_battles.models import BattleResponse,BattleResult
+    from cs_battles.models import BattleResponse,Battle
     from django.contrib.auth.models import User
     from django.utils import timezone
 #    from codeschool.settings import base
