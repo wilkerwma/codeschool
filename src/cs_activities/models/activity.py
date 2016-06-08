@@ -114,7 +114,9 @@ class Activity(models.CopyMixin,
     )
     course = models.ForeignKey(
         'cs_courses.Course',
-        related_name='activities'
+        related_name='activities',
+        blank=True,
+        null=True,
     )
     parent = models.ForeignKey(
         'self',

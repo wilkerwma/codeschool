@@ -5,14 +5,15 @@ from autoslug import AutoSlugField
 from codeschool import models
 from cs_activities.models import Activity
 from cs_auth.models import FriendshipStatus
+from wagtail.wagtailcore.models import Page
 
 
 #
 # Main model classes
 #
-class Faculty(models.DescribableModel):
+class FacultyPage(models.DescribableModel, Page):
     """Describes a faculty/department or any institution that is responsible for
-     some given discipline"""
+     disciplines"""
 
 
 class Discipline(models.DescribableModel):

@@ -93,7 +93,9 @@ setup(
         #'django-viewpack',
         #'ejudge>=0.3.6',
         #'iospec>=0.2.2',
+
         #'markio>=0.1.2',
+        'mistune',
     ],
     extras_require={
         'testing': ['pytest'],

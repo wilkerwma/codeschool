@@ -1,0 +1,88 @@
+- model: cs_activities.activity
+  pk: 1
+  fields:
+    name: Sorting algorithms
+    short_description: Let us study sorting algorithms
+    long_description: >
+      In this activity we will study sorting algorithms and their efficiency
+      properties. All algorithms are implemented in Python.
+    owner_content_type: [cs_courses, course]
+    owner_id: 1
+    status: open
+
+- model: cs_activities.sourcecodeactivity
+  pk: 1
+  fields: {}
+
+- model: cs_activities.sourceitem
+  pk: 1
+  fields:
+    activity: 1
+    index: 0
+    format: python
+    name: Bogosort
+    description: Probably the worst sorting algorithms.
+    source: >
+      import random
+
+      def bogosort(L):
+          def is_sorted():
+              return all(x <= y for (x, y) in zip(L[:-1], L[1:]))
+          L = list(L)
+          while not is_sorted():
+              random.shuffle(L)
+          return L
+
+- model: cs_activities.sourceitem
+  pk: 2
+  fields:
+    activity: 1
+    index: 1
+    format: python
+    name: Min sort
+    description: A not very good algorithm either. Expect O(n^2) performance.
+    source: >
+      def minsort(L):
+          remaining = list(L)
+          L = []
+          while remaining:
+              L.append(min(remaining))
+              del remaining[remaining.index(L[-1])]
+          return L
+
+- model: cs_activities.sourceitem
+  pk: 3
+  fields:
+    activity: 1
+    index: 2
+    format: python
+    name: Bubblesort
+    description: A not very good algorithm either. Expect O(n^2) performance.
+    source: >
+      def bubblesort(L):
+          L = list(L)
+          sorted = False
+          while not sorted:
+              sorted = True
+              for i in range(len(L) - 1):
+                  if L[i + 1] < L[i]:
+                      sorted = False
+                      L[i], L[i + 1] = L[i + 1], L[i]
+          return L
+
+- model: cs_activities.sourceitem
+  pk: 4
+  fields:
+    activity: 1
+    index: 3
+    format: python
+    name: Quicksort
+    description: The quicksort algorithm is an efficient O(n log n) solution.
+    source: >
+      def quicksort(L):
+          if len(L) == 1:
+              return L[:]
+          head, *tail = L
+          lesser = qsort([x for x in tail if x <= head])
+          greater = qsort([x for x in tail if x > head])
+          return lesser + [head] + greater

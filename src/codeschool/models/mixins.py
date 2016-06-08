@@ -1,6 +1,8 @@
+from markdown import markdown
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from markdown import markdown
+from wagtail.wagtailcore.fields import RichTextField
+from wagtail.wagtailcore.models import Page
 
 
 __all__ = [
@@ -94,3 +96,35 @@ class DescribableModel(NamedModel):
     # Html expansion of descriptions
     short_description_html = property(lambda x: markdown(x.short_description))
     long_description_html = property(lambda x: markdown(x.long_description))
+
+
+class DescribablePage(Page):
+    """
+    A describable model that inherits from a wagtail's Page model and uses a
+    RichTextField for its long_description field.
+    """
+    class Meta:
+        abstract = True
+
+    name = models.CharField(
+        _('name'),
+        max_length=100
+    )
+    short_description = models.CharField(
+        _('short description'),
+        max_length=140,
+        default='no-description',
+        help_text=_('A very brief one-phrase description used in listings.'),
+    )
+    long_description = RichTextField(
+        _('long description'),
+        blank=True,
+        help_text=_('A detailed explanation.')
+    )
+
+    # Html expansion of descriptions
+    short_description_html = property(lambda x: markdown(x.short_description))
+    long_description_html = property(lambda x: markdown(x.long_description))
+
+    def __str__(self):
+        return self.name
