@@ -56,7 +56,7 @@ var srvice = (function($) {
 
         */
         return srvice_call(arguments, {
-            program: false,
+            program: true,
             converter: function(x) { return x.result }
         });
     }
@@ -75,7 +75,7 @@ var srvice = (function($) {
     srvice.sync = function() {
         return srvice_call(arguments, {
             async: false,
-            program: false,
+            program: true,
             converter: function(x) { return x.result }
         });
     };
@@ -108,6 +108,13 @@ var srvice = (function($) {
         return srvice_call(arguments, {srvice: 'program'});
     };
 
+
+    srvice.call = function() {
+        return srvice_call(arguments, {
+            program: false,
+            converter: function(x) { return x.result }
+        });
+    };
 
     /**
      Execute the javascript source code in the given API point in an

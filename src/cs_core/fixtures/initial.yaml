@@ -1,0 +1,60 @@
+# Programming languages
+- model: cs_core.programminglanguage
+  pk: python
+  fields:
+    name: 'Python 3.x'
+
+- model: cs_core.programminglanguage
+  pk: python2
+  fields:
+    name: 'Python 2.7'
+
+- model: cs_core.programminglanguage
+  pk: c
+  fields:
+    name: 'C99 (gcc)'
+
+- model: cs_core.programminglanguage
+  pk: cpp
+  fields:
+    name: 'C++11 (g++)'
+
+# File formats
+- model: cs_core.sourceformat
+  pk: csv
+  fields:
+    name: 'Comma separated values'
+
+- model: cs_core.sourceformat
+  pk: markdown
+  fields:
+    name: 'Markdown'
+
+- model: cs_core.sourceformat
+  pk: txt
+  fields:
+    name: 'Plain text file'
+
+
+
+
+
+- model: cs_core.sourceformat
+  pk: python
+  fields:
+    name: 'Python 3.x'
+
+- model: cs_core.sourceformat
+  pk: python2
+  fields:
+    name: 'Python 2.7'
+
+- model: cs_core.sourceformat
+  pk: c
+  fields:
+    name: 'C99 (gcc)'
+
+- model: cs_core.sourceformat
+  pk: cpp
+  fields:
+    name: 'C++11 (g++)'

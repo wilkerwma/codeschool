@@ -6,7 +6,6 @@ from viewpack.utils import lazy, delegate_to_parent, get_view_name
 
 
 class ChildViewMixin:
-
     """
     Implements functionality in the base :class:`viewpack.views.View`.
     """

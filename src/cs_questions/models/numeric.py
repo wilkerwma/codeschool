@@ -14,7 +14,7 @@ class NumericResponse(QuestionResponse):
 
     def autograde_compute(self):
         question = self.question
-        if abs(self.feedback_data - question.answer) <= question.tolerance:
+        if abs(self.value - question.answer) <= question.tolerance:
             return 100
         else:
             return 0
