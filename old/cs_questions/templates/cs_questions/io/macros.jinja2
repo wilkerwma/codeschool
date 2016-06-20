@@ -1,0 +1,61 @@
+{% macro answer_key_edit_box(question) %}
+    <div>
+        <table id="answer-keys">
+            <thead>
+                <tr>
+                    <th class="first-col">{{ _('Language') }}</th>
+                    <th>{{ _('Is valid') }}</th>
+                    <th>{{ _('Source?') }}</th>
+                    <th>{{ _('Placeholder?') }}</th>
+                    <th>{{ _('Edit') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for key in question.answer_keys.all() %}
+                    <tr>
+                        <td>{{ key.language }}</td>
+                        <td>{{ key.is_valid|icon }}</td>
+                        <td>{{ (key.source != '')|icon }}</td>
+                        <td>{{ (key.placeholder != '')|icon }}</td>
+                        <td>
+                            <i class="material-icons"
+                               onclick="srvice.dialog({
+                                       url: '../edit-key/' + {{ key.pk}}
+                                   })">edit</i>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+                {% if not question.is_answer_keys_complete %}
+                    <tr>
+                        <td>{{ _('Add new') }}</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <i class="material-icons"
+                                   onclick="srvice.dialog({
+                                           url: '../add-key/'
+                                       })">add</i>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <style>
+        #answer-keys {
+            width: 70%;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        #answer-keys td,
+        #answer-keys th {
+            padding: 10px;
+        }
+
+        #answer-keys th {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+{% endmacro %}

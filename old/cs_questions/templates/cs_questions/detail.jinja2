@@ -1,0 +1,46 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% if feedback is not defined and response.status == response.STATUS_DONE %}{% set feedback = response.feedback %}{% endif %}
+
+{% block content_head %}
+    {{ super() }}
+    {% if activity %}
+        <p><a href="/activities/{{ activity.pk }}">{{ _('Go back to other questions') }}</a></p>
+    {% endif %}
+{% endblock %}
+
+{% block object_description %}
+    <h2 class="banner">{{ _('Description') }}</h2>
+    <article class="long-description">
+        {{ question.long_description|markdown }}
+    </article>
+
+    {% block feedback %}
+        {% if response.is_done %}
+            <h2 class="banner">{{ _('Feedback') }}</h2>
+            <div class="question-feedback mdl-shadow--4dp">{{ response.html_feedback() }}</div>
+        {% endif %}
+    {% endblock %}
+
+    <form method="POST" id="{{ form_name }}">
+        {% csrf_token %}
+        {% block response_form %}
+            <h2 class="banner">{{ _('Response') }}</h2>
+            <table class="form">{{ form.as_table() }}</table>
+        {% endblock %}
+    </form>
+
+    <div class="toolbar highlight">
+        <button class="mdl-button mdl-js-button" form="{{ form_name }}">{{ _('Send') }}</button>
+    </div>
+{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        .question-feedback {
+            padding: 20px;
+            background-color: #eee;
+        }
+    </style>
+{% endblock %}

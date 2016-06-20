@@ -1,0 +1,18 @@
+{% extends "cs_questions/detail.jinja2" %}
+
+{% block object_detail_dl %}
+    <dl>
+        <dt>{{ _('Maximum runtime') }}</dt>
+        <dd>{{ gettext('%(time)s seconds', time=question.timeout) }}</dd>
+    </dl>
+{% endblock %}
+
+{% block response_form %}
+    <h2 class="banner">{{ _('Response') }}</h2>
+    <div class="code-area mdl-shadow--4dp">
+        <div class="select">
+            <p>Programming language {{ form['language'] }}</p>
+        </div>
+        <ace-editor mode="python" name="source" id="code-editor"></ace-editor>
+    </div>
+{% endblock %}

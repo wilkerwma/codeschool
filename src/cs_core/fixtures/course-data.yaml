@@ -1,0 +1,24 @@
+---
+model/type: cs_core.faculty
+id: cs
+title: Programming@Codeschool
+short description: In this sample institution we can learn more about Codeschool.
+body: <p>This basic "Faculty" page serves as a root for all disciplines
+  offered by some department or institution. You can also create different "faculties"
+  to organize your data by subject.</p><p>In this demo we have:</p><p></p><ul><li>Sample
+  users, including the "root" user with a pre-initilizalized passwords '1234'.</li><li>A
+  sample discipline and the corresponding course</li><li>A few questions
+  and user responses</li></ul><p></p>
+---
+model/type: cs_core.discipline
+id: cs/prog-101
+title: Programming 101
+short description: Learn how to program with Python
+body: <p>This is an introdutory programming course that covers the following
+  subjects:</p><p></p><ul><li>Programming basics and algorithms</li><li>Turtle
+  graphics</li><li>Basic programming constructs (for, while, if, etc)</li><li>Basic
+  data types</li></ul><p></p>
+---
+model/type: cs_core.course
+id: cs/prog-101/fabio
+title: Programming 101 (Prof. Fábio)

@@ -1,5 +1,4 @@
 from django.apps import AppConfig
 
-
-class RankingConfig(AppConfig):
-    name = 'ranking'
+class BattlesConfig(AppConfig):
+    name = 'battles'

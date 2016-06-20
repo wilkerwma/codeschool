@@ -1,3 +1,7 @@
+jsonfield
+markdown
+wagtail
+html2text
 lazy
 django
 unidecode

@@ -1,4 +1,5 @@
 import io
+import sys
 import inspect
 import functools
 import traceback
@@ -6,6 +7,7 @@ from django import http
 from django.core import exceptions
 from django.views.generic import View
 from django.shortcuts import render
+from django.utils.html import escape
 from srvice import json
 from srvice.client import Client, js_compile
 __all__ = ['BadResponseError', 'SrviceView', 'SrviceAPIView',
@@ -121,14 +123,19 @@ class SrviceView(View):
             response = http.HttpResponseForbidden(ex)
             raise BadResponseError(response)
 
+        # Let us write the traceback to stderr
+        file = io.StringIO()
+        traceback.print_tb(tb or ex.__traceback__, file=file)
+        print(file.getvalue(), file=sys.stderr)
+        print(ex, file=sys.stderr)
+
+        # Now we create the error object to be sent to javascript
         error = {
             'error': type(ex).__name__,
             'message': str(ex)
         }
         if self.DEBUG:
-            file = io.StringIO()
-            traceback.print_tb(tb or ex.__traceback__, file=file)
-            error['traceback'] = file.getvalue()
+            error['traceback'] = '<pre>%s</pre>' % escape(file.getvalue())
         return error
 
     def execute(self, request, *args, **kwargs):

@@ -1,0 +1,78 @@
+{% extends 'cs_core/auth-base.jinja2' %}
+
+
+{% block title_suffix %} - {{ user.get_full_name()}}{% endblock %}
+{% block content_title %}{{ gettext('Profile: %(name)s', name=username) }}{% endblock %}
+{% block style %}
+    {{ super() }}
+    <style>
+        dt {
+            float: none
+        }
+        dd {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content_sessions %}
+    <div>
+        {% block profile_details %}
+            <img class="mugshot" src="{{ profile.get_mugshot_url }}"
+                 alt="{{ _("Your mugshot") }}">
+            <dl class="user-details">
+                {% block profile_definition_list %}
+                    {% if profile.user.get_full_name %}
+                        <dt>{{ _("Name") }}</dt>
+                        <dd>{{ profile.user.get_full_name()|e }}</dd>
+                    {% endif %}
+                    {% if profile.user.email and not hide_email %}
+                        <dt>{{ _("Email") }}</dt>
+                        <dd>{{ profile.user.email }}</dd>
+                    {% endif %}
+                    {% if profile.age %}
+                        <dt>{{ _("Age") }}</dt>
+                        <dd>{{ profile.age }}</dd>
+                    {% endif %}
+                    {% if profile.website %}
+                        <dt>{{ _("Website") }}</dt>
+                        <dd>{{ profile.website|urlize }}</dd>
+                    {% endif %}
+                    {% if profile.location %}
+                        <dt>{{ _("Location") }}</dt>
+                        <dd>{{ profile.location|e }}</dd>
+                    {% endif %}
+                    {% if profile.about_me %}
+                        <dt>{{ _("About me") }}</dt>
+                        <dd>{{ profile.about_me|markdown }}</dd>
+                    {% endif %}
+                {% endblock %}
+            </dl>
+        {% endblock %}
+    </div>
+
+    <div>
+        <h2>{{ _('Contacts') }}</h2>
+
+        <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+            <div class="mdl-tabs__tab-bar">
+                <a href="#tab1" class="mdl-tabs__tab is-active">{{ _('Friends') }}</a>
+                <a href="#tab2" class="mdl-tabs__tab">{{ _('Staff') }}</a>
+                <a href="#tab3" class="mdl-tabs__tab">{{ _('Colleagues') }}</a>
+            </div>
+
+            {% for list in profile.contact_classes %}
+                <div id="tab{{ loop.index }}" class="mdl-tabs__panel{% if loop.first %} is-active{% endif %}">
+                    <ul class="contact-list">
+                        {% for friend in list %}
+                            <li>
+                                <a href="/accounts/{{ friend.username }}">{{ friend.get_full_name() or friend }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

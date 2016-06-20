@@ -18,6 +18,10 @@ __pycache__/
 doc/_build/
 build/
 dist/
+
+# Temporary files
+*.*~
+*.swp
 .cache/
 src/.cache/
 collect/

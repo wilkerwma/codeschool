@@ -1,6 +1,11 @@
 {% extends "viewpack/crud/list-base.jinja2" %}
 
 {% block list_item %}
-    <p class="list-item-title"><a href="./{{ object.pk }}/">{{ object.title|default(object) }}</a></p>
+    {% if object.get_absolute_url is defined %}
+        {% set url = object.get_absolute_url() %}
+    {% else %}
+        {% set url = './' + object.pk + '/' %}
+    {% endif %}
+    <p class="list-item-title"><a href="{{ url }}">{{ object.title|default(object) }}</a></p>
     <p class="list-item-description">{{ object.short_description }}</p>
 {% endblock %}

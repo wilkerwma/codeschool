@@ -82,11 +82,8 @@ var srvice = (function($) {
 
 
     /**
-     The run() function calls a remote function marked with a
-     ``@srvice.program`` decorator in Django. These "programs" encode a
-     series of operations that should be carried out in the client.
-
-     A program is defined in Django using the decorator:
+     Like the regular srvice function, but will not run any program returned by
+     the server.
 
      .. code:: python
          import srvice
@@ -99,16 +96,10 @@ var srvice = (function($) {
              client.alert("this will trigger a js alert in the client!")
              client.jquery('div').hide()
              client.js('console.log("foo bar")')
-             return None
+             return 42
 
-     The client in python object exposes all functions that exist in the
-     srvice object in javascript.
+     This function will only handle the 42 result.
      */
-    srvice.run = function() {
-        return srvice_call(arguments, {srvice: 'program'});
-    };
-
-
     srvice.call = function() {
         return srvice_call(arguments, {
             program: false,
@@ -133,7 +124,7 @@ var srvice = (function($) {
     srvice.js = function() {
         return srvice_call(arguments, {
             method: 'js',
-            converter: function (x) {x.js_data}
+            converter: function (x) { return x.data }
         }).then(processProgram);
     };
 
@@ -155,7 +146,7 @@ var srvice = (function($) {
     srvice.html = function(api) {
         return srvice_call(arguments, {
             srvice: 'html',
-            converter: function (x) {x.html_data}
+            converter: function (x) { return x.data }
         });
     };
 
@@ -173,6 +164,93 @@ var srvice = (function($) {
         });
 
     };
+
+    /**
+     Form processing using srvice: the form is converted into the arguments
+     passed to a srvice function which is then executed.
+     */
+    srvice.form = function(api, form) {
+        var args = getFormData(form);
+        return srvice(api, args);
+    };
+
+    /**
+     Bind api element to form submit event.
+     */
+    srvice.bindForm = function(api, form) {
+        $(form).submit(function(event) {
+            event.preventDefault();
+            srvice.form(api, this);
+        });
+    };
+
+    srvice.bindClick = function(api, elem) {
+        $(elem).click(function(event) {
+            alert('not implemented');
+            event.preventDefault();
+        })
+    };
+
+    srvice.bind = function(api, elem, event) {
+        if (event == undefined) {
+            return bindAuto(api, elem);
+        }
+
+        // We map event names to events
+        return {
+            form: srvice.bindForm,
+            click: srvice.bindClick
+        }[event](api, elem);
+    };
+
+    function bindAuto(element) {
+        var query;
+        if (element === undefined) {
+            query = $('[srvice-bind]');
+        } else {
+            query = $('srvice-bind', element);
+        }
+        bindForms(query);
+        bindClickable(query);
+    }
+
+    // Bind all srvice form elements to the submit event
+    function bindForms(query) {
+        query.filter('form').each(function() {
+            var api = $(this).attr('srvice-bind');
+            var transform = getBoundTransform(this);
+           srvice.bindForm(api, this, transform);
+        });
+    }
+
+    // Bind all clickable elements to srvice
+    function bindClickable(query) {
+        query.filter('a, button, input[type=button]').each(function() {
+            var api = $(this).attr('srvice-bind');
+            var transform = getBoundTransform(this);
+           srvice.bindClick(api, this, transform);
+        });
+    }
+
+    function getBoundTransform(elem) {
+        var data = $(elem).attr('srvice-transform');
+        return undefined;
+    }
+
+
+    function getFormData(form) {
+        var formData = $(form).serializeArray();
+        var args = {};
+
+        // Convert array into dictionary. We iterate backwards to preserve the
+        // first occurrence of a given name.
+        for (var i = formData.length - 1; i >= 0; i--) {
+            var item = formData[i];
+            args[item.name] = item.value;
+        }
+        return args;
+    }
+
 
 
     srvice.rpc = function(args) {
@@ -247,7 +325,8 @@ var srvice = (function($) {
             converters: {
                 "text json": function (x) {
                     var data = json.loads(x);
-                    args.errors && processErrors(data.errors);
+                    console.log(data);
+                    args.errors && processErrors(data.error);
                     args.program && processProgram(data.program);
                     return args.converter(data);
                 }
@@ -259,15 +338,16 @@ var srvice = (function($) {
 
     function processProgram(program) {
         if (program !== undefined) {
-            var fn = Function(program);
-            fn();
+            Function(program)();
         }
     }
 
 
     function processErrors(error) {
         if (error !== undefined) {
-
+            var errormsg = error.error + ': ' + error.message + '\n\n' + error.traceback;
+            srvice.dialog({html: errormsg});
+            throw Error(errormsg);
         }
     }
 
@@ -360,3 +440,8 @@ var srvice = (function($) {
     return srvice;
 })(jQuery);
 
+
+// Bind all [srvice-bind] elements in the bubbling phase of document load.
+window.addEventListener('load', function() {
+    srvice.bind();
+}, false);

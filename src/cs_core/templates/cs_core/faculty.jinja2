@@ -1,0 +1,16 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% block content_body %}
+    {{ faculty.body }}
+
+    <h2>{{ _('Courses') }}</h2>
+    <ul>
+        {% for course in faculty.courses.all() %}
+            <li>
+                <h3 class="list-item-title"><a href="{{ course.url }}">{{ course.title }}</a></h3>
+                <p>{{ course.short_description }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

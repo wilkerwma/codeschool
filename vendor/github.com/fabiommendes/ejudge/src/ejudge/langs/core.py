@@ -265,7 +265,7 @@ class ExternalExecution(LanguageManager):
                 result.append(types.Out(data))
 
         tmpdir = context.tempdir
-        result = types.IoTestCase()
+        result = types.SimpleTestCase()
 
         # Execute script in the tmpdir and than go back once execution has
         # finished
@@ -299,7 +299,7 @@ class ExternalExecution(LanguageManager):
                                 list(result),
                                 error_message=msg + missing)
                         else:
-                            return types.IoTestCase(list(result))
+                            return types.SimpleTestCase(list(result))
 
                     # This clause is just a safeguard. We don't expect to ever
                     # get here

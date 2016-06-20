@@ -58,43 +58,58 @@ setup(
             'static/*/*/*.*'],
     },
     install_requires=[
+        # Non-django dependencies
+        'pygments',
+        'frozendict',
+        'markdown',
+        'csscompressor',
+        'html5lib',
+        'slimit',
+        'unidecode',
+        'pygeneric',
+        'lazy',
+        'fake-factory',
+        'pytz',
+
+        # Django and extensions
         'django>=1.9',
         'django-model-utils',
         'django-picklefield',
-        'pygments',
-        'wagtail',
-        'frozendict',
-        'markdown',
-        'django_jinja',
-        'djinga',
-        'djangorestframework',
+        'django-jsonfield',
         'django-annoying',
         'django-autoslug',
         'django-compressor',
-        'slimit',
-        'csscompressor',
-        'html5lib',
         'django-extensions',
         'django-guardian',
-        'pytz',
-        'jinja2-django-tags',
         'django-bower',
-        'django-address',
         'django-userena',
+        'django-polymorphic',
+        'django-filter',
+        'djangorestframework',
+
+        # Wagtail
+        'wagtail',
+        'wagtailfontawesome',
+        'wagtailgmaps',
+        'wagtailosm',
+        # 'wagtailembedder',  (vendorized until it lands on pip)
+        # 'wagtail-markdown', (vendorized until it lands on pip)
+
+        # Jinja support
+        'jinja2',
+        'django_jinja',
+        'djinga',
+        'jinja2-django-tags',
+
+        # 'ejudge', (vendorized)
         'boxed>=0.3',
         'psutil',
         'pexpect',
-        'unidecode',
-        'fake-factory',
-        'pygeneric',
-        'lazy',
 
-        # These are vendorized until they stabilize
-        #'django-viewpack',
-        #'ejudge>=0.3.6',
-        #'iospec>=0.2.2',
+        # 'django-viewpack', (vendorized)
 
-        #'markio>=0.1.2',
+        # 'markio', (vendorized)
+        # 'iospec', (vendorized)
         'mistune',
     ],
     extras_require={
@@ -112,4 +127,3 @@ setup(
     license='GPL',
     test_suite='%s.test.test_%s' % (name, name),
 )
-

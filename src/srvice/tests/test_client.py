@@ -51,9 +51,8 @@ def test_chain(client):
 
 def test_dialog(client):
     client.dialog(html='Hello world!')
-    assert js_compile(client) == "var __v1 = srvice.dialog({" \
-                                 "dialogContentId: null, dialogId: 'dialog', " \
-                                 "html: 'Hello world!', sourceId: null});"
+    assert js_compile(client) == "var __v1 = srvice.dialog({"\
+                                 "html: 'Hello world!'});"
 
 if __name__ == '__main__':
     pytest.main('test_client.py')

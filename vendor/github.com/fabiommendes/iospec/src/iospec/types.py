@@ -10,7 +10,7 @@ __all__ = [
     'Atom', 'Comment', 'In', 'Out', 'Command',
 
     # Nodes
-    'IoSpec', 'TestCase', 'ErrorTestCase', 'IoTestCase', 'InputTestCase',
+    'IoSpec', 'TestCase', 'ErrorTestCase', 'SimpleTestCase', 'InputTestCase',
 
     # Functions
     'isequal', 'normalize'
@@ -340,12 +340,12 @@ class LinearNode(collections.MutableSequence):
 
         return copy.deepcopy(self)
 
-    def setmeta(self, attr, value):
+    def set_meta(self, attr, value):
         """Writes an attribute of meta information."""
 
         self.meta[attr] = value
 
-    def getmeta(self, attr, *args):
+    def get_meta(self, attr, *args):
         """Retrieves an attribute of meta information.
 
         Can give a second positional argument with the default value to return
@@ -372,12 +372,27 @@ class IoSpec(LinearNode):
 
     type = 'iospec-root'
 
+    @property
+    def has_errors(self):
+        return any(x.is_error for x in self)
+
+    @property
+    def is_simple(self):
+        return all(x.is_simple for x in self)
+
+    @property
+    def is_simple_io(self):
+        return all(x.is_simple_io for x in self)
+
     def __init__(self, data=(), *,
                  commands=None, make_commands=None, definitions=()):
         super().__init__(data)
         self.commands = AttrDict(commands or {})
         self.make_commands = AttrDict(make_commands or {})
         self.definitions = list(definitions)
+
+    def __repr__(self):
+        return '<IoSpec: %s>' % [x.type for x in self]
 
     def source(self):
         prefix = '\n\n'.join(block.strip('\n') for block in self.definitions)
@@ -427,23 +442,40 @@ class IoSpec(LinearNode):
             self.expand_inputs()
 
     def fuse_outputs(self):
-        """Fuse any consecutive Out() strings together."""
+        """Fuse consecutive Out() strings together."""
 
         for case in self:
             case.fuse_outputs()
 
-    def has_errors(self):
-        """Return True if the IoSpec data has some error block"""
-
-        return any(case.error is not None for case in self)
-
-    def get_error(self):
+    def get_exception(self):
         """Return an exception that describes the first error encountered in
         the run."""
 
         for case in self:
-            if case.error is not None:
+            if case.is_error:
                 return case.error
+
+    def get_error_type(self):
+        """
+        Return a string with the first error type encountered in the IoSpec.
+
+        If no errors are found, return None.
+        """
+
+        for case in self:
+            if case.is_error:
+                return case.error_type
+
+    def get_error_message(self):
+        """
+        Return a string with the first error message encountered in the IoSpec.
+
+        If no errors are found, return None.
+        """
+
+        for case in self:
+            if case.is_error:
+                return case.error_message
 
     def to_json(self):
         """Convert object to a json structure."""
@@ -480,24 +512,23 @@ class TestCase(LinearNode):
     def priority(self, value):
         self._priority = value
 
+    # Query attributes
     @property
     def is_error(self):
-        return False
+        return self.type.startswith('error')
 
     @property
-    def error(self):
-        return self._error
+    def is_simple(self):
+        return self.type == 'simple'
 
-    @error.setter
-    def error(self, value):
-        if isinstance(value, Exception):
-            self._error  = value
-        elif isinstance(value, type) and issubclass(value, Exception):
-            self._error = value()
-        elif value is None:
-            self._error = value
-        else:
-            raise TypeError('expect exception, got %s' % value)
+    @property
+    def is_simple_io(self):
+        iotypes = {In, Out}
+        return self.type == 'simple' and set(map(type, self)).issubset(iotypes)
+
+    @property
+    def is_input(self):
+        return self.type == 'input'
 
     def inputs(self):
         """Return a list of inputs for the test case."""
@@ -512,7 +543,7 @@ class TestCase(LinearNode):
                 self[idx] = atom.expand()
 
     def fuse_outputs(self):
-        pass
+        """Fuse Out strings together."""
 
     def to_json(self):
         return {'type': self.type, 'data': [x.to_json() for x in self]}
@@ -520,18 +551,18 @@ class TestCase(LinearNode):
     @classmethod
     def from_json(cls, data):
         atoms = [Atom.from_json(x) for x in data['data']]
-        if data['type'] == 'io':
-            return IoTestCase(atoms)
+        if data['type'] == 'simple':
+            return SimpleTestCase(atoms)
         else:
             raise NotImplementedError
 
 
-class IoTestCase(TestCase):
+class SimpleTestCase(TestCase):
     """Regular input/output test case."""
 
     @property
     def type(self):
-        return 'io'
+        return 'simple'
 
     def inputs(self):
         return [str(x) for x in self if isinstance(x, In)]
@@ -637,12 +668,23 @@ class ErrorTestCase(TestCase):
     """
 
     @property
-    def is_error(self):
-        return True
-
-    @property
     def type(self):
         return 'error-' + self.error_type
+
+    @property
+    def error(self):
+        return self._error
+
+    @error.setter
+    def error(self, value):
+        if isinstance(value, Exception):
+            self._error = value
+        elif isinstance(value, type) and issubclass(value, Exception):
+            self._error = value()
+        elif value is None:
+            self._error = value
+        else:
+            raise TypeError('expect exception, got %s' % value)
 
     def __init__(self, data=(), *,
                  error_message='', error_type='exception', **kwds):
@@ -688,7 +730,7 @@ class ErrorTestCase(TestCase):
         return self._with_comment(source)
 
     def inputs(self):
-        return IoTestCase.inputs(self)
+        return SimpleTestCase.inputs(self)
 
     def transform_strings(self, func):
         super().transform_strings(func)

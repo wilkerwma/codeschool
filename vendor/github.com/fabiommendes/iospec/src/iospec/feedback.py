@@ -1,7 +1,7 @@
 import decimal
 import jinja2
 from iospec.util import tex_escape
-from iospec.types import TestCase, IoTestCase, ErrorTestCase, IoSpec
+from iospec.types import TestCase, SimpleTestCase, ErrorTestCase, IoSpec
 from generic import generic
 from unidecode import unidecode
 
@@ -201,8 +201,12 @@ class Feedback:
         """Convert feedback to a JSON compatible structure of dictionaries and
         lists."""
 
+        if not hasattr(self, 'testcase'):
+            self.testcase = self.case
+            del self.case
+
         data = dict(self.__dict__)
-        data['case'] = self.testcase.to_json()
+        data['testcase'] = self.testcase.to_json()
         data['answer_key'] = self.answer_key.to_json()
         data['grade'] = float(self.grade)
         return data
@@ -212,7 +216,7 @@ class Feedback:
         new = object.__new__(cls)
         for k, v in data.items():
             setattr(new, k, v)
-        new.case = TestCase.from_json(new.case)
+        new.testcase = TestCase.from_json(new.testcase)
         new.answer_key = TestCase.from_json(new.answer_key)
         new.grade = decimal.Decimal(new.grade)
         return new
@@ -270,7 +274,7 @@ def feedback(response: TestCase, answer_key: TestCase):
         grade = decimal.Decimal(0.5)
 
     # Wrong answer
-    elif isinstance(response, IoTestCase):
+    elif isinstance(response, SimpleTestCase):
         status = 'wrong-answer'
 
     # Invalid

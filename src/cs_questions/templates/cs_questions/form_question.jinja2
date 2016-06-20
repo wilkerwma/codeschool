@@ -1,0 +1,9 @@
+{% extends "cs_questions/detail.jinja2" %}
+
+{% block response_form %}
+    <form srvice-bind="./submit-response">
+        <table class="form">
+            {{ question.body }}
+        </table>
+    </form>
+{% endblock %}

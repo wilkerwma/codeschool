@@ -155,9 +155,13 @@ input[type=reset].danger.flat {
     margin-bottom: 30px;
 }
 .list-item-title {
-    font-weight: bold;
+    font-family: Roboto, sans-serif;
     font-size: 1.2em;
     margin-bottom: 5px;
+}
+.list-item-title,
+.list-item-title * {
+    font-weight: bold;
 }
 
 .list-item-description {
@@ -194,4 +198,17 @@ h6.banner {
 .long-description pre {
     padding: 20px;
     background: #eee;
+}
+
+/* Gradebook tables */
+table.gradebook {
+    margin: 10px auto;
+}
+table.gradebook tr > * {
+    padding: 5px;
+}
+
+table.gradebook thead {
+    background: lightgray;
+    border-bottom: 1px solid black;
 }

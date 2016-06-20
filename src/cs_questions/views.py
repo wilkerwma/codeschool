@@ -6,15 +6,14 @@ from viewpack.views.mixins import (DetailObjectContextMixin,
                                    VerboseNamesContextMixin)
 from codeschool.utils import lazy
 from codeschool.models import User
-from cs_activities.views import ActivityCRUD
 from cs_questions import models
 
 users = User.objects
 
 
 class QuestionDetailView(DetailObjectContextMixin,
-                        VerboseNamesContextMixin,
-                        DetailWithResponseView):
+                         VerboseNamesContextMixin,
+                         DetailWithResponseView):
     """Base detail view class for question types.
 
     This view can be plugged and reused in the many places that a question
@@ -78,7 +77,7 @@ class QuestionDetailView(DetailObjectContextMixin,
         response = form.save(commit=False)
         response.user = self.request.user
         response.question = self.question
-        response.autograde()
+        response.autograde_response()
         register(self.request.user, response)
         return response
 
@@ -159,34 +158,11 @@ class QuestionCRUD(CRUDViewPack):
 
 
 @QuestionInheritanceCRUD.register
-class NumericQuestionViews(QuestionCRUD):
-    subclass_view_name = 'numeric'
-    model = models.NumericQuestion
-    response_model = models.NumericResponse
-    response_fields = ['value']
-    template_basename = 'cs_questions/numeric/'
-    upload_enable = True
-    upload_success_url = '/questions/{object.pk}/edit/'
-
-
-@QuestionInheritanceCRUD.register
 class CodingIoQuestionViews(QuestionCRUD):
     subclass_view_name = 'io'
     model = models.CodingIoQuestion
-    response_model = models.CodingIoResponse
+    response_model = models.CodingIoResponseItem
     response_fields = ['source', 'language']
     template_basename = 'cs_questions/io/'
     upload_enable = True
     upload_success_url = '/questions/{object.pk}/edit/'
-
-
-# Related activities
-@ActivityCRUD.register
-class QuizActivityViews(CRUDViewPack):
-    subclass_view_name = 'quiz'
-    model = models.QuizActivity
-    template_basename = '/cs_questions/quiz/'
-
-    class StatisticsView(DetailView):
-        pattern = r'^(?P<pk>\d+)/statistics/'
-

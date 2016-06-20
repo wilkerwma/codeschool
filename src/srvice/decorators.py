@@ -110,7 +110,7 @@ should be available to each user.
 **Under construction.**
 
 """
-from functools import wraps
+from functools import wraps, partial
 from srvice.views import (SrviceAPIView, SrviceProgramView,
                           SrviceJsView, SrviceHtmlView)
 
@@ -127,10 +127,18 @@ def decorator(decorator_func):
         if not args:
             def decorator(func):
                 return decorator_func(func, **kwargs)
-            return decorator
-        else:
+        elif len(args) == 1:
             func, = args
-            return decorator_func(func, **kwargs)
+            if callable(func):
+                return decorator_func(func, **kwargs)
+            else:
+                arg, = args
+
+                def decorator(func):
+                    return decorator_func(func, arg, **kwargs)
+        else:
+            raise TypeError('invalid number of positional arguments')
+        return decorator
 
     return decorated
 
@@ -150,7 +158,7 @@ def make_view(view_cls, func, **kwargs):
 
 
 @decorator
-def api(func, **kwargs):
+def api(func, pattern=None, **kwargs):
     """
     Convert a regular Python function in a remote function that can be called
     from Javascript using the :js:func:`srvice()` function. Communication
@@ -208,7 +216,7 @@ def api(func, **kwargs):
 
 
 @decorator
-def program(func, **kwargs):
+def program(func, pattern=None, **kwargs):
     """
     Register a program API.
 
@@ -228,12 +236,60 @@ def program(func, **kwargs):
     return make_view(SrviceProgramView, func, **kwargs)
 
 
-def html(func, **kwargs):
+@decorator
+def html(func, pattern=None, **kwargs):
+    """
+    Register an HTML API point.
+    """
+
     return make_view(SrviceHTMLView, func, **kwargs)
 
 
-def js(func, **kwargs):
+@decorator
+def js(func, pattern=None, **kwargs):
+    """
+    Register a javascript API point.
+    """
+
     return make_view(SrviceJsView, func, **kwargs)
+
+
+def route(pattern, *, method='program', **kwargs):
+    """
+    Uses Wagtail's RouterPage route decorator and marks the method as a srvice
+    API.
+    """
+
+    from wagtail.contrib.wagtailroutablepage.models import route
+
+    # Mapping from names to srvice decorators
+    srvice_decorator = {
+        'api': api,
+        'program': program,
+        'html': html,
+        'js': js,
+    }[method]
+    srvice_kwargs = kwargs
+
+    # We create a wrapped method that is decorated with the @route decorator
+    # from wagtailroutablepage.
+    #
+    # Inside the wrapped method, we choose some specific srvice decorator
+    # and apply the correct srvice decorator, instantiate the view and call
+    # it with the proper request.
+    def decorator(func):
+        @route(pattern)
+        def wrapped_method(self, request, *args, **kwargs):
+            bind_method = partial(func, self)
+            srvice_function = srvice_decorator(**srvice_kwargs)(bind_method)
+            srvice_view = srvice_function.as_view()
+            response = srvice_view(request, *args, **kwargs)
+            return response
+
+        func.__dict__.update(wrapped_method.__dict__)
+        return func
+
+    return decorator
 
 
 def srvice_register(view_cls, *args, name=None, register=True, **kwargs):

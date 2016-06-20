@@ -49,7 +49,7 @@ class PythonManager(Python3Mixin, IntegratedLanguage):
             exec(code, context.globals, context.locals)
         else:
             exec(code, context.globals)
-        return types.IoTestCase(self.flush_io())
+        return types.SimpleTestCase(self.flush_io())
 
 
 class PythonScriptManager(Python3Mixin, ScriptingLanguage):

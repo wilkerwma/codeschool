@@ -1,113 +1,75 @@
-from datetime import datetime
 from django.shortcuts import render,redirect
 from django.http import Http404,HttpResponse
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from cs_battles.models import BattleResponse, CodingIoBattle
+from cs_questions.models import Question, CodingIoResponseItem
+from cs_core.models import ProgrammingLanguage
+from .models import BattleResponse, Battle
+from datetime import datetime
+from viewpack import CRUDViewPack
+from django.views.generic.edit import ModelFormMixin
 
-# Principal method to battles
-def index(request):
-    all_battles = CodingIoBattle.objects.all()
-    invitations_user = invitations(request)
-    return render(request, 'ranking/index.jinja2', { "battles": all_battles,"invitations": invitations_user })
-
-# Controller to view result of a battle
-def battle_result(request,id_battle):
-    context = {}
-    try:
-        # Obtain the battles of battle result
-        result_battle = CodingIoBattle.objects.get(id=id_battle)
-        battles = result_battle.battles.all()
-
-        # Determine the winner of this battle result based in the type (lenght, time resolution)
-        winner = result_battle.determine_winner()
-        
-        context = { "battles": battles,"battle_winner": winner}
-
-    except CodingIoBattle.DoesNotExist as e:
-        print("Not found battle"+str(e))
-        raise Http404("BattleResponse not found")
-
-    return render(request,'ranking/battle_result.jinja2',context)
+from .forms import  BattleForm
 
 def battle(request,battle_pk):
     if request.method == "POST":
-        print("Method POST")
-        form = request.POST
-        battle_code = form.get('code')
-        if battle_code:
+        message = ""
+        form = BattleForm(request.POST)
+        if form.is_valid():
+            battle_code = request.POST.get("code")
             time_now = datetime.now()
-            battle_result = CodingIoBattle.objects.get(id=1)
+            battle = Battle.objects.get(id=battle_pk)
 
-            battle = BattleResponse.objects.create(
-                user=request.user,
-                battle_code=battle_code,
-                time_begin=time_now,
-                time_end=time_now,
-                battle_result=battle_result
-            )
+            battle_response = battle.battles.filter(user_id=request.user.id).first()
+            battle_response.source = battle_code
+            battle_response.question = battle.question
+            battle_response.language=battle.language
+            battle_response.time_end = time_now
 
-        return render(request, 'ranking/battle.jinja2')
+            battle_response.autograde_response()
+            battle_response.save()
+            battle_is_corret = battle_response.is_correct
+            if battle_is_corret:
+                message = "Sua questão está certa"
+            else:
+                message = "Está errada"
+
+        context = {
+            'message':message,
+        }
+        return render(request, 'battles/result.jinja2', context)
     else:
-        print("Method GET")
-        return render(request, 'ranking/battle.jinja2')
+        return render(request, 'battles/battle.jinja2')
 
-# Define the battles of a user
 def battle_user(request):
+    """Define the battles of a user"""
     user = request.user
     battles = BattleResponse.objects.filter(user_id=user.id)
-    print(battles)
     context = {"battles": battles}
-    return render(request, 'ranking/battle_user.jinja2', context)
+    return render(request, 'battles/battle_user.jinja2', context)
 
-
-# Create a new invitation
-def invitation_users(request):
-    if request.method == "POST":
-
-        battle = CodingIoBattle()
-        battle.date = timezone.now()
-        battle.type = request.POST.get('type')
-        battle.question = request.POST.get('question') 
-        battle.save()
-
-        names = request.POST.get('usernames')
-        print(names)
-        users = [request.user]
-
-        for name in names.split(";"):
-            user = User.objects.filter(username=name.strip())
-            if len(user):
-                users.append(user[0])
-
-        [battle.invited_users.add(user) for user in users]
-        create_battle_response(battle,request.user)
-        return redirect(reverse('fights:battle',kwargs={'battle_pk':battle.id})) 
-    else:
-        return render(request,'ranking/invitation.jinja2')
 
 # View the invitations
 def invitations(request):
-    print(request.user.id)
-    invited_users = CodingIoBattle.objects.filter(invited_users=request.user.id).all()
-    return invited_users
+    invitations_user = Battle.objects.filter(invitations_user=request.user.id).all()
+    context = {'invitations': invitations_user}
+    return render(request,'battles/invitation.jinja2', context)
 
 # Accept the invitation
 def battle_invitation(request):
     if request.method == "POST":
         form_post = request.POST
-        id_battle = form_post.get('id_battle')
+        battle_pk = form_post.get('battle_pk')
         method_return = None
         if form_post.get('accept'):
-            battle = CodingIoBattle.objects.get(id=id_battle)
+            battle = Battle.objects.get(id=battle_pk)
             create_battle_response(battle,request.user)
-            method_return = redirect(reverse('fights:battle',kwargs={'battle_pk':id_battle}))
-        elif id_battle and form_post.get('reject'):
-            battle_result = CodingIoBattle.objects.get(id=id_battle)
-            battle_result.invited_users.remove(request.user)
-            method_return = redirect("/battle/")
-        
+            method_return = redirect(reverse('cs_battles:battle',kwargs={'battle_pk':battle_pk}))
+        elif battle_pk and form_post.get('reject'):
+            battle_result = Battle.objects.get(id=battle_pk)
+            battle_result.invitations_user.remove(request.user)
+            method_return = redirect(reverse('cs_battles:view_invitation'))
     return method_return
 
 def create_battle_response(battle,user):
@@ -115,10 +77,41 @@ def create_battle_response(battle,user):
     if not battle_response:
         battle_response = BattleResponse.objects.create(
             user=user,
-            battle_code="",
+            language=battle.language,
+            source="",
             time_begin=timezone.now(),
             time_end=timezone.now(),
-            battle_result=battle
+            battle=battle,
         )
-    battle.invited_users.remove(user)
+    battle.invitations_user.remove(user)
+
+class BattleCRUDView(CRUDViewPack):
+    model = Battle
+    template_extension = '.jinja2'
+    template_basename = 'battles/'
+    check_permissions = False
+    raise_404_on_permission_error = False
+    exclude_fields = ['battle_owner','battle_winner' ]
+
+    class CreateMixin:
+
+        def get_success_url(self):
+            return reverse("cs_battles:battle",kwargs={'battle_pk': self.object.pk})
+
+        def form_valid(self,form):
+            self.object = form.save(commit=False)
+            self.object.battle_owner = self.request.user
+            self.object.save()
+            create_battle_response(self.object,self.request.user)
+            return super(ModelFormMixin, self).form_valid(form)
+
+    class DetailViewMixin:
+        def get_object(self,queryset=None):
+            object = super().get_object(queryset)
+            object.determine_winner()
+            return object
+
+        def get_context_data(self, **kwargs):
+                return super().get_context_data(
+                    all_battles=self.object.battles.all(),**kwargs)
 

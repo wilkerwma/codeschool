@@ -1,0 +1,116 @@
+{% extends "cs_courses/base.jinja2" %}
+
+{% block content %}
+    <section class="content-cards">
+        <aside>
+            <h1>Cursos inscritos</h1>
+            <p>Acesse a lista de cursos inscritos</p>
+        </aside>
+
+        <article>
+            {% for course in course_list.auth(user) -%}
+                <cs-card href="{{ course.pk }}" icon="help">
+                    <h1>{{ course.name }}</h1>
+                    <p>{{ course.short_description }}</p>
+                </cs-card>
+            {%- endfor %}
+
+            <cs-card onclick="console.log('go'); srvice.openDialog({sourceId: 'course-subscription-dialog'})" faded
+                     icon="add_circle">
+                <h1>Adicionar</h1>
+                <p>Cadastre-se em outros cursos.</p>
+            </cs-card>
+        </article>
+    </section>
+
+    <section class="content-separated">
+        <aside></aside>
+        <article></article>
+    </section>
+{% endblock %}
+
+{% block hidden_content %}
+    {{ super() }}
+    <script>
+        // Called when a course is selected for subscription
+        $('#course-subscription-help').hide();
+
+        function subscribe() {
+            var item = $('#course-subscription-menu')[0].selectedItem;
+            if (item) {
+                var data = item.children[0].getAttribute('data-id');
+                $('#course-subscription-selected').prop('value', data);
+                $('#course-subscription-form').submit();
+            }
+            else {
+                $('#course-subscription-help').removeClass('hidden').hide().show(200);
+            }
+        }
+    </script>
+    <div id="course-subscription-dialog" class="hidden">
+        <h2>{{ _('Available courses') }}</h2>
+
+        {% if open_courses %}
+            <div id="course-subscription-help" class="hidden">
+                <i class="material-icons">warning</i>
+                <p>{{ _('Please select a course') }}</p>
+            </div>
+            <form method="POST" id="course-subscription-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="subscribe">
+                <input type="hidden" name="course" id="course-subscription-selected">
+            </form>
+
+            <paper-menu id="course-subscription-menu">
+                {% for course in open_courses %}
+                    <paper-item data-id="{{ course.pk }}">
+                        <div>
+                            <p><h4>{{ course.name }}</h4></p>
+                            <p>{{ course.short_description }}
+                                ({{ gettext('Prof. %(name)s', name=course.teacher.get_full_name()) }})</p>
+                        </div>
+                    </paper-item>
+                {% endfor %}
+            </paper-menu>
+
+            <nav class="toolbar highlight">
+                <button class="separated" onclick="srvice.closeDialog()">
+                    {{ _('Cancel') }}
+                </button>
+
+                <button class="primary"
+                        name="action"
+                        value="subscribe"
+                        form="subscription-form"
+                        onclick="subscribe()">
+                    {{ _('Subscribe') }}
+                </button>
+            </nav>
+        {% else %}
+            <p>{{ _('Sorry, there are no courses available!') }}</p>
+            <div class="toolbar highlight">
+                <button class="separated" onclick="srvice.closeDialog()">{{ _('Cancel') }}</button>
+                <button class="primary" onclick="srvice.closeDialog()">{{ _('Close') }}</button>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        #course-subscription-help {
+            padding: 30px;
+            background-color: #FFC042;
+            display: flex;
+        }
+        #course-subscription-help > * {
+             display: block;
+             margin: 0;
+        }
+        #course-subscription-help > i {
+            margin-right: 20px;
+            font-size: 1.5em;
+        }
+    </style>
+{% endblock %}

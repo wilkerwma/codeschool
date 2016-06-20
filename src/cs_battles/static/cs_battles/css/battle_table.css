@@ -1,0 +1,11 @@
+#battles{
+    width: 100%;
+    height: 100%;
+
+}
+
+#battles tr:hover{
+    cursor: pointer;
+    background: white;
+    color: black;
+}

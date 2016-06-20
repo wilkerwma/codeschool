@@ -1,0 +1,25 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+{% set quiz = quizactivity %}
+
+{% block content_body %}
+    <h2 class="banner">{{ _('Description') }}</h2>
+    <article class="long-description">
+        {{ quiz.long_description|markdown }}
+
+        <ul class="object-list">
+            {% for question, answered in quiz.iter_tagged_questions('answered', user) %}
+                <li>
+                    <p class="list-item-title">
+                        <a href="/questions/{{ question.pk }}?activity={{ object.pk }}">{{ question.title|e }}</a>
+                        ({% if answered %}{{ _('answered') }}{% else %}{{ _('not answered') }}{% endif %})
+                    </p>
+                    <p class="list-item-description">{{ question.short_description|markdown }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </article>
+
+    <h2 class="banner">{{ _('Results') }}</h2>
+    <p>{{ _('Final grade:') }} {{ quiz.get_final_grade(user)|int }}%</p>
+
+{% endblock %}

@@ -24,7 +24,7 @@ class PytugaManager(IntegratedLanguage, ScriptingLanguage):
         assert context is not None
         pytuga.exec(self.source, context.globals, context.locals,
                     forbidden=True)
-        return types.IoTestCase(self.flush_io())
+        return types.SimpleTestCase(self.flush_io())
 
     def exec(self, inputs, context):
         if self.is_sandboxed:

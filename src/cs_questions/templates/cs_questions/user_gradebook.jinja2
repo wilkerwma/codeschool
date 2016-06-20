@@ -1,0 +1,8 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+{% if form_name is undefined %}{% set form_name='form' %}{% endif %}
+
+{% block object_description %}
+    <h2 class="banner">{{ _('List of grades by question') }}</h2>
+
+    {{ object }}
+{% endblock %}

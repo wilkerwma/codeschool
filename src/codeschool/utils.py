@@ -3,6 +3,7 @@ Like codeschool.shortcuts for things that do not touch the database or any
 django-related settings.
 """
 from functools import partial
+import pprint
 
 
 class lazy:
@@ -91,6 +92,73 @@ def delegation(delegate_attr, fields):
         return cls
 
     return decorator
+
+
+def migrate_object(obj, cls, blacklist=(), save=False,
+                   kwargs_T=lambda x, y: y, new_T=lambda x: x, verbose=True):
+    """Create instance from cls using data from the given object."""
+
+    kwargs = {}
+    for field in obj._meta.fields:
+        field = field.name
+        kwargs[field] = getattr(obj, field)
+    kwargs = kwargs_T(obj, kwargs)
+    new = new_T(cls(**kwargs))
+
+    if save:
+        new.save()
+    if verbose:
+        print('*' * 60)
+        print('new %s:' % cls.__name__)
+        pprint.pprint(kwargs)
+    return new
+
+
+def migrate_all(clsA, clsB, base='base', **kwargs):
+    """
+    Migrate all objects from clsA to clsB
+    """
+
+    bases = clsB.objects.values_list(base, flat=True)
+    for obj in clsA.objects.all().exclude(id__in=bases):
+        migrate_object(obj, clsB, **kwargs)
+
+
+class delegate_to:
+    """Creates a simple delegation property."""
+
+    def __init__(self, delegate_to, readonly=False):
+        self.delegate_to = delegate_to
+        self.readonly = readonly
+
+    def __get__(self, obj, cls=None):
+        if obj is None:
+            return self
+        owner = getattr(obj, self.delegate_to)
+        try:
+            attr = self._name
+        except AttributeError:
+            attr = self._get_name(cls)
+        return getattr(owner, attr)
+
+    def __set__(self, obj, value):
+        if self.readonly:
+            raise AttributeError
+
+        owner = getattr(obj, self.delegate_to)
+        try:
+            attr = self._name
+        except AttributeError:
+            attr = self._get_name(type(cls))
+        setattr(owner, attr, value)
+
+    def _get_name(self, cls):
+        for k in dir(cls):
+            v = getattr(cls, k)
+            if v is self:
+                return k
+        raise RuntimeError('not a member of class')
+
 
 if __name__ == '__main__':
     import doctest
