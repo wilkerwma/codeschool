@@ -6,7 +6,6 @@ from viewpack.views.mixins import (DetailObjectContextMixin,
                                    VerboseNamesContextMixin)
 from codeschool.utils import lazy
 from codeschool.models import User
-from cs_activities.views import ActivityCRUD
 from cs_questions import models
 
 users = User.objects
@@ -105,7 +104,7 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
 
     model = models.Question
     template_extension = '.jinja2'
-    template_basename = 'cs_questions/'
+    template_basename = 'cs_questioning/'
     check_permissions = True
     raise_404_on_permission_error = True
     exclude_fields = ['status', 'status_changed', 'author_name', 'comment',
@@ -158,16 +157,6 @@ class QuestionCRUD(CRUDViewPack):
             return question.unbound_responses.filter(user=self.request.user)
 
 
-@QuestionInheritanceCRUD.register
-class NumericQuestionViews(QuestionCRUD):
-    subclass_view_name = 'numeric'
-    model = models.NumericQuestion
-    response_model = models.NumericResponse
-    response_fields = ['value']
-    template_basename = 'cs_questions/numeric/'
-    upload_enable = True
-    upload_success_url = '/questions/{object.pk}/edit/'
-
 
 @QuestionInheritanceCRUD.register
 class CodingIoQuestionViews(QuestionCRUD):
@@ -179,14 +168,14 @@ class CodingIoQuestionViews(QuestionCRUD):
     upload_enable = True
     upload_success_url = '/questions/{object.pk}/edit/'
 
-
-# Related activities
-@ActivityCRUD.register
-class QuizActivityViews(CRUDViewPack):
-    subclass_view_name = 'quiz'
-    model = models.QuizActivity
-    template_basename = '/cs_questions/quiz/'
-
-    class StatisticsView(DetailView):
-        pattern = r'^(?P<pk>\d+)/statistics/'
+#
+# # Related activities
+# @ActivityCRUD.register
+# class QuizActivityViews(CRUDViewPack):
+#     subclass_view_name = 'quiz'
+#     model = models.Quiz
+#     template_basename = '/cs_questions/quiz/'
+#
+#     class StatisticsView(DetailView):
+#         pattern = r'^(?P<pk>\d+)/statistics/'
 

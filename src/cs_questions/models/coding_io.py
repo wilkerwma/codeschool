@@ -4,20 +4,24 @@ import iospec.feedback
 import ejudge
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-from model_utils import FieldTracker
+from django import forms
 from codeschool import models
-from codeschool.db import saving
+from codeschool import fields
+from codeschool import panels
 from codeschool.shortcuts import lazy, render_object
 from cs_core.models import ProgrammingLanguage, get_language, get_languages
-from cs_questions.models.base import (Question, QuestionActivity,
-                                      QuestionResponse)
+from cs_questions.models import Question, QuestionResponse
 
 
-class CodingIoQuestion(Question, models.StatusModel):
+class CodingIoQuestion(models.StatusModel, Question):
     """
     CodeIo questions evaluate source code and judge them by checking if the
     inputs and corresponding outputs match an expected pattern.
     """
+
+    class Meta:
+        verbose_name = _('input/output question')
+        verbose_name_plural = _('input/output questions')
 
     STATUS_INVALID = 'invalid'
     STATUS_UGLY = 'ugly'
@@ -55,7 +59,7 @@ class CodingIoQuestion(Question, models.StatusModel):
             help_text=_('Defines the maximum runtime the grader will spend '
                         'evaluating each test case.'),
     )
-    tracker = FieldTracker()
+    # tracker = FieldTracker()
 
     @property
     def iospec(self):
@@ -79,14 +83,9 @@ class CodingIoQuestion(Question, models.StatusModel):
         all_refs = ProgrammingLanguage.objects.values('ref', flatten=True)
         return set(all_refs) == set(refs)
 
-    class Meta:
-        app_label = 'cs_questions'
-        verbose_name = _('input/output question')
-        verbose_name_plural = _('input/output questions')
-
     # Importing and exporting
     @classmethod
-    def from_markio(cls, source, commit=None, return_keys=False):
+    def from_markio(cls, source):
         """Creates a CodingIoQuestion object from a Markio object r source
         string and saves the resulting question in the database.
 
@@ -96,18 +95,10 @@ class CodingIoQuestion(Question, models.StatusModel):
         Args:
             source:
                 A string with the Markio source code.
-            commit (bool):
-                If True (default), saves resulting question in the database.
-            return_keys (bool):
-                If True, also return a dictionary mapping language references
-                to answer keys.
 
         Returns:
             question:
                 A question object.
-            [answer_keys]:
-                A map from language references to :class:`CodingIoAnswerKey`
-                objects.
         """
 
         import markio
@@ -118,7 +109,7 @@ class CodingIoQuestion(Question, models.StatusModel):
             data = markio.parse_string(source)
 
         # Create question object from parsed markio data
-        question = CodingIoQuestion(
+        question = CodingIoQuestion.objects.create(
             title=data.title,
             author_name=data.author,
             timeout=data.timeout,
@@ -126,34 +117,26 @@ class CodingIoQuestion(Question, models.StatusModel):
             long_description=data.description,
             iospec_source=data.tests,
         )
-        saving(question, commit)
 
         # Add answer keys
         answer_keys = {}
         for (lang, answer_key) in data.answer_key.items():
             language = get_language(lang)
-            key = saving(CodingIoAnswerKey(question=question,
-                                           language=language,
-                                           source=answer_key), commit)
+            key = question.answer_keys.create(language=language,
+                                              source=answer_key)
             answer_keys[lang] = key
         for (lang, placeholder) in data.placeholder.items():
             if placeholder is None:
                 continue
             try:
                 answer_keys[lang].placeholder = placeholder
-                saving(answer_keys[lang], commit, update_fields=['placeholder'])
+                answer_keys[lang].save(update_fields=['placeholder'])
             except KeyError:
                 language = ProgrammingLanguage.objects.get(lang)
-                key = CodingIoAnswerKey(question=question,
-                                        language=language,
-                                        placeholder=placeholder)
-                saving(key, commit)
-
-        # Question is done!
-        if return_keys:
-            answer_keys = {key.language.ref: key
-                           for key in answer_keys.values()}
-            return question, answer_keys
+                question.answer_keys.create(
+                    language=language,
+                    placeholder=placeholder
+                )
         return question
 
     @classmethod
@@ -351,8 +334,50 @@ class CodingIoQuestion(Question, models.StatusModel):
         source = response.source
         return grade_code(source, iospec_data, lang=lang)
 
+    def get_response_form(self, request, *args, **kwargs):
+        return ResponseForm(request.POST, question=self)
 
-class CodingIoAnswerKey(models.Model):
+    # Wagtail admin
+    content_panels = Question.content_panels[:]
+    content_panels.insert(-1, panels.MultiFieldPanel([
+        panels.FieldPanel('iospec_size'),
+        panels.FieldPanel('iospec_source'),
+    ], heading=_('IoSpec definitions')))
+    content_panels.insert(
+        -1, panels.InlinePanel('answer_keys', label=_('Answer keys'))
+    )
+
+        # # Migration
+        # base = models.OneToOneField(
+        #     'cs_questions.CodingIoQuestion',
+        #     on_delete=models.SET_NULL,
+        #     related_name='converted',
+        #     blank=True,
+        #     null=True,
+        # )
+        #
+        # migrate_skip_attributes = Question.migrate_skip_attributes.union(
+        #     {'long_description', 'question_ptr', 'comment'}
+        # )
+        # migrate_attribute_conversions = dict(
+        #     Question.migrate_attribute_conversions,
+        #     long_description='body',
+        #     discipline='course',
+        # )
+        #
+        # def migrate_course_T(x):
+        #     from cs_core.models import Course
+        #     return Course.objects.get(slug='computacao-basica')
+        #
+        # @classmethod
+        # def migrate_post_conversions(cls, new):
+        #     import json
+        #     base = new.base
+        #     new.stem = json.dumps([{'value': base.long_description, 'type': 'markdown'}])
+        #     new.save()
+
+
+class CodingIoAnswerKey(models.MigrateMixin, models.Model):
     """Represents an answer to some question given in some specific computer
     language plus the placeholder text that should be displayed"""
 
@@ -360,28 +385,36 @@ class CodingIoAnswerKey(models.Model):
         pass
 
     class Meta:
-        app_label = 'cs_questions'
         verbose_name = _('answer key')
         verbose_name_plural = _('answer keys')
         unique_together = [('question', 'language')]
 
-    question = models.ForeignKey(CodingIoQuestion, related_name='answer_keys')
-    language = models.ForeignKey(ProgrammingLanguage)
+    question = models.ParentalKey(
+        CodingIoQuestion,
+        related_name='answer_keys'
+    )
+    language = models.ForeignKey(
+        ProgrammingLanguage,
+        related_name='answer_keys',
+    )
     source = models.TextField(
             _('Answer source code'),
             blank=True,
-            help_text=_('Source code for the correct answer in the given '
-                        'programming language'),
+            help_text=_(
+                'Source code for the correct answer in the given programming '
+                'language'
+            ),
     )
     placeholder = models.TextField(
             _('Placeholder source code'),
             blank=True,
-            help_text=_('This optional field controls which code should be '
-                        'placed in the source code editor when a question is '
-                        'opened. This is useful to put boilerplate or even a '
-                        'full program that the student should modify. It is '
-                        'possible to configure a global per-language '
-                        'boilerplate and leave this field blank.'),
+            help_text=_(
+                'This optional field controls which code should be placed in '
+                'the source code editor when a question is opened. This is '
+                'useful to put boilerplate or even a full program that the '
+                'student should modify. It is possible to configure a global '
+                'per-language boilerplate and leave this field blank.'
+            ),
     )
     is_valid = models.BooleanField(default=False)
     iospec_hash = models.CharField(max_length=32, blank=True)
@@ -454,10 +487,58 @@ class CodingIoAnswerKey(models.Model):
         if validate and self.is_valid is False:
             raise self.ValidationError('could not validate Answer key')
 
+    # Wagtail admin
+    panels = [
+        panels.FieldPanel('language'),
+        panels.FieldPanel('source'),
+        panels.FieldPanel('placeholder'),
+    ]
 
-class CodingIoResponse(QuestionResponse):
-    source = models.TextField(blank=True)
-    language = models.ForeignKey(ProgrammingLanguage)
+
+    # # Migration
+    # base = models.OneToOneField(
+    #     'cs_questions.CodingIoAnswerKey',
+    #     on_delete=models.SET_NULL,
+    #     related_name='converted',
+    #     blank=True,
+    #     null=True,
+    # )
+    #
+    # def migrate_question_T(x):
+    #     return x.converted
+
+
+class CodingIoResponse(models.MigrateMixin, QuestionResponse):
+    """
+    A response proxy class specialized in CodingIoQuestion responses.
+    """
+    class Meta:
+        proxy = True
+
+    @property
+    def source(self):
+        return self.response_data.get('source', '')
+
+    @source.setter
+    def source(self, value):
+        self.response_data['source'] = value
+
+    @property
+    def language(self):
+        try:
+            return self._language
+        except AttributeError:
+            lang_id = self.response_data.get('language', None)
+            if lang_id is None:
+                return None
+            else:
+                self._language = ProgrammingLanguage.objects.get(ref=lang_id)
+                return self._language
+
+    @language.setter
+    def language(self, value):
+        self.response_data['language'] = value.ref
+        self._language = value
 
     # Feedback properties
     feedback = property(lambda x: x.feedback_data)
@@ -465,6 +546,20 @@ class CodingIoResponse(QuestionResponse):
     testcase = property(lambda x: x.feedback_data.testcase)
     answer_key = property(lambda x: x.feedback_data.answer_key)
     is_correct = property(lambda x: x.feedback_data.is_correct)
+
+    def __init__(self, *args, **kwargs):
+        language = kwargs.pop('language', None)
+        source = kwargs.pop('language', None)
+        feedback = kwargs.pop('feedback', None)
+        super().__init__(*args, **kwargs)
+
+        # Update attributes
+        if language is not None:
+            self.language = language
+        if source is not None:
+            self.source = source
+        if feedback is not None:
+            self.feedback = feedback
 
     def autograde_compute(self):
         self.feedback_data = self.question.grade(self)
@@ -484,9 +579,85 @@ class CodingIoResponse(QuestionResponse):
             r.grade = r.get_grade_from_feedback()
             r.save()
 
+    # # Migrations
+    # migrate_skip_attributes = {'is_converted', 'value', 'response_ptr', 'id'}
+    # migrate_attribute_conversions = {'question_for_unbound': 'question'}
+    #
+    # def migrate_question_T(x):
+    #     return x.codingioquestion.converted
+    #
+    # def migrate_parent_T(x):
+    #     if x is None:
+    #         return None
+    #     return x.converted
+    #
+    # def migrate_feedback_data_T(x):
+    #     return x.to_json()
+    #
+    # @classmethod
+    # def migrate_qs(cls):
+    #     from cs_questions.models import CodingIoResponse
+    #     return CodingIoResponse.objects.all()
+    #
+    # @classmethod
+    # def migrate_post_conversions(cls, new):
+    #     base = new.base.codingioresponse
+    #     question = base.question_for_unbound.codingioquestion or base.activity.codingioactivity.question
+    #     new.response_data = [{'source': base.source, 'language': base.language.ref}]
+    #     new.activity = question.converted
+    #     new.save()
+    #
+    #     base.is_converted = True
+    #     base.save()
 
-class CodingIoActivity(QuestionActivity):
+
+class ResponseModel(models.Model):
+    """
+    Fake model used only to create a ModelForm.
+    """
+    class Meta:
+        abstract = True
+
     language = models.ForeignKey(ProgrammingLanguage)
+    source = models.TextField()
+
+
+# noinspection PyAttributeOutsideInit
+class ResponseForm(forms.ModelForm):
+    class Meta:
+        model = ResponseModel
+        fields = ['language', 'source']
+
+    def __init__(self, *args, **kwargs):
+        self.question = kwargs.pop('question')
+        self.response = None
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        # The save method does not return a ResponseModel object. We create
+        # a generic response
+        if self.response is None:
+            fake = super().save(commit=False)
+            self.response = response = self.get_response_from_fake(fake)
+            if commit:
+                response.save()
+                self._m2m_save()
+            else:
+                response.m2m_save = self._m2m_save
+        elif commit:
+            self.response.save()
+            self._m2m_save()
+            return response
+        else:
+            self.m2m_save = self._m2m_save
+            return self.response
+
+    def get_response_from_fake(self, fake):
+        """
+        Return a real Response object from the Fake response class.
+        """
+        return CodingIoResponse(source=fake.source, language=fake.language,
+                                question=self.question)
 
 
 # Utility functions
@@ -515,5 +686,4 @@ def grade_code(source, answer_key, lang=None):
                            raises=False,
                            sandbox=settings.CODESCHOOL_USE_SANDBOX)
 
-# Set the correct response class
-CodingIoQuestion.response_cls = CodingIoResponse
+

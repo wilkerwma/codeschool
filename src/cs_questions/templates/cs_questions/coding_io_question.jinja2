@@ -1,0 +1,31 @@
+{% extends "cs_questions/detail.jinja2" %}
+{% from "cs_questions/macros.jinja2" import feedback_styles %}
+
+{% set source_code = form['source'].value() %}
+{% if not source_code %}
+    {% set source_code = '' %}
+{% endif %}
+
+{% block object_detail_dl %}
+    <dl>
+        <dt>{{ _('Maximum runtime') }}</dt>
+        <dd>{{ gettext('%(time)s seconds', time=question.timeout) }}</dd>
+    </dl>
+{% endblock %}
+
+{% block response_form %}
+    <h2 class="banner">{{ _('Response') }}</h2>
+    <div class="code-area mdl-shadow--4dp">
+        <div class="select">
+            <p>Programming language {{ form['language'] }}</p>
+        </div>
+
+        <ace-editor mode="python" name="source">{{ source_code|e }}</ace-editor>
+    </div>
+{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    {{ feedback_styles() }}
+{% endblock %}
+

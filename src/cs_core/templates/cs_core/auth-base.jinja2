@@ -1,0 +1,34 @@
+{% extends "base.jinja2" %}
+
+{% block content_title %}Perfil: {{ user.username }}{% endblock %}
+
+{% block style %}
+    {{ super() }}
+    <style>
+        .toolbar.highlight.user-toolbar {
+            display: flex;
+            justify-content: space-between;
+            padding-left: 40px;
+            padding-right: 40px;
+        }
+        .toolbar.highlight.user-toolbar a {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% set username=user.username %}
+{% block content_head %}
+    <h1>{{ self.content_title() }}</h1>
+
+    {% if user.username %}
+        {% if user.username == profile.user.username %}
+            <div class="user-toolbar toolbar highlight">
+                <a href="{% url 'auth:profile-detail' username %}">{{ _("View profile") }}</a>
+                <a href="{% url 'auth:profile-edit' username %}">{{ _("Edit details") }}</a>
+                <a href="{% url 'auth:password-change' username %}">{{ _("Change password") }}</a>
+                <a href="{% url 'auth:email-change' username %}">{{ _("Change email") }}</a>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

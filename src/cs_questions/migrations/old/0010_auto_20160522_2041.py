@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='QuizActivity',
+            name='Quiz',
             fields=[
                 ('activity_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='cs_activities.Activity')),
                 ('grading_method', models.IntegerField(choices=[(0, 'largest grade of all responses'), (1, 'smallest grade of all responses'), (2, 'mean grade')])),
@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
             bases=('cs_activities.activity',),
         ),
         migrations.CreateModel(
-            name='QuizActivityItem',
+            name='QuizItem',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('index', models.PositiveIntegerField()),

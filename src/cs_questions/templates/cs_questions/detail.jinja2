@@ -1,6 +1,6 @@
 {% extends "viewpack/crud/detail.jinja2" %}
 
-{% if feedback is not defined and response.status == response.STATUS_DONE %}{% set feedback = response.feedback %}{% endif %}
+{% if feedback is not defined and response is defined and response.status == response.STATUS_DONE %}{% set feedback = response.feedback %}{% endif %}
 
 {% block content_head %}
     {{ super() }}
@@ -12,11 +12,11 @@
 {% block object_description %}
     <h2 class="banner">{{ _('Description') }}</h2>
     <article class="long-description">
-        {{ question.long_description|markdown }}
+        {{ question.long_description }}
     </article>
 
     {% block feedback %}
-        {% if response.is_done %}
+        {% if response is defined and response.is_done %}
             <h2 class="banner">{{ _('Feedback') }}</h2>
             <div class="question-feedback mdl-shadow--4dp">{{ response.html_feedback() }}</div>
         {% endif %}

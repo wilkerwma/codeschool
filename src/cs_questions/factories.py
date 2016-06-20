@@ -1,5 +1,6 @@
-from codeschool.factories import *
-from cs_core.factories import ProgrammingLanguageFactory
+from cs_core.factories import *
+import cs_core.factories as factory
+from cs_core.models import get_language
 from cs_questions import models
 
 
@@ -7,9 +8,8 @@ class CodingIoAnswerKeyFactory(factory.DjangoModelFactory):
     class Meta:
         model = models.CodingIoAnswerKey
 
-    language = factory.SubFactory(ProgrammingLanguageFactory)
+    language = factory.LazyAttribute(lambda x: get_language('python'))
     source = "print('hello', input('who? '))"
-    question = None
 
 
 class CodingIoQuestionFactory(factory.DjangoModelFactory):
