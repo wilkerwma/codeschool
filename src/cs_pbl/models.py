@@ -7,6 +7,7 @@ from codeschool.models import User
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.urlresolvers import reverse
 
 
 @receiver(post_save, sender=Response)
@@ -39,6 +40,20 @@ class Action(models.Model):
     points_correct_at_first_try = models.PositiveIntegerField(default=12)
     activity = models.ForeignKey(Activity)
 
+    name = models.CharField(_('name'), default="Action", max_length=200)
+
+    def get_absolute_url(self):
+        return reverse('detail')
+        # , kwargs={'name':self.name})
+
+    class Meta():
+        verbose_name = _('action')
+        verbose_name_plural = _('actions')
+
+    title = property(lambda x: x.name)
+
+    def __str__(self):
+        return self.name
 
 class Badge(models.Model):
     name = models.CharField(_('name'), max_length=200)
@@ -51,12 +66,15 @@ class GivenBadge(models.TimeStampedModel):
     badge = models.ForeignKey(Badge)
     users = models.ForeignKey(models.User)
 
+
 class Goal(models.Model):
     badge = models.ForeignKey(
         Badge,
         related_name='goals'
     )
     required_points = models.PositiveIntegerField(default=0)
+    # required_actions = models.ManyToManyField(Action)
+
 
 class GoalStep(HasCategoryMixin, models.Model):
     goal = models.ForeignKey(Goal, related_name='steps')
@@ -64,12 +82,10 @@ class GoalStep(HasCategoryMixin, models.Model):
     category = models.CharField(choices=HasCategoryMixin.CATEGORY_CHOICES, null=True, blank=True, max_length=20)
     required = models.BooleanField()
 
+
 class PblUser(models.Model):
     users = models.OneToOneField(models.User)
     accumulated_points = models.PositiveIntegerField()
-
-def register_points(user, action):
-    pass
 
 
 class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
@@ -91,6 +107,11 @@ class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
             return self.action.points_correct_at_first_try
         else:
             raise ValueError('invalid category: %s' % self.category)
+
+
+    def __int__(self):
+        return self.value()
+
 
     def update(self, category):
         value = self.value(category)

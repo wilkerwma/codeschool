@@ -1,0 +1,45 @@
+- model: cs_pbl.badge
+  pk: 1
+  fields:
+    name: test badge
+    short_description: blah blah
+    long_description: blah blah
+
+- model: cs_pbl.badge
+  pk: 2
+  fields:
+    name: second badge
+    short_description: blah blah 2
+    long_description: blah blah 22
+
+- model: cs_pbl.givenbadge
+  pk: 1
+  fields:
+    badge: 1
+    user: foo
+    
+- model: cs_pbl.givenbadge
+  pk: 2
+  fields:
+    badge: 2
+    user: foo
+    
+- model: cs_pbl.goal
+  pk: 1
+  fields:
+    badge: 1
+    required_actions: [1, 2, 3]
+    
+- model: cs_pbl.goal
+  pk: 2
+  fields:
+    badge: 2
+    required_actions: 1
+    
+- goalstep: cs_pbl.goalstep
+  pk: 1
+  fields:
+    go   
+    
+    
+    
