@@ -66,8 +66,8 @@ class Question(models.CopyMixin,
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
-        return url_reverse('question-detail', args=(self.pk,))
+    def get_absolute_url(self): 
+        return url_reverse('question:detail', args=(self.pk,))
 
     def update(self):
         """Tells question object to validate and update any fields necessary

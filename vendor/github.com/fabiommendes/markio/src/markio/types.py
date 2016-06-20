@@ -102,7 +102,7 @@ class MetaAttribute:
             except AttributeError:
                 raise TypeError('meta has no %r attribute' % attr)
 
-            if isintance(old, set):
+            if isinstance(old, set):
                 old.update(new)
             else:
                 setattr(self, attr, new)
@@ -114,10 +114,10 @@ class RootMeta(type):
     """
     def __new__(cls, name, bases, ns):
         meta = ns.pop('Meta', None)
-        new = type.__new__(name, bases, ns)
+        new = super().__new__(cls, name, bases, ns)
         if bases:
-            base = new._get_base(bases)
-            new._meta = base.meta.copy()
+            base = new._get_base()
+            new._meta = base._meta.copy()
             new._meta.update(meta)
         else:
             new._meta = MetaAttribute.from_class(meta)

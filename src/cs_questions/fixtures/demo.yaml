@@ -1,0 +1,30 @@
+# A numeric question
+- model: cs_questions.question
+  pk: 1
+  fields:
+    owner: 2
+    discipline: 1
+    is_active: true
+    name: The question
+    short_description: The most important question
+    long_description: What is the answer to the question of life, the universe and everything?
+- model: cs_questions.numericquestion
+  pk: 1
+  fields:
+    answer: 42
+
+# A coding question
+- model: cs_questions.question
+  pk: 2
+  fields:
+    owner: 2
+    discipline: 1
+    is_active: true
+    name: Hello world
+    short_description: Starting programming now!
+    long_description: Create a program that prints the message `Hello world!` on the screen.
+- model: cs_questions.codingioquestion
+  pk: 2
+  fields:
+    iospec_source: Hello world!
+

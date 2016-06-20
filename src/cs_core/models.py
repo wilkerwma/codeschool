@@ -20,7 +20,35 @@ default_aliases = {
 }
 
 
-class ProgrammingLanguage(models.Model):
+class Base:
+    def __str__(self):
+        return '%s (%s)' % (self.ref, self.name)
+
+    @classmethod
+    def setdefault(cls, ref, *args, **kwds):
+        """Create object if it does not exists."""
+
+        try:
+            return cls.objects.get(ref=ref)
+        except cls.DoesNotExist:
+            new = cls(ref, *args, **kwds)
+            new.save()
+            return new
+
+
+class SourceFormat(Base, models.Model):
+    """
+    Generalizes a programming language to other non-programming based file
+    formats.
+    """
+    # TODO: make it a base class for ProgrammingLanguage
+
+    ref = models.CharField(max_length=10, primary_key=True)
+    name = models.CharField(max_length=140)
+    comments = models.TextField(blank=True)
+
+
+class ProgrammingLanguage(Base, models.Model):
     """Represents a programming language."""
 
     ref = models.CharField(max_length=10, primary_key=True)
@@ -41,19 +69,11 @@ class ProgrammingLanguage(models.Model):
             else:
                 return cls.objects.create(ref=ref, name=name)
 
-    @classmethod
-    def setdefault(cls, ref, *args, **kwds):
-        """Create object if it does not exists."""
-
-        try:
-            return cls.objects.get(ref=ref)
-        except cls.DoesNotExist:
-            new = cls(ref, *args, **kwds)
-            new.save()
-            return new
-
-    def __str__(self):
-        return '%s (%s)' % (self.ref, self.name)
+    def save(self, *args, **kwargs):
+        SourceFormat.setdefault(self.ref,
+                                name=self.name,
+                                comments=self.comments)
+        super().save(*args, **kwargs)
 
 
 def get_language(ref, use_db=None):
