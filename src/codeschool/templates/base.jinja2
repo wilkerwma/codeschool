@@ -51,11 +51,13 @@
     <!-- Javascript -->
     {% block javascript_header %}
         {% compress js %}
-            <script src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}"></script>
             <script src="{% static 'js/vendor/modernizr-2.8.3.min.js' %}"></script>
+            <script src="{% static 'bower_components/webcomponentsjs/webcomponents-lite.min.js' %}"></script>
             <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
             <script src="{% static 'bower_components/dialog-polyfill/dialog-polyfill.js' %}"></script>
         {% endcompress %}
+        <script src="{% static 'bower_components/requirejs/require.js' %}"
+                data-main="{% static 'js/config.js' %}"></script>
     {% endblock %}
 
     <!-- Web components -->

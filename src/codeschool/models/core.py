@@ -7,21 +7,18 @@ be used as a drop-in replacement to django.db.models module.
 The database should not be touched here. This module should only host abstract
 models
 """
-import collections
-from django.utils import timezone
-from django.db.models import *
 from django.db.models.fields.reverse_related import OneToOneRel as _OneToOneRel
+from django.db.models import Model, Manager, QuerySet, DateField
 from django.utils.translation import ugettext_lazy as _
-from model_utils.models import *
+from django.contrib.auth.models import User, Group, AnonymousUser
 from model_utils import Choices
 from model_utils import managers as _mu_managers
-from model_utils.managers import InheritanceManager as _InheritanceManager
-from django.contrib.auth.models import *
-from annoying.fields import JSONField, AutoOneToOneField
-from picklefield.fields import PickledObjectField
+from model_utils.managers import InheritanceManager, QueryManager
+from model_utils.models import TimeStampedModel, TimeFramedModel, StatusModel
 from codeschool.utils import lazy
 
 
+# Adds the decorated method to the given class
 def _add_method(cls):
     def decorator(func):
         setattr(cls, func.__name__, func)
@@ -68,7 +65,7 @@ _mu_managers.QueryManager.__bases__ = (_mu_managers.QueryManagerMixin,
 
 
 # Combinations of model_util models
-class InheritableModel(models.Model):
+class InheritableModel(Model):
     """A model with an InheritanceManager manager.
 
     When used with multiple inheritance, it generally should be the first base
@@ -78,7 +75,7 @@ class InheritableModel(models.Model):
     class Meta:
         abstract = True
 
-    objects = _InheritanceManager()
+    objects = InheritanceManager()
 
     @classmethod
     def get_subclasses(cls):
@@ -132,7 +129,7 @@ class TimeTrackingStatusModel(TimeTrackingModel, StatusModel):
         abstract = True
 
 
-class DateFramedModel(models.Model):
+class DateFramedModel(Model):
     """Like a :cls:`TimeFramedModel`, but it's start and end fields are dates
     rather than datetimes."""
 
@@ -141,6 +138,3 @@ class DateFramedModel(models.Model):
 
     start = DateField(_('start'), null=True, blank=True)
     end = DateField(_('start'), null=True, blank=True)
-
-User.add_method = _add_method
-User.full_name = property(lambda s: '%s %s' % (s.first_name, s.last_name))

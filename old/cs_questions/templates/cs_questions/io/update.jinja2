@@ -1,0 +1,7 @@
+{% extends "cs_questions/update.jinja2" %}
+{% from "cs_questions/io/macros.jinja2" import answer_key_edit_box %}
+
+{% block content_head %}
+    {{ super() }}
+    {{ answer_key_edit_box(question) }}
+{% endblock %}

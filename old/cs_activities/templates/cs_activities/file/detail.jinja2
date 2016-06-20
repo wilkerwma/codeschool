@@ -1,0 +1,18 @@
+{% extends "cs_activities/detail.jinja2" %}
+
+
+{% block content_body %}
+    {{ super() }}
+
+    <h2 class="banner">{{ _('Downloads') }}</h2>
+    <div>
+        <ul>
+            {% for file in object.files %}
+                <li>
+                    {{ file.name }}
+                    [<a href="{% static file|string %}">{{ _('download') }}</a>]</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}

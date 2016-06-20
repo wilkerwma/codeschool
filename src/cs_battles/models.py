@@ -1,19 +1,28 @@
+from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.contrib.auth import models as auth_model
 from django.core.urlresolvers import reverse
 from cs_questions.models import Question
 from cs_core.models import ProgrammingLanguage
-from cs_questions.models import CodingIoQuestion, CodingIoResponse
+from cs_questions.models import CodingIoQuestion, CodingIoResponseItem
 
 class Battle(models.Model):
-    """The model to associate many battles"""
+    """
+    The model to associate many battles
+    """
     TYPE_BATTLES = ( ("length","length"),("time","time") )
     date = models.DateField(auto_now_add=True)
     invitations_user = models.ManyToManyField(auth_model.User)
     battle_owner = models.ForeignKey(auth_model.User,related_name="battle_owner")
     battle_winner = models.OneToOneField('BattleResponse',blank=True,null=True,related_name="winner")
     question = models.ForeignKey(CodingIoQuestion,related_name="battle_question")
-    type = models.CharField(default="length",choices=TYPE_BATTLES,max_length=20)
+    type = models.CharField(
+        _('type'),
+        default="length",
+        choices=TYPE_BATTLES,
+        max_length=20,
+        help_text=_('Choose a battle type.'),
+    )
     language = models.ForeignKey(ProgrammingLanguage, related_name="battle_language")
     short_description = property(lambda x: x.question.short_description)
     long_description = property(lambda x: x.question.long_description)
@@ -46,8 +55,11 @@ class Battle(models.Model):
             return "(%s) %s" % (self.id,self.short_description)
 
 
-class BattleResponse(CodingIoResponse):
-    """BattleResponse class with attributes necessary to one participation for one challenger"""
+class BattleResponse(CodingIoResponseItem):
+    """
+    BattleResponse class with attributes necessary to one participation for one
+    challenger
+    """
 
     time_begin = models.DateTimeField()
     time_end = models.DateTimeField()

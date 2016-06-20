@@ -13,7 +13,6 @@ from cs_core.models import ProgrammingLanguage
 from codeschool.models import User
 
 
-
 class LanguageChooserBlock(blocks.ChooserBlock):
     target_model = ProgrammingLanguage
     widget = forms.Select

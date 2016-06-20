@@ -1,7 +1,13 @@
 from collections import OrderedDict
+from django.forms.utils import flatatt, force_text, format_html
+from django.utils.safestring import mark_safe
+from django.utils.html import escape
 from django.utils.functional import cached_property
 from django import forms
 from wagtail.wagtailcore import blocks
+
+__all__ = ['AceBlock', 'CodeBlock', 'AceWidget']
+
 
 ACE_LANGUAGE_CHOICES = OrderedDict([
     ("ace/mode/abap", "ABAP"),
@@ -138,6 +144,32 @@ ACE_LANGUAGE_CHOICES = OrderedDict([
 ])
 
 
+class AceWidget(forms.Textarea):
+    """
+    An ace-editor widget using the <ace-editor> component.
+    """
+    def __init__(self, attrs=None, mode='python'):
+        self.mode = mode
+        super().__init__(attrs)
+
+    def render(self, name, value, attrs=None):
+        if value is None:
+            value = ''
+        attrs = attrs or {}
+        attrs.setdefault('mode', self.mode)
+        attrs.setdefault('font-size', 15)
+        final_attrs = self.build_attrs(attrs, name=name)
+        final_attrs.pop('rows', None)
+        return format_html('<ace-editor{}>\r\n{}</ace-editor>',
+                           flatatt(final_attrs),
+                           force_text(value))
+
+    class Media:
+        html = (
+            'components/ace-editor/ace-editor.html',
+        )
+
+
 class AceBlock(blocks.TextBlock):
     """
     A text input block that uses the AceEditor instance.
@@ -168,12 +200,13 @@ class CodeBlock(blocks.StructBlock):
         required=True,
         choices=ACE_LANGUAGE_CHOICES.items(),
     )
-    code = AceBlock()
+    source = AceBlock()
 
     class Meta:
         icon = 'code'
 
     def render(self, value):
-        src = value['code'].strip('\n')
-        lang = value['language'].ref
-        return '<ace-editor mode="%s" read-only>%s</ace-editor>' % (lang, src)
+        src = escape(value['source'].strip('\n'))
+        lang = value['language'].rpartition('/')[-1]
+        return mark_safe('<ace-editor mode="%s" read-only>%s</ace-editor>' %
+                         (lang, src))

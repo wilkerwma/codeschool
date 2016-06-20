@@ -1,0 +1,86 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-04-23 18:27-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: src/cs_questions/templates/cs_questions/detail.jinja2:19
+#: src/cs_questions/templates/cs_questions/io/detail.jinja2:16
+msgid "Response"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/detail.jinja2:24
+msgid "Send"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/globals.jinja2:2
+msgid "question"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/index.jinja2:20
+msgid "List of questions"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/add-key.jinja2:1
+#: src/cs_questions/templates/cs_questions/io/edit-key.jinja2:1
+msgid "answer key"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/add-key.jinja2:12
+#: src/cs_questions/templates/cs_questions/io/edit-key.jinja2:12
+msgid "Submit"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/detail.jinja2:6
+msgid "Rules"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/detail.jinja2:8
+msgid "Maximum runtime"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:5
+msgid "Add a new I/O based coding question"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:10
+msgid "Edit Answer Keys"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:14
+msgid "Language"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:15
+msgid "Is valid"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:16
+msgid "Source?"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:17
+msgid "Placeholder?"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:18
+msgid "Edit"
+msgstr ""
+
+#: src/cs_questions/templates/cs_questions/io/edit.jinja2:38
+msgid "Add new"
+msgstr ""

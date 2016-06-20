@@ -1,0 +1,531 @@
+[
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mendes",
+    "name": "Entrada e sa\u00edda (b\u00e1sico)",
+    "status": "valid",
+    "modified": "2016-05-18T02:48:52.855Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Quase sempre queremos que nossos programas interajam de alguma forma com o usu\u00e1rio. A maneira mais simples de intera\u00e7\u00e3o talvez seja escrevendo e lendo valores digitados em um terminal. Vamos ent\u00e3o come\u00e7ar com um programa bem simples: ele deve perguntar o nome e idade do usu\u00e1rio e mostrar uma mensagem na tela dizendo qual ser\u00e1 a idade do mesmo daqui a 5 anos.\r\n\r\nA esta tarefa simples, vamos adicionar uma dificuldade. Todas as mensagens trocadas entre o programa e o usu\u00e1rio devem seguir **exatamente** o modelo abaixo, reproduzindo cada ponto, cada letra mai\u00fascula e at\u00e9 mesmo os espa\u00e7os em branco:\r\n\r\n    Nome: <entrada do usu\u00e1rio>\r\n    Idade: <entrada do usu\u00e1rio>\r\n    Oi <nome>, voc\u00ea ter\u00e1 <n\u00famero> anos daqui a cinco anos!\r\n\r\n\u00c9 l\u00f3gico que os campos <entrada do usu\u00e1rio>, <nome> e <n\u00famero> devem ser substitu\u00eddos pelos valores digitados durante a execu\u00e7\u00e3o do programa.\r\n\r\nO Codeschool simula um usu\u00e1rio humano interagindo com o seu programa e testa os resultados para verificar se os mesmos correspondem ao esperado. Geralmente cada programa \u00e9 testado v\u00e1rias vezes com v\u00e1rias entradas diferinptentes. Agora \u00e9 m\u00e3os \u00e0 obra e boa programa\u00e7\u00e3o!",
+    "id": 1,
+    "is_active": true,
+    "iospec_source": "Nome: <Maria>\r\nIdade: <20>\r\nOi Maria, voc\u00ea ter\u00e1 25 anos daqui a cinco anos!\r\n\r\nNome: <Paulo>\r\nIdade: <0>\r\nOi Paulo, voc\u00ea ter\u00e1 5 anos daqui a cinco anos!\r\n\r\nNome: <Albert Einstein>\r\nIdade: <70>\r\nOi Albert Einstein, voc\u00ea ter\u00e1 75 anos daqui a cinco anos!\r\n\r\n@input\r\n    $name\r\n    $int(0..100)",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Programa simples testando as opera\u00e7\u00f5es de entrada e sa\u00edda",
+    "created": "2016-04-19T19:22:07.359Z",
+    "status_changed": "2016-05-04T13:54:28.163Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "n: <5>\r\nvalores: 2 4 6 8 12\r\n\r\n@plain 10;\r\n\r\n@plain 20;\r\n\r\n@plain 100;\r\n\r\n@plain 1;",
+    "name": "Listagem de n\u00fameros",
+    "status": "valid",
+    "modified": "2016-05-05T18:25:41.914Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Crie um programa que pergunte um valor m\u00e1ximo ``N`` e imprima uma listagem com os\r\n``N`` primeiros n\u00fameros pares que n\u00e3o s\u00e3o m\u00faltiplos de 10.\r\n\r\n\r\n### Entradas\r\n\r\n``N`` \u00e9 um n\u00famero entre 1 e 1000 (inclusive). \r\n\r\n### Exemplos\r\n\r\n    n: <5>\r\n    valores: 2 4 6 8 12",
+    "id": 4,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Lista alguns n\u00fameros em sequ\u00eancia.",
+    "created": "2016-05-04T13:54:15.560Z",
+    "status_changed": "2016-05-04T13:54:28.062Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "x: <1>\nn: <1>\nexp(1.0000) ~ 2.0000\n\n@plain 1; 2;\n\n@plain 1; 5;\n\n@plain 1; 10;\n\n@plain 1; 100;\n\n@plain -1; 1;\n\n@plain -1; 2;\n\n@plain 0.5; 10;",
+    "name": "Exponencial",
+    "status": "valid",
+    "modified": "2016-05-04T16:46:45.532Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "A fun\u00e7\u00e3o exponencial ``exp(x)`` pode ser aproximada pelo produto ``(1 + x/n) * ... * (1 + x/n)``\r\ncom ``n`` termos. Crie um programa que pergunte o valor de ``x`` e o valor de ``n`` e calcule\r\naproxima\u00e7\u00f5es da exponencial. Sempre utilize precis\u00e3o dupla e imprima o resultado com 4 casas decimais de precis\u00e3o.\r\n\r\n### Exemplos\r\n\r\nAproxima\u00e7\u00e3o de um termo (``exp(x) ~= 1 + x``)\r\n\r\n    x: <1.0>\r\n    n: <1>\r\n    exp(1.0000) ~ 2.0000\r\n    \r\nAproxima\u00e7\u00e3o de um termo (``exp(x) ~= (1 + x/2) * (1 + x/2)``)\r\n\r\n    x: <1>\r\n    n: <2>\r\n    exp(1.0000) ~ 2.2500",
+    "id": 5,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calcule a exponencial de um n\u00famero.",
+    "created": "2016-05-04T16:46:28.770Z",
+    "status_changed": "2016-05-04T16:46:45.535Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "x: <1>\nf(1.0000) = 0.5403\n\n@plain 0;\n\n@plain 0.5;\n\n@plain 1;\n\n@plain -1;\n\n@plain 5;\n\n@plain 10;",
+    "name": "S\u00e9rie de pot\u00eancias",
+    "status": "valid",
+    "modified": "2016-05-04T16:48:54.018Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Uma fun\u00e7\u00e3o pode ser escrita como s\u00e9rie de pot\u00eancias na forma::\r\n\r\n     f(x) = a_0 + a_1 * x + a_2 * x^2 + a_3 * x^3 + ...\r\n     \r\nMuitas vezes conseguimos determinar os coeficientes a_n por uma rela\u00e7\u00e3o de \r\nrecorr\u00eancia. Considere que a rela\u00e7\u00e3o entre os coeficientes \u00e9 dada por::\r\n\r\n    a_n = (-1) * a_(n - 2) / (n * (n - 1))\r\n    \r\nOnde temos somente os coeficients pares quando inicamos com a_0 = 1. Usando a rela\u00e7\u00e3o \r\nde recorr\u00eancia podemos calcular ``a_2`` como ``- 1/(2 * (1 - 1)) * a_0 = -0.5``.\r\n \r\nCrie uma fun\u00e7\u00e3o que calcule aproxima\u00e7\u00f5es da solu\u00e7\u00e3o que utilizem at\u00e9 o\r\ntermo a_20. O programa deve utilizar precis\u00e3o dupla e imprimir todos os valores\r\ncom 4 casas decimais.\r\n\r\n### Exemplos\r\n\r\n    x: <1.0>\r\n    f(1.0000) = 0.5403.",
+    "id": 6,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Aproxima\u00e7\u00e3o de uma fun\u00e7\u00e3o por s\u00e9rie de pot\u00eancias.",
+    "created": "2016-05-04T16:48:42.948Z",
+    "status_changed": "2016-05-04T16:48:54.021Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "n: <3>\nseq: 1 2 3\n\n@plain 1;\n\n@plain 4;\n\n@plain 6;\n\n@plain 9;\n\n@plain 10;\n\n@plain 50;\n\n@plain 75;\n\n@plain 100;",
+    "name": "Sequ\u00eancia composta",
+    "status": "valid",
+    "modified": "2016-05-11T11:46:16.193Z",
+    "long_description": "Considere a sequ\u00eancia num\u00e9rica abaixo:\r\n\r\n    1 2 3 1 4 2 5 3 1 6 4 2 7 5 3 1 ...\r\n    \r\nEla \u00e9 formada incrementando o n\u00famero principal, que \u00e9 seguido por valores decrescentes de 2 em 2 at\u00e9 logo antes\r\nde atingir valores negativos. Fa\u00e7a um programa que pergunte o n\u00famero ``n`` de elementos da sequ\u00eancia e imprima\r\nos valores correspondentes. \r\n\r\n### Entradas\r\n\r\nN\u00fameros entre 1 e 100.\r\n\r\n### Exemplos\r\n\r\n    n: <3>\r\n    seq: 1 2 3",
+    "id": 7,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calcule uma sequencia de n\u00fameros.",
+    "created": "2016-05-11T11:44:12.960Z",
+    "status_changed": "2016-05-11T11:46:16.194Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "x: <2>\nf(x) = 1.0000\n\n@plain 1;\n\n@plain 2;\n\n@plain 3;\n\n@plain 10;\n\n@plain -42\n\n@plain 1.1\n\n@plain 3.1415\n\n@plain 50;\n\n@plain 100;",
+    "name": "Recursividade",
+    "status": "valid",
+    "modified": "2016-05-16T02:33:39.806Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "A fun\u00e7\u00e3o f(x) \u00e9 definida de forma recursiva: para valores de x menores ou iguais a 1, a fun\u00e7\u00e3o vale 0. Para\r\nvalores positivos f(x) = f(x - 1) + f(x / 2) + x - 1. A fun\u00e7\u00e3o aceita entradas de ponto flutuante em dupla \r\nprecis\u00e3o e retorna valores do mesmo tipo num\u00e9rico.\r\n\r\nO programa deve perguntar o valor de ``x`` e responder o valor de ``f(x)`` com 4 casas de precis\u00e3o.\r\n\r\n### Entradas\r\n\r\nN\u00fameros entre -100 at\u00e9 100\r\n\r\n### Sa\u00edda\r\n\r\nN\u00fameros com 4 casas decimais\r\n\r\n### Exemplos\r\n\r\n    x: <1>\r\n    f(x) = 0.0000\r\n    \r\n    x: <2>\r\n    f(x) = 1.0000",
+    "id": 8,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Implemente uma fun\u00e7\u00e3o recursiva.",
+    "created": "2016-05-11T11:48:27.764Z",
+    "status_changed": "2016-05-11T11:48:40.453Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "partido: <A>\npresidente: <A>\napoio de C: <B>\nVAI TER LUTA\n\n@plain A;A;A;\n\n@plain A;A;B;\n\n@plain A;B;A;\n\n@plain A;B;B;\n\n@plain B;A;A;\n\n@plain B;A;B;\n\n@plain B;B;A;\n\n@plain B;B;B;",
+    "name": "Game of thrones",
+    "status": "valid",
+    "modified": "2016-05-15T20:01:16.754Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Um certo pa\u00eds possui 3 partidos, A, B e C. Os partidos A e B s\u00e3o sempre advers\u00e1rios. J\u00e1 o \r\npartido C nunca concorre \u00e0 presid\u00eancia e a cada elei\u00e7\u00e3o escolhe um dos outros dois partidos \r\npara apoiar. Neste pa\u00eds, sempre que o presidente perde o apoio do partido C, a  oposi\u00e7\u00e3o \r\ngrita as palavras de ordem ``VAI TER IMPEACHEMENT``. Em caso de amea\u00e7a de impeachment, a \r\nmilit\u00e2ncia do partido governista grita ``VAI TER LUTA``. Caso o partido C apoie a presid\u00eancia,\r\nas palavras de ordem mudam para respectivamente ``VAI TER MUDANCA`` e ``VAI TER CONTINUIDADE``.\r\n\r\nCrie um programa que pergunte o partido do usu\u00e1rio, o partido do presidente e o apoio do\r\npartido C e imprima em seguida a palavra de ordem que o usu\u00e1rio deve proferir.\r\n\r\n### Entradas\r\n\r\nA entrada consiste em 3 partidos, que podem apenas assumir os valores \"A\", \"B\" ou \"C\". \r\n\r\n### Exemplos\r\n\r\n    partido: <A>\r\n    presidente: <A>\r\n    apoio de C: <B>\r\n    VAI TER LUTA",
+    "id": 9,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Grite palavras de ordem que dependem da situa\u00e7\u00e3o pol\u00edtica.",
+    "created": "2016-05-11T11:51:07.347Z",
+    "status_changed": "2016-05-11T11:51:19.301Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "Item: <6>\r\nOutro: <2>\r\nEDUCACAO, 5.72% do total.\r\nGasto 3.31 vezes menor que JUROS.\r\n\r\n@plain 1;3;",
+    "name": "Programa pol\u00edtico",
+    "status": "valid",
+    "modified": "2016-05-16T18:20:14.847Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "A tabela abaixo mostra a tabela de gastos do governo federal para 2014 listando \r\ndo maior para o menor (Compilado a partir de dados da Secretaria de Or\u00e7amento\r\nFederal e do Banco Central).\r\n\r\n    1   PREVIDENCIA COMUM               402.089\r\n    2   JUROS                           310.550\r\n    3   TRANSFERENCIAS                  210.165\r\n    4   OUTROS      \t                158.214\r\n    5   PROVIDENCIA OUTROS              103.698\r\n    6   EDUCACAO        \t            93.860\r\n    7   SAUDE\t                        93.173\r\n    8   TRABALHO\t                    71.564\r\n    9   ASSISTENCIA SOCIAL\t            71.207\r\n    10  DEFESA E SEGURANCA      \t    45.206\r\n    11  AGRICULTURA\t                    22.786\r\n    12  TRANSPORTES\t                    21.019\r\n    13  ADMINISTRACAO                   20.526\r\n    15  BENEFICIOS          \t        11.607\r\n    16  HABITACAO           \t        4.125\r\n\r\nFa\u00e7a um programa que armazene estas 16 entradas de or\u00e7amento em um vetor X. \r\nAp\u00f3s ler cada entrada, o programa deve pedir dois n\u00fameros de 1 a 16, que \r\ncorrespondem a gastos espec\u00edficos nesta tabela. O programa deve ent\u00e3o imprimir \r\no valor percentual do gasto total para o primeiro valor e quantas vezes ele \u00e9\r\nmenor ou maior que o segundo. \r\n\r\nO valor do PIB para o ano de 2014 \u00e9 5.520.000 milh\u00f5es de reais.\r\n\r\n### Exemplos\r\n\r\n    Item: <6>\r\n    Outro: <2>\r\n    EDUCACAO, 5.72% do orcamento e 1.70% do PIB.\r\n    Gasto 3.31 vezes menor que JUROS.\r\n\r\n### Valores\r\n\r\nA lista de valores:\r\n\r\n    402089, 310550, 210165, 158214, 103698, \r\n    93860, 93173, 71564, 71207, 45206, 22786,\r\n    21019, 20526, 11607, 4125\r\n\r\nA lista de nomes:\r\n\r\n    PREVIDENCIA COMUM\r\n    JUROS\r\n    TRANSFERENCIAS\r\n    OUTROS\r\n    PROVIDENCIA OUTROS\r\n    EDUCACAO\r\n    SAUDE\r\n    TRABALHO\r\n    ASSISTENCIA SOCIAL\r\n    DEFESA E SEGURANCA\r\n    AGRICULTURA\r\n    TRANSPORTES\r\n    ADMINISTRACAO\r\n    BENEFICIOS\r\n    HABITACAO",
+    "id": 10,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Investigue o or\u00e7amento do governo federal brasileiro.",
+    "created": "2016-05-16T04:31:17.557Z",
+    "status_changed": "2016-05-16T04:31:33.965Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mendes",
+    "name": "Cont\u00e9m caractere?",
+    "status": "valid",
+    "modified": "2016-05-18T02:48:07.777Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Crie um programa que pergunte uma palavra e um caracter ao usu\u00e1rio e diga se o caracter est\u00e1 contido ou n\u00e3o na string.\r\n\r\n### Entradas\r\n\r\nAs palavras de entrada ter\u00e3o no m\u00e1ximo 200 caracteres e no m\u00ednimo 1 caractere, \r\nconstituindo-se apenas de n\u00fameros e letras (sem espa\u00e7os em branco). O programa deve diferenciar mai\u00fasculas de min\u00fasculas.\r\n\r\n### Exemplo\r\n\r\npalavra: <foobar>\r\ncaractere: x\r\nnao contem",
+    "id": 18,
+    "is_active": true,
+    "iospec_source": "palavra: <foobar>\r\ncaractere: x\r\nnao contem\r\n\r\n@plain xyz;x;",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Verifique se uma string cont\u00eam o caractere fornecido.",
+    "created": "2016-05-18T02:22:00.702Z",
+    "status_changed": "2016-05-18T02:24:47.329Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mendes",
+    "name": "Remover caractere de string",
+    "status": "valid",
+    "modified": "2016-05-18T02:48:23.493Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Crie uma fun\u00e7\u00e3o `remove_char(st, chr)` que receba uma string e um caractere \r\ncomo argumentos de entrada e remove todas as ocorr\u00eancias deste caractere na \r\nstring fornecida. O programa deve pedir uma string e um caractere para o \r\nusu\u00e1rio, aplicar a fun\u00e7\u00e3o `remove_char` nos argumentos fornecidos e imprimir o\r\nresultado.\r\n\r\n### Entradas\r\n\r\nAs palavras de entrada ter\u00e3o no m\u00e1ximo 200 caracteres, constituindo-se apenas de n\u00fameros e letras (sem espa\u00e7os em branco). O caracter de entrada pode ser qualquer letra ou n\u00famero.\r\n\r\n### Exemplo\r\n\r\npalavra: <foobar>\r\ncaractere: <o>\r\nfbar",
+    "id": 19,
+    "is_active": true,
+    "iospec_source": "palavra: <foobar>\r\ncaractere: <o>\r\nfbar",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Manipula\u00e7\u00e3o simples de strings: remo\u00e7\u00e3o de um \u00fanico tipo de caractere.",
+    "created": "2016-05-18T02:25:41.054Z",
+    "status_changed": "2016-05-18T02:28:02.530Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mendes",
+    "name": "Vota\u00e7\u00e3o em lista",
+    "status": "valid",
+    "modified": "2016-05-18T18:21:55.471Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Num sistema de votos transfer\u00edveis, cada eleitor vota em uma lista com a ordem\r\nde prefer\u00eancia de seus candidatos. A id\u00e9ia geral \u00e9 que se a primeira op\u00e7\u00e3o do\r\neleitor se mostrar invi\u00e1vel, seu voto \u00e9 transferido para a segunda op\u00e7\u00e3o e assim\r\npor diante. Existem v\u00e1rias maneiras de implementar este mecanismo.\r\n\r\nConsideramos neste exemplo que podem existir at\u00e9 100 eleitores cujos votos \r\nconstituem uma lista com a ordem de preferencia entre os candidatos a, b, c, \r\nd ou e. O eleitor pode preencher quantos canditados quiser sem repeti\u00e7\u00f5es. O \r\nprograma deve ler o voto de cada eleitor at\u00e9 o ponto de parada, sinalizado por \r\num `x` como no exemplo abaixo:\r\n\r\n    voto: <ab> \r\n    voto: <abd>\r\n    voto: <cb>\r\n    voto: <cbe>\r\n    voto: <b>\r\n    voto: <x>\r\n    ...\r\n\r\nVoc\u00ea deve armazernar todos os votos em uma array de strings do tipo\r\n\r\n    char votos[100][6];  // um array de 100 arrays de chars com 6 posi\u00e7\u00f5es \r\n    \r\nAp\u00f3s armazenar todos os votos, imprima um sum\u00e1rio com quantas vezes cada \r\ncandidato aparece na lista.\r\n\r\n    ...\r\n    a: 2\r\n    b: 5\r\n    c: 2\r\n    d: 1\r\n    e: 1\r\n    votos: 5\r\n\r\n\r\n    \r\n\r\n### Entradas\r\n\r\nOs votos de cada usu\u00e1rio ter\u00e3o pelo menos um caractere at\u00e9 o m\u00e1ximo de 5. S\u00e3o no\r\nm\u00e1ximo 100 votantes.\r\n\r\n\r\n### Codigo\r\n\r\n    #include<stdio.h>\r\n    #include<string.h>\r\n\r\n\r\n    /**\r\n     * Le at\u00e9 100 votos do usu\u00e1rio e retorna o n\u00fameoro de votos registrado.\r\n     */\r\n    int read_votes(char votos[100][6]) {\r\n        char voto[6];\r\n        int i;\r\n        \r\n        for (i=0; i < 100; i++) {\r\n            printf(\"voto: \");\r\n            scanf(\"%5s\", voto);\r\n            if (strcmp(voto, \"x\")==0) break;\r\n            else strcpy(votos[i], voto);\r\n        }\r\n        return i;\r\n    }\r\n\r\n    /**\r\n     * Retorna 1 se o caractere chr estiver dentro da string str ou 0 \r\n     * caso contr\u00e1rio\r\n     */\r\n    int has_char(char* str, char chr) {\r\n        int i = 0;\r\n        while (str[i] != '\\x00') {\r\n            if (str[i] == chr) {\r\n                return 1;\r\n            }\r\n            i++;\r\n        }\r\n        return 0;\r\n    }\r\n\r\n    int main() {\r\n        char votos[100][6];\r\n        int size = read_votes(votos);\r\n               \r\n        printf(\"votos: %d\\n\", size);\r\n        printf(\"Voto1: %s, %d\\n\", votos[0], has_char(votos[0], 'c'));\r\n    }",
+    "id": 20,
+    "is_active": true,
+    "iospec_source": "@plain a;b;c;x;",
+    "iospec_size": 0,
+    "discipline": 1,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calcule o resultado de uma elei\u00e7\u00e3o.",
+    "created": "2016-05-18T02:29:28.427Z",
+    "status_changed": "2016-05-18T02:40:39.923Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mendes",
+    "name": "Crit\u00e9rio de Condorcet",
+    "status": "valid",
+    "modified": "2016-05-18T18:46:22.238Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Esta \u00e9 a continua\u00e7\u00e3o da quest\u00e3o \"vota\u00e7\u00e3o em lista\", sobre sistemas de votos \r\ntransfer\u00edveis. Aqui, assumimos que voc\u00ea j\u00e1 implementou a rotina para ler os \r\nvotos de cada eleitor. Faremos uma an\u00e1lise diferente que contar o n\u00famero de \r\nvotos de cada candidato.\r\n    \r\nConsidere uma disputa entre os candidatos `a` e `b` no exemplo de vota\u00e7\u00e3o \r\nabaixo: \r\n\r\n    voto: <ab>\r\n    voto: <abd>\r\n    voto: <cb>\r\n    voto: <cbe>\r\n    voto: <b>\r\n    voto: <x>\r\n    ...\r\n\r\nDesconsiderando os votos para os outros candidatos e utilizando somente a escolha\r\npreferencial entre `a` e `b`, ver\u00edamos que `b` venceria por 3 votos a 2. Se um \r\ncandidato vencer todas as disputas dois a dois, dizemos que ele \u00e9 o vencedor de \r\nCondorcet (o Marqu\u00eas de Condorcet foi o primeiro a propor sistemas de vota\u00e7\u00e3o que \r\nrespeitam este crit\u00e9rio. Nosso sistema de vota\u00e7\u00e3o em dois turnos, por exemplo,\r\nn\u00e3o satisfaz o crit\u00e9rio de Condorcet).\r\n\r\nO pr\u00f3ximo passo do programa \u00e9 ler um par de caracteres, <xy> e imprimir o\r\nresultado da vota\u00e7\u00e3o considerando apenas os dois candidatos requisitados. O \r\nprograma deve seguir fazendo isto at\u00e9 que o usu\u00e1rio pe\u00e7a o valor \"xx\":\r\n\r\n    ...\r\n    par: <ab>\r\n    2 x 3\r\n    par: <bc>\r\n    3 x 2\r\n    par: <be>\r\n    5 x 0\r\n    par: <xx>\r\n\r\n\r\n    \r\n\r\n### Entradas\r\n\r\nAs palavras de entrada ter\u00e3o no m\u00e1ximo 200 caracteres e no m\u00ednimo 1 caractere, \r\nconstituindo-se apenas de n\u00fameros e letras (sem espa\u00e7os em branco).",
+    "id": 21,
+    "is_active": true,
+    "iospec_source": "@plain a;b;c;x;xx;",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calcule o resultado de uma disputa simples de Condorcet.",
+    "created": "2016-05-18T02:33:24.499Z",
+    "status_changed": "2016-05-18T02:42:21.642Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mendes",
+    "name": "Vencedor das elei\u00e7\u00f5es",
+    "status": "valid",
+    "modified": "2016-05-18T02:47:51.457Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Esta \u00e9 a continua\u00e7\u00e3o da quest\u00e3o \"Crit\u00e9rio de Condorcet\", sobre sistemas de votos \r\ntransfer\u00edveis. Aqui, assumimos que voc\u00ea j\u00e1 implementou a rotina para ler os \r\nvotos de cada eleitor.\r\n    \r\nConsidere uma disputa entre os candidatos `a` e `b` no exemplo de vota\u00e7\u00e3o \r\nabaixo: \r\n\r\n    voto: <ab>\r\n    voto: <abd>\r\n    voto: <cb>\r\n    voto: <cbe>\r\n    voto: <b>\r\n    voto: <x>\r\n    ...\r\n\r\nVimos que a disputa Condorcet entre  `a` e `b` daria vit\u00f3ria para `b` por 3 votos\r\ncontra 2. Na verdade, `b` \u00e9 o vencendor Condorcet desta elei\u00e7\u00e3o pois ele venceria\r\nas disputas Condorcet contra todos os outros candidatos. O programa deve dizer \r\nqual \u00e9 o vencedor Condorcet se houver algum:\r\n\r\n    vencendor: b \r\n    \r\nExistem situa\u00e7\u00f5es onde n\u00e3o h\u00e1 um vencedor Condorcet. Neste caso, o programa deve\r\nretornar a palavra \"???\"\r\n\r\n    voto: <abc>\r\n    voto: <bca>\r\n    voto: <cab>\r\n    vencedor: ???",
+    "id": 22,
+    "is_active": true,
+    "iospec_source": "@plain a;b;c;x;",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calcule o resultado de uma elei\u00e7\u00e3o que pode ser decidida pelo crit\u00e9rio de Condorcet.",
+    "created": "2016-05-18T02:34:07.906Z",
+    "status_changed": "2016-05-18T02:43:29.986Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mac\u00eado Mendes",
+    "name": "Banqueiro de Fibonacci",
+    "status": "valid",
+    "modified": "2016-05-23T17:28:51.498Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "O Banqueiro de Fibonacci oferece um cart\u00e3o de cr\u00e9dito que te deixa atrasar por \r\n1 m\u00eas o pagamento dos juros do cheque especial e depois cobra uma taxa de 20% \r\nsobre o pen\u00faltimo m\u00eas. Sendo assim, se no primeiro m\u00eas voc\u00ea deve `1` real, \r\nno segundo m\u00eas a d\u00edvida continua igual `1` real pois ainda n\u00e3o incide juros. \r\nJ\u00e1 no terceiro m\u00eas, ela vira `1 + 0.20`, depois `1.20 + 0.2` e assim por \r\ndiante. (A regra para calcular a d\u00edvida de um m\u00eas consiste em somar a d\u00edvida \r\ndo \u00faltimo m\u00eas, o principal, com 0.20 vezes o pen\u00faltimo m\u00eas, os juros.) \r\n\r\nCrie um programa que pergunte um valor para o usu\u00e1rio e diga quantos meses \r\nser\u00e3o necess\u00e1rios para ultrapassar ou igualar este valor. (O valor de entrada\r\nser\u00e1 sempre maior que 1).\r\n\r\n### Exemplo\r\n\r\n    valor: <2>\r\n    7 meses\r\n\r\n### Dica\r\n\r\nOs primeiros n\u00fameros da sequ\u00eancia do banqueiro Fibonacci s\u00e3o:\r\n\r\n    1 1 1.2 1.4 1.64 1.92 2.248 ...\r\n\r\n### Curiosidade\r\n\r\nA taxa de juros m\u00e9dia deste empr\u00e9stimo \u00e9 de aproximadamente 17%, n\u00e3o muito \r\ndistante da taxa dos cart\u00f5es de cr\u00e9dito que atualmente est\u00e1 pr\u00f3xima de 15%. \r\nVerifique quantos anos demoraria para esta d\u00edvida de 1 real virar uma d\u00edvida \r\nde 1 milh\u00e3o!",
+    "id": 23,
+    "is_active": true,
+    "iospec_source": "valor: <2>\r\n7 meses\r\n\r\n@input 10\r\n\r\n@input 1000000\r\n\r\n@input 1.5\r\n\r\n@input 42\r\n\r\n@input 5\r\n\r\n@input 1.1\r\n\r\n@input 1.2\r\n\r\n@input 1.44",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Perca dinheiro com uma sequ\u00eancia parecida com a de Fibonacci.",
+    "created": "2016-05-23T00:02:25.246Z",
+    "status_changed": "2016-05-23T04:11:08.371Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mac\u00eado Mendes",
+    "name": "Calculadora",
+    "status": "valid",
+    "modified": "2016-05-23T17:28:36.294Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Escreva um programa que pergute dois n\u00fameros e uma opera\u00e7\u00e3o ('+', '-', '*' e '/')\r\ne realize a opera\u00e7\u00e3o matem\u00e1tica correspondente com estes dois n\u00fameros. A resposta\r\ndeve ser apresentada com 4 casas de precis\u00e3o.\r\n\r\n### Exemplo\r\n\r\n    x: <42>\r\n    y: <2>\r\n    op: </>\r\n    resultado: 21.0000",
+    "id": 24,
+    "is_active": true,
+    "iospec_source": "x: <42>\r\ny: <2>\r\nop: </>\r\nresultado: 21.0000\r\n\r\n@input 1;2;+;\r\n@input 3;4;-;\r\n@input 5;6;*;\r\n@input 7;8;/;\r\n@input 0.5;1.5;+;\r\n@input -1;1;-;",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calculadora simples",
+    "created": "2016-05-23T00:10:13.982Z",
+    "status_changed": "2016-05-23T04:19:57.028Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mac\u00eado Mendes",
+    "name": "Fun\u00e7\u00e3o",
+    "status": "valid",
+    "modified": "2016-05-23T17:28:20.941Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Implemente a fun\u00e7\u00e3o f(x) = sqrt(x + 1), onde x \u00e9 um valor de dupla precis\u00e3o. O\r\nprograma deve perguntar um n\u00famero de dupla precis\u00e3o `x` e um n\u00famero inteiro `n`\r\ne deve aplicar f(x) n vezes ao valor fornecido.\r\n\r\nO resultado deve ser mostrado com 4 casas decimais de precis\u00e3o.\r\n\r\n### Exemplo\r\n\r\nSe utilizarmos `x = 3` e `n = 2`, a primeira aplica\u00e7\u00e3o de `f(x)` resultaria em\r\nf(3 + 1) = sqrt(4) = 2. J\u00e1 a segunda aplica\u00e7\u00e3o daria o resultado final \r\n`f(2) = sqrt(2 + 1) = 1.7321`. \r\n\r\n    x: <3>\r\n    n: <2>\r\n    resultado: 1.7321",
+    "id": 25,
+    "is_active": true,
+    "iospec_source": "x: <3>\r\nn: <2>\r\nresultado: 1.7321\r\n\r\n@input 2;2;\r\n@input 0;2;\r\n@input 0.5;2;\r\n@input 1;10;\r\n@input 1;1;\r\n@input 3;1;\r\n@input 0.1;50;\r\n@input 5;10",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Implemente fun\u00e7\u00e3o.",
+    "created": "2016-05-23T00:10:38.909Z",
+    "status_changed": "2016-05-23T04:15:03.209Z"
+  },
+  {
+    "timeout": 1.0,
+    "author_name": "F\u00e1bio Mac\u00eado Mendes",
+    "name": "Soma",
+    "status": "valid",
+    "modified": "2016-05-23T17:27:32.339Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "No exemplo abaixo, a fun\u00e7\u00e3o `num(i)` gera n\u00fameros aparentemente aleat\u00f3rios. \r\nComplete a implementa\u00e7\u00e3o da fun\u00e7\u00e3o main que some os N primeiros n\u00fameros (com i\r\nvariando de 1 at\u00e9 N). \r\n\r\n    #include<stdio.h>\r\n\r\n    \r\n    int num(int i) {\r\n        return (231 * i + 43) % 100; \r\n    } \r\n    \r\n    int main() {\r\n        int N, soma;\r\n        printf(\"n: \"); scanf(\"%d\", &N);\r\n        \r\n        // Calcule num(1) + num(2) + ... + num(N) e salve na vari\u00e1vel soma.\r\n        for (...) {\r\n            \r\n        }\r\n        \r\n        printf(\"soma: %d\\n\", soma);\r\n        \r\n    }\r\n\r\n(Copie e cole este c\u00f3digo na resposta e complete as partes que est\u00e3o faltando).",
+    "id": 27,
+    "is_active": true,
+    "iospec_source": "@input 0;\r\n@input 1;\r\n@input 2;\r\n@input 5;\r\n@input 10;\r\n@input 50;\r\n@input 100;\r\n@input 500;",
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Some um conjunto de n\u00fameros.",
+    "created": "2016-05-23T00:12:00.310Z",
+    "status_changed": "2016-05-23T04:11:08.149Z"
+  },
+  {
+    "timeout": 5.0,
+    "iospec_source": "@input\r\n    10\r\n    1,1,5,500\r\n    2,2,10,1000\r\n    1,1,15,3500\r\n    2,3,13,2500\r\n    1,2,1,200\r\n    1,4,10,0\r\n    1,2,5,500\r\n    2,5,10,1500\r\n    1,2,8,800\r\n    2,3,15,5000\r\n    15\r\n@input\r\n    10\r\n    1,1,5,500\r\n    2,2,10,1000\r\n    1,1,15,3500\r\n    2,3,13,2500\r\n    1,2,1,200\r\n    1,4,10,0\r\n    1,2,5,500\r\n    2,5,10,1500\r\n    1,2,8,800\r\n    2,3,15,5000\r\n    10\r\n@input\r\n    10\r\n    1,1,5,500\r\n    2,2,10,1000\r\n    1,1,15,3500\r\n    2,3,13,2500\r\n    1,2,1,200\r\n    1,4,10,0\r\n    1,2,5,500\r\n    2,5,10,1500\r\n    1,2,8,800\r\n    2,3,15,5000\r\n    5",
+    "name": "Import\u00e2ncia do estudo",
+    "status": "valid",
+    "modified": "2016-06-08T17:21:29.151Z",
+    "owner": [
+      "chips"
+    ],
+    "long_description": "Vamos analisar dados sociais relacionando educa\u00e7\u00e3o e renda. Para implementar este programa, recomendamos definir um struct como o abaixo::\r\n\r\n    typedef struct Person {\r\n        int sexo;\r\n        int raca;\r\n        int escolaridade;\r\n        int renda;\r\n    } person;\r\n\r\nO programa deve iniciar perguntando um n\u00famero `N` de 1 a 100 de quantos indiv\u00edduos ser\u00e3o inseridos. Cada entrada consiste a uma lista de 4 n\u00fameros\r\ninteiros separados por v\u00edrgula, correspondendo respectivamente aos campos \r\nsexo, raca, escolaridade e renda de cada indiv\u00edduo.\r\n\r\nAp\u00f3s completar a leitura dos `N` indiv\u00edduos, o programa deve perguntar uma faixa de escolaridade e retornar o sal\u00e1rio m\u00e9dio dos indiv\u00edduos nesta faixa.\r\n\r\nCaso nenhum indiv\u00edduo seja encontrado com a faixa de escolaridade escolhida, considere que a m\u00e9dia salarial \u00e9 nula.\r\n\r\n### Exemplo\r\n\r\n    N: <4>\r\n    <1,1,10,1000>\r\n    <1,1,10,2000>\r\n    <1,1,8,500>\r\n    <1,1,7,550>\r\n    Escolaridade: <10>\r\n    Renda: 1500.00",
+    "id": 34,
+    "is_active": true,
+    "iospec_size": 0,
+    "discipline": 2,
+    "model/type": "cs_questions.codingioquestion",
+    "short_description": "Calcule a import\u00e2ncia do n\u00edvel educacional no sal\u00e1rio.",
+    "created": "2016-06-08T13:30:06.085Z",
+    "status_changed": "2016-06-08T13:35:56.867Z"
+  },
+  {
+    "source": "nome = leia_texto(\"Nome: \")\r\nidade = leia_n\u00famero(\"Idade:\")\r\nmostre(\"Oi %s, voc\u00ea ter\u00e1 %s anos daqui a cinco anos!\" % (nome, idade + 5))",
+    "iospec_source": "Nome: <Maria>\nIdade: <20>\nOi Maria, voc\u00ea ter\u00e1 25 anos daqui a cinco anos!\n\nNome: <Paulo>\nIdade: <0>\nOi Paulo, voc\u00ea ter\u00e1 5 anos daqui a cinco anos!\n\nNome: <Albert Einstein>\nIdade: <70>\nOi Albert Einstein, voc\u00ea ter\u00e1 75 anos daqui a cinco anos!\n\nNome: <TDgGGGcypSJhQRZdXMiL>\nIdade: <36>\nOi TDgGGGcypSJhQRZdXMiL, voc\u00ea ter\u00e1 41 anos daqui a cinco anos!",
+    "is_valid": true,
+    "id": 1,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 1,
+    "language": "pytuga",
+    "iospec_hash": "f8dc84d371a86947b1047d54c713c088"
+  },
+  {
+    "source": "#include<stdio.h>\r\n\r\nint main() {\r\n    int N = 0;\r\n    int count = 1;\r\n    int x = 0;\r\n    \r\n    // L\u00ea valores\r\n    printf(\"n: \");\r\n    scanf(\"%d\", &N);\r\n    printf(\"valores:\");\r\n\r\n    while (count <= N) {\r\n        if ((x % 10) != 0) {\r\n            printf(\" %d\", x);\r\n            count += 1;\r\n        }\r\n        x += 2;\r\n    }\r\n    printf(\"\\n\");\r\n}",
+    "iospec_source": "n: <5>\nvalores: 2 4 6 8 12\n\nn: <10>\nvalores: 2 4 6 8 12 14 16 18 22 24\n\nn: <20>\nvalores: 2 4 6 8 12 14 16 18 22 24 26 28 32 34 36 38 42 44 46 48\n\nn: <100>\nvalores: 2 4 6 8 12 14 16 18 22 24 26 28 32 34 36 38 42 44 46 48 52 54 56 58 62 64 66 68 72 74 76 78 82 84 86 88 92 94 96 98 102 104 106 108 112 114 116 118 122 124 126 128 132 134 136 138 142 144 146 148 152 154 156 158 162 164 166 168 172 174 176 178 182 184 186 188 192 194 196 198 202 204 206 208 212 214 216 218 222 224 226 228 232 234 236 238 242 244 246 248\n\nn: <1>\nvalores: 2",
+    "is_valid": true,
+    "id": 2,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 4,
+    "language": "c",
+    "iospec_hash": "7a23a602a5b025d85fc165eda852cfdf"
+  },
+  {
+    "source": "#include<stdio.h>\r\n\r\nint main() {\r\n    int n = 0;\r\n    double x = 0;\r\n    \r\n    // L\u00ea valores\r\n    printf(\"x: \");\r\n    scanf(\"%lf\", &x);\r\n    printf(\"n: \");\r\n    scanf(\"%d\", &n);\r\n    \r\n    // Aproxima\u00e7\u00e3o\r\n    double prod = 1, \r\n           term = 1 + x /  n;\r\n\r\n    for (int i = 1; i <= n; i++) {\r\n        prod *= term;\r\n    }\r\n    \r\n    // Imprime resultado\r\n    printf(\"exp(%.4lf) ~ %.4lf\\n\", x, prod);\r\n}",
+    "iospec_source": "x: <1>\nn: <1>\nexp(1.0000) ~ 2.0000\n\nx: <1>\nn: < 2>\nexp(1.0000) ~ 2.2500\n\nx: <1>\nn: < 5>\nexp(1.0000) ~ 2.4883\n\nx: <1>\nn: < 10>\nexp(1.0000) ~ 2.5937\n\nx: <1>\nn: < 100>\nexp(1.0000) ~ 2.7048\n\nx: <-1>\nn: < 1>\nexp(-1.0000) ~ 0.0000\n\nx: <-1>\nn: < 2>\nexp(-1.0000) ~ 0.2500\n\nx: <0.5>\nn: < 10>\nexp(0.5000) ~ 1.6289",
+    "is_valid": true,
+    "id": 3,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 5,
+    "language": "c",
+    "iospec_hash": "f6d33ced9397397e91828fd8bf639b03"
+  },
+  {
+    "source": "#include<stdio.h>\r\n\r\nint main() {\r\n    double x = 0;\r\n    \r\n    // L\u00ea valores\r\n    printf(\"x: \");\r\n    scanf(\"%lf\", &x);\r\n    \r\n    // Aproxima\u00e7\u00e3o\r\n    double coeff = 1.0;\r\n    double power = 1.0;\r\n    double result = coeff;\r\n    \r\n    for (int n = 2; n <= 20; n = n + 2) {\r\n        coeff = - coeff / (n * (n - 1));\r\n        power = power * x * x;\r\n        result += coeff * power;\r\n    }\r\n    \r\n    // Imprime resultado\r\n    printf(\"f(%.4lf) = %.4lf\\n\", x, result);\r\n}",
+    "iospec_source": "x: <1>\nf(1.0000) = 0.5403\n\nx: <0>\nf(0.0000) = 1.0000\n\nx: <0.5>\nf(0.5000) = 0.8776\n\nx: <1>\nf(1.0000) = 0.5403\n\nx: <-1>\nf(-1.0000) = 0.5403\n\nx: <5>\nf(5.0000) = 0.2837\n\nx: <10>\nf(10.0000) = 6.6646",
+    "is_valid": true,
+    "id": 4,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 6,
+    "language": "c",
+    "iospec_hash": "fcd69ab0f8ea187b4620d3a391ec5517"
+  },
+  {
+    "source": "n = int(input('n: '))\r\n\r\nnumeros = []\r\nx = 1\r\ny = 1\r\nwhile len(numeros) < n:\r\n    numeros.append(y)\r\n    y -= 2\r\n    if y <= 0:\r\n        x += 1\r\n        y = x\r\n\r\nprint('seq:', ' '.join(str(x) for x in numeros))",
+    "iospec_source": "n: <3>\nseq: 1 2 3\n\nn: <1>\nseq: 1\n\nn: <4>\nseq: 1 2 3 1\n\nn: <6>\nseq: 1 2 3 1 4 2\n\nn: <9>\nseq: 1 2 3 1 4 2 5 3 1\n\nn: <10>\nseq: 1 2 3 1 4 2 5 3 1 6\n\nn: <50>\nseq: 1 2 3 1 4 2 5 3 1 6 4 2 7 5 3 1 8 6 4 2 9 7 5 3 1 10 8 6 4 2 11 9 7 5 3 1 12 10 8 6 4 2 13 11 9 7 5 3 1 14\n\nn: <75>\nseq: 1 2 3 1 4 2 5 3 1 6 4 2 7 5 3 1 8 6 4 2 9 7 5 3 1 10 8 6 4 2 11 9 7 5 3 1 12 10 8 6 4 2 13 11 9 7 5 3 1 14 12 10 8 6 4 2 15 13 11 9 7 5 3 1 16 14 12 10 8 6 4 2 17 15 13\n\nn: <100>\nseq: 1 2 3 1 4 2 5 3 1 6 4 2 7 5 3 1 8 6 4 2 9 7 5 3 1 10 8 6 4 2 11 9 7 5 3 1 12 10 8 6 4 2 13 11 9 7 5 3 1 14 12 10 8 6 4 2 15 13 11 9 7 5 3 1 16 14 12 10 8 6 4 2 17 15 13 11 9 7 5 3 1 18 16 14 12 10 8 6 4 2 19 17 15 13 11 9 7 5 3 1",
+    "is_valid": true,
+    "id": 5,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 7,
+    "language": "python",
+    "iospec_hash": "5663518f28ed2ef3693ca1f1e6b4b784"
+  },
+  {
+    "source": "def func(x):\r\n    if x <= 1:\r\n        return 0.0\r\n    else:\r\n        return func(x - 1) + func(x / 2.0) + x - 1\r\n    \r\nx = float(input('x: '))\r\nprint('f(x) = %.4f' % func(x))",
+    "iospec_source": "x: <2>\nf(x) = 1.0000\n\nx: <1>\nf(x) = 0.0000\n\nx: <2>\nf(x) = 1.0000\n\nx: <3>\nf(x) = 3.5000\n\nx: <10>\nf(x) = 89.6250\n\nx: <-42>\nf(x) = 0.0000\n\nx: <1.1>\nf(x) = 0.1000\n\nx: <3.1415>\nf(x) = 4.0660\n\nx: <50>\nf(x) = 19827.1562\n\nx: <100>\nf(x) = 424264.1719",
+    "is_valid": true,
+    "id": 6,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 8,
+    "language": "python",
+    "iospec_hash": "34f08acb1cd9b2bfffa12533d029890f"
+  },
+  {
+    "source": "partido = input('partido: ')\r\npresidente = input('presidente: ')\r\napoio_c = input('apoio de C: ')\r\n\r\n# Sem impeachment\r\nif presidente == apoio_c:\r\n    if partido in [presidente, 'C']:\r\n        print('VAI TER CONTINUIDADE')\r\n    else:\r\n        print('VAI TER MUDANCA')\r\n\r\n# Com impeachment\r\nelse:\r\n    if partido == presidente:\r\n        print('VAI TER LUTA')\r\n    else:\r\n        print('VAI TER IMPEACHMENT')",
+    "iospec_source": "partido: <A>\npresidente: <A>\napoio de C: <B>\nVAI TER LUTA\n\npartido: <A>\npresidente: <A>\napoio de C: <A>\nVAI TER CONTINUIDADE\n\npartido: <A>\npresidente: <A>\napoio de C: <B>\nVAI TER LUTA\n\npartido: <A>\npresidente: <B>\napoio de C: <A>\nVAI TER IMPEACHMENT\n\npartido: <A>\npresidente: <B>\napoio de C: <B>\nVAI TER MUDANCA\n\npartido: <B>\npresidente: <A>\napoio de C: <A>\nVAI TER MUDANCA\n\npartido: <B>\npresidente: <A>\napoio de C: <B>\nVAI TER IMPEACHMENT\n\npartido: <B>\npresidente: <B>\napoio de C: <A>\nVAI TER LUTA\n\npartido: <B>\npresidente: <B>\napoio de C: <B>\nVAI TER CONTINUIDADE",
+    "is_valid": true,
+    "id": 7,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 9,
+    "language": "python",
+    "iospec_hash": "4b83602ea28b937844aadd60a215eb10"
+  },
+  {
+    "source": "L = [402089, 310550, 210165, 158214, 103698, 93860, 93173, 71564, 71207, 45206, \r\n     22786, 21019, 20526, 11607, 4125]\r\nNOMES = '''PREVIDENCIA COMUM\r\nJUROS\r\nTRANSFERENCIAS\r\nOUTROS\r\nPROVIDENCIA OUTROS\r\nEDUCACAO\r\nSAUDE\r\nTRABALHO\r\nASSISTENCIA SOCIAL\r\nDEFESA E SEGURANCA\r\nAGRICULTURA\r\nTRANSPORTES\r\nADMINISTRACAO\r\nBENEFICIOS\r\nHABITACAO'''.splitlines()\r\n\r\nPIB = 5520000\r\nA = int(input('Item: ')) -1 \r\nB = int(input('Outro: ')) - 1\r\ntotal = sum(L)\r\nprint('%s, %.2f%% do orcamento e %.2f%% do PIB.' % (NOMES[A], 100 * L[A] / total, 100 * L[A] / PIB))\r\n\r\nif L[A] > L[B]: \r\n    print('Gasto %.2f maior que %s.' % (L[A] / L[B], NOMES[B]))\r\nelse:\r\n    print('Gasto %.2f menor que %s.' % (L[B] / L[A], NOMES[B]))",
+    "iospec_source": "Item: <6>\nOutro: <2>\nEDUCACAO, 5.72% do orcamento e 1.70% do PIB.\nGasto 3.31 menor que JUROS.\n\nItem: <1>\nOutro: <3>\nPREVIDENCIA COMUM, 24.52% do orcamento e 7.28% do PIB.\nGasto 1.91 maior que TRANSFERENCIAS.",
+    "is_valid": true,
+    "id": 8,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 10,
+    "language": "python",
+    "iospec_hash": "0b81e5f930d2fae2b74b16d7e900adca"
+  },
+  {
+    "source": "word = input('palavra: ')\r\n    char = input('caractere: ')\r\n    print('contem' if char in word else 'nao contem')",
+    "iospec_source": "@build-error\n\n\n    @error\n    Traceback (most recent call last):\n    cs_questions.models_io.DoesNotExist: CodingIoAnswerKey matching query does not exist.\n    \n    During handling of the above exception, another exception occurred:\n    \n    Traceback (most recent call last):\n      File \"main.py\", line 2\n        char = input('caractere: ')\n        ^\n    IndentationError: unexpected indent",
+    "is_valid": true,
+    "id": 15,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 18,
+    "language": "python",
+    "iospec_hash": "f4c39914cbb166abe28eecd8c487a6cc"
+  },
+  {
+    "source": "word = input('palavra: ')\r\nchar = input('caractere: ')\r\nprint(word.replace(char, ''))",
+    "iospec_source": "palavra: <foobar>\ncaractere: <o>\nfbar",
+    "is_valid": true,
+    "id": 16,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 19,
+    "language": "python",
+    "iospec_hash": "a6255a983545a2fb0361e1634e655a0d"
+  },
+  {
+    "source": "#include<stdio.h>\r\n#include<string.h>\r\n\r\nint read_votes(char votes[100][6]) {\r\n    int i;\r\n    char input[6]; \r\n    for (i = 0; i < 100; i++) {\r\n        printf(\"voto: \");\r\n        scanf(\"%5s\", input);\r\n        if (strcmp(input, \"x\") == 0) {\r\n            return i;\r\n        } else {\r\n            strcpy(votes[i], input);\r\n        }\r\n    }\r\n}\r\n\r\n\r\nint count_vote(char votes[100][6], char vote, int size) {\r\n    int n = 0;\r\n    for (int k = 0; k < size; k++) {\r\n        if (strchr(votes[k], vote) != NULL) {\r\n            n += 1;\r\n        };\r\n    } \r\n    return n;\r\n}\r\n\r\nint main() {\r\n    char votes[100][6];\r\n    int n, size = read_votes(votes);\r\n          \r\n    for (int i = 0; i < 5; i++) {\r\n        n = count_vote(votes, 'a' + i, size);\r\n        printf(\"%c: %d\\n\", 'a' + i, n);\r\n    }\r\n    printf(\"votos: %d\\n\", size);\r\n}",
+    "iospec_source": "voto: <a>\nvoto: <b>\nvoto: <c>\nvoto: <x>\na: 1\nb: 1\nc: 1\nd: 0\ne: 0\nvotos: 3",
+    "is_valid": true,
+    "id": 17,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 20,
+    "language": "c",
+    "iospec_hash": "9e7c6f00de7231f1aaa2b1f214270c06"
+  },
+  {
+    "source": "#include<stdio.h>\r\n#include<string.h>\r\n\r\n\r\nint read_votes(char votes[100][6]) {\r\n    int i;\r\n    char input[6]; \r\n    for (i = 0; i < 100; i++) {\r\n        printf(\"voto: \");\r\n        scanf(\"%5s\", input);\r\n        if (strcmp(input, \"x\") == 0) {\r\n            return i;\r\n        } else {\r\n            strcpy(votes[i], input);\r\n        }\r\n    }\r\n}\r\n\r\nvoid print_votes(char votes[100][6], int size, char a, char b) {\r\n    int nA = 0, nB = 0;\r\n    \r\n    for (int i=0; i < size; i++) {\r\n        for (int k = 0; k < 5; k++) {\r\n            if (votes[i][k] == a) {\r\n                nA++;\r\n                break;\r\n            }\r\n            else if (votes[i][k] == b) {\r\n                nB++;\r\n                break;\r\n            }\r\n        }\r\n    }\r\n    printf(\"%d x %d\\n\", nA, nB);\r\n}\r\n\r\n\r\nint main() {\r\n    char votes[100][6];\r\n    int n, size = read_votes(votes);\r\n    char c1, c2;\r\n    \r\n    while (1) {\r\n        printf(\"par: \");\r\n        scanf(\" %c%c\", &c1, &c2);\r\n        if (c1 == 'x') {\r\n            break;\r\n        }\r\n        print_votes(votes, size, c1, c2);       \r\n    }\r\n}",
+    "iospec_source": "voto: <a>\nvoto: <b>\nvoto: <c>\nvoto: <x>\npar: <xx>\n",
+    "is_valid": true,
+    "id": 18,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 21,
+    "language": "c",
+    "iospec_hash": "a2710fe65530d525e851d8d28856ed63"
+  },
+  {
+    "source": "#include<stdio.h>\r\n    #include<string.h>\r\n\r\n\r\n    int read_votes(char votes[100][6]) {\r\n        int i;\r\n        char input[6]; \r\n        for (i = 0; i < 100; i++) {\r\n            printf(\"voto: \");\r\n            scanf(\"%5s\", input);\r\n            if (strcmp(input, \"x\") == 0) {\r\n                return i;\r\n            } else {\r\n                strcpy(votes[i], input);\r\n            }\r\n        }\r\n    }\r\n\r\n\r\n    int iswinner(char votes[100][6], int size, char a) {\r\n        for (char b = 'a'; b <= 'e'; b++) {\r\n            if (b == a) continue;\r\n            \r\n            int nA = 0, nB = 0;\r\n            for (int i=0; i < size; i++) {\r\n                for (int k = 0; k < 5; k++) {\r\n                    if (votes[i][k] == a) {\r\n                        nA++;\r\n                        break;\r\n                    }\r\n                    else if (votes[i][k] == b) {\r\n                        nB++;\r\n                        break;\r\n                    }\r\n                }\r\n            }\r\n            if (nB >= nA) return 0;\r\n        }\r\n        return 1;\r\n    }\r\n\r\n\r\n    int main() {\r\n        char votes[100][6];\r\n        int n, size = read_votes(votes);\r\n        char *opts = \"abcde\";\r\n       \r\n        for (int i = 0; i < 5; i++) {\r\n            if (iswinner(votes, size, 'a' + i)) {\r\n                printf(\"vencedor: %c\\n\", 'a' + i);\r\n                return 0;\r\n            } \r\n        }\r\n        printf(\"vencedor: ???\\n\");\r\n    }",
+    "iospec_source": "voto: <a>\nvoto: <b>\nvoto: <c>\nvoto: <x>\nvencedor: ???",
+    "is_valid": true,
+    "id": 19,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 22,
+    "language": "c",
+    "iospec_hash": "9e7c6f00de7231f1aaa2b1f214270c06"
+  },
+  {
+    "source": "M = float(input('valor: '))\r\nn = 1 \r\nx, y = 1, 1\r\nwhile M >= x:\r\n    x, y = y, 0.2 * x + y\r\n    n += 1\r\nprint('%s meses' % n)",
+    "iospec_source": "valor: <2>\n7 meses\n\nvalor: <10>\n17 meses\n\nvalor: <1000000>\n90 meses\n\nvalor: <1.5>\n5 meses\n\nvalor: <42>\n26 meses\n\nvalor: <5>\n13 meses\n\nvalor: <1.1>\n3 meses\n\nvalor: <1.2>\n4 meses\n\nvalor: <1.44>\n5 meses",
+    "is_valid": true,
+    "id": 20,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 23,
+    "language": "python",
+    "iospec_hash": "09214c4bcaa6d5a9c8b7a28c897077cf"
+  },
+  {
+    "source": "x = float(input('x: '))\r\ny = float(input('y: '))\r\nop = input('op: ')\r\nif op == '*':\r\n    print('resultado: %.4f' % (x * y))\r\nelif op == '/':\r\n    print('resultado: %.4f' % (x / y))\r\nelif op == '+':\r\n    print('resultado: %.4f' % (x + y))\r\nelif op == '-':\r\n    print('resultado: %.4f' % (x - y))",
+    "iospec_source": "x: <42>\ny: <2>\nop: </>\nresultado: 21.0000\n\nx: <1>\ny: <2>\nop: <+>\nresultado: 3.0000",
+    "is_valid": true,
+    "id": 21,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 24,
+    "language": "python",
+    "iospec_hash": "fb4a90bfc3d3cbbbf20ab8ee9a70d361"
+  },
+  {
+    "source": "f = lambda x: (x + 1) ** 0.5\r\nx = float(input('x: '))\r\nn = int(input('n: '))\r\nfor i in range(n):\r\n    x = f(x)\r\nprint('resultado: %.4f' % x)",
+    "iospec_source": "x: <3>\nn: <2>\nresultado: 1.7321\n\nx: <2>\nn: <2>\nresultado: 1.6529",
+    "is_valid": true,
+    "id": 22,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 25,
+    "language": "python",
+    "iospec_hash": "1cafd53d0c540b8744cf9b1d7a5b39cf"
+  },
+  {
+    "source": "def num(i):\r\n    return (231 * i + 43) % 100\r\n\r\nN = int(input(\"n: \"))\r\nsoma = sum(num(i) for i in range(1, N + 1))\r\n\r\nprint(\"soma: %s\" % soma);",
+    "iospec_source": "n: <0>\nsoma: 0",
+    "is_valid": true,
+    "id": 24,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 27,
+    "language": "python",
+    "iospec_hash": "e32c2de3cbebc1f1174722b2246eba96"
+  },
+  {
+    "source": "N = int(input('N: '))\r\nanswers = [map(int, input().split(',')) for _ in range(N)]\r\nedu = int(input('Escolaridade: '))\r\nincomes = [r for _, _, e, r in answers if e == edu]\r\nmean = sum(incomes) / len(incomes) if incomes else 0.0\r\nprint('Renda: %.2f' % mean)",
+    "iospec_source": "N: <10>\n<1,1,5,500>\n<2,2,10,1000>\n<1,1,15,3500>\n<2,3,13,2500>\n<1,2,1,200>\n<1,4,10,0>\n<1,2,5,500>\n<2,5,10,1500>\n<1,2,8,800>\n<2,3,15,5000>\nEscolaridade: <15>\nRenda: 4250.00\n\nN: <10>\n<1,1,5,500>\n<2,2,10,1000>\n<1,1,15,3500>\n<2,3,13,2500>\n<1,2,1,200>\n<1,4,10,0>\n<1,2,5,500>\n<2,5,10,1500>\n<1,2,8,800>\n<2,3,15,5000>\nEscolaridade: <10>\nRenda: 833.33\n\nN: <10>\n<1,1,5,500>\n<2,2,10,1000>\n<1,1,15,3500>\n<2,3,13,2500>\n<1,2,1,200>\n<1,4,10,0>\n<1,2,5,500>\n<2,5,10,1500>\n<1,2,8,800>\n<2,3,15,5000>\nEscolaridade: <5>\nRenda: 500.00",
+    "is_valid": true,
+    "id": 25,
+    "model/type": "cs_questions.codingioanswerkey",
+    "question": 34,
+    "language": "python",
+    "iospec_hash": "18bf226c0cd550bd55f6d88741d60f1f"
+  }
+]

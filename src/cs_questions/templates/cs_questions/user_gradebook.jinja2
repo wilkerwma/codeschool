@@ -1,30 +1,8 @@
 {% extends "viewpack/crud/detail.jinja2" %}
-{% from "cs_questions/macros.jinja2" import feedback_styles %}
 {% if form_name is undefined %}{% set form_name='form' %}{% endif %}
 
 {% block object_description %}
-    <h2 class="banner">{{ _('Description') }}</h2>
-    <article class="long-description">
-        {{ question.long_description }}
-    </article>
+    <h2 class="banner">{{ _('List of grades by question') }}</h2>
 
-    <form method="POST" id="{{ form_name }}" srvice-bind="./submit-response">
-        {% csrf_token %}
-        {% block response_form %}
-            <h2 class="banner">{{ _('Response') }}</h2>
-            <table class="form">{{ form.as_table() }}</table>
-        {% endblock %}
-    </form>
-
-    <div class="toolbar highlight">
-        <button class="mdl-button mdl-js-button"
-                form="{{ form_name }}">
-            {{ _('Send') }}
-        </button>
-    </div>
-{% endblock %}
-
-{% block style %}
-    {{ super() }}
-    {{ feedback_styles() }}
+    {{ object }}
 {% endblock %}

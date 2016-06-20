@@ -3,7 +3,7 @@ from django.http import Http404,HttpResponse
 from django.utils import timezone
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
-from cs_questions.models import Question, CodingIoResponse
+from cs_questions.models import Question, CodingIoResponseItem
 from cs_core.models import ProgrammingLanguage
 from .models import BattleResponse, Battle
 from datetime import datetime
@@ -27,7 +27,7 @@ def battle(request,battle_pk):
             battle_response.language=battle.language
             battle_response.time_end = time_now
 
-            battle_response.autograde()
+            battle_response.autograde_response()
             battle_response.save()
             battle_is_corret = battle_response.is_correct
             if battle_is_corret:

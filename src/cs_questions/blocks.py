@@ -1,5 +1,7 @@
 from decimal import Decimal
+from django.forms import widgets
 from django import forms
+from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from wagtail.wagtailcore import blocks
@@ -8,24 +10,104 @@ import cs_core.blocks
 
 
 #
-# Simple answer blocks
+# Base blocks
 #
+class ResponseForm(forms.Form):
+    """
+    Base form class for fetching responses for AnswerBlocks.
+
+    We must store the type and index for the block in a hidden input.
+    """
+
+    response_id = forms.IntegerField(widget=widgets.HiddenInput())
+
+    def to_json(self):
+        """
+        Convert validated form data to JSON.
+        """
+        if self.is_valid():
+            return self.cleaned_data
+        else:
+            raise ValidationError(self.errors)
+
+
 class AnswerBlock(blocks.StructBlock):
     """
     Base class for answer blocks.
     """
 
+    response_form = ResponseForm
+
     name = blocks.CharBlock(
+        verbose_name=_('name'),
         max_legth=200,
         required=True,
         help_text=_('A name used to display this field in forms.'),
     )
-    value = blocks.FloatBlock(
+    description = blocks.CharBlock(
+        verbose_name=_('description'),
+        required=False,
+        help_text=_(
+            'The description text displayed bellow the form field.'
+        )
+    )
+    value = blocks.DecimalBlock(
+        verbose_name=_('value'),
         default=1.0,
         help_text=_(
             'Relative weight given to this answer in the question.'
         ),
     )
+    ref = blocks.RandomIdBlock()
+
+    def normalize_response(self, value, response):
+        """
+        Normalize the given response.
+
+        `value` is the structure representing the AnswerBlock state saved by
+        wagtail.
+        """
+
+        return response
+
+    def autograde_response(self, value, response):
+        """
+        Grades a response. Return a value between 0-100.
+
+        `value` is the structure representing the AnswerBlock state saved by
+        wagtail.
+        """
+
+        raise NotImplemented
+
+    def render(self, value):
+        form = self.get_form(value)
+        if form:
+            return form
+        else:
+            return super().render(value)
+
+    def get_form(self, value):
+        """
+        Return an initialized response form for the object.
+        """
+
+        if self.response_form:
+            form = self.response_form()
+            form['response'].label = value['name']
+            return form.as_table()
+        return None
+
+
+#
+# Numeric responses
+#
+class NumericResponseForm(ResponseForm):
+    response = forms.DecimalField()
+
+
+class BooleanResponseForm(ResponseForm):
+    response = forms.BooleanField()
 
 
 @blocks.register_block
@@ -33,6 +115,8 @@ class NumericAnswerBlock(AnswerBlock):
     """
     Represents a numeric answer.
     """
+
+    response_form = NumericResponseForm
 
     answer = blocks.DecimalBlock(
         required=True,
@@ -46,6 +130,17 @@ class NumericAnswerBlock(AnswerBlock):
         ),
     )
 
+    def normalize_response(self, value, response):
+        return Decimal(response)
+
+    def autograde_response(self, value, response):
+        tolerance = Decimal(value['tolerance'])
+        answer = Decimal(value['answer'])
+        if abs(response - answer) <= tolerance:
+            return Decimal(100)
+        else:
+            return Decimal(0)
+
 
 @blocks.register_block
 class BooleanAnswerBlock(AnswerBlock):
@@ -53,10 +148,19 @@ class BooleanAnswerBlock(AnswerBlock):
     Represents a numeric answer.
     """
 
+    response_form = BooleanResponseForm
+
     answer = blocks.BooleanBlock(
         required=True,
         help_text=_('Correct true/false answer.'),
     )
+
+
+#
+# Text-based responses
+#
+class TextResponseForm(ResponseForm):
+    response = forms.CharField()
 
 
 @blocks.register_block
@@ -71,17 +175,34 @@ class StringAnswerBlock(AnswerBlock):
     )
     case_sensitive = blocks.BooleanBlock(
         default=False,
-        help_text=_('If true, the response will be sensitive to the case.'),
+        help_text=_('If enabled, the response will be sensitive to the case.'),
     )
     use_regex = blocks.BooleanBlock(
+        verbose_name=_('use regular expressions?'),
         default=False,
         help_text=_(
-            'If true, the answer string is interpreted as a regular '
+            'If enabled, the answer string is interpreted as a regular '
             'expression. A response is considered to be correct if it matches '
             'the regular expression. Remember to use both ^ and $ to match the'
             'begining and the end of the string, if that is desired.'
         )
     )
+    multiple_lines = blocks.BooleanBlock(
+        verbose_name=_('allow multiple lines?'),
+        default=False,
+        help_text=_(
+            'If enabled, this will allow the user input multiple lines of '
+            'text. It will also present <textarea> widget instead of a regular '
+            '<input> text box.'
+        )
+    )
+
+
+#
+# Date/time responses
+#
+class DateResponseForm(ResponseForm):
+    response = forms.DateField()
 
 
 @blocks.register_block
@@ -94,3 +215,12 @@ class DateAnswerBlock(AnswerBlock):
         required=True,
         help_text=_('Required date.'),
     )
+
+
+#
+# Utility functions
+#
+def get_response_form(block):
+    """
+    Return the response form associated with the given block.
+    """

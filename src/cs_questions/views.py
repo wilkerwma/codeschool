@@ -12,8 +12,8 @@ users = User.objects
 
 
 class QuestionDetailView(DetailObjectContextMixin,
-                        VerboseNamesContextMixin,
-                        DetailWithResponseView):
+                         VerboseNamesContextMixin,
+                         DetailWithResponseView):
     """Base detail view class for question types.
 
     This view can be plugged and reused in the many places that a question
@@ -77,7 +77,7 @@ class QuestionDetailView(DetailObjectContextMixin,
         response = form.save(commit=False)
         response.user = self.request.user
         response.question = self.question
-        response.autograde()
+        response.autograde_response()
         register(self.request.user, response)
         return response
 
@@ -104,7 +104,7 @@ class QuestionInheritanceCRUD(InheritanceCRUDViewPack):
 
     model = models.Question
     template_extension = '.jinja2'
-    template_basename = 'cs_questioning/'
+    template_basename = 'cs_questions/'
     check_permissions = True
     raise_404_on_permission_error = True
     exclude_fields = ['status', 'status_changed', 'author_name', 'comment',
@@ -157,25 +157,12 @@ class QuestionCRUD(CRUDViewPack):
             return question.unbound_responses.filter(user=self.request.user)
 
 
-
 @QuestionInheritanceCRUD.register
 class CodingIoQuestionViews(QuestionCRUD):
     subclass_view_name = 'io'
     model = models.CodingIoQuestion
-    response_model = models.CodingIoResponse
+    response_model = models.CodingIoResponseItem
     response_fields = ['source', 'language']
     template_basename = 'cs_questions/io/'
     upload_enable = True
     upload_success_url = '/questions/{object.pk}/edit/'
-
-#
-# # Related activities
-# @ActivityCRUD.register
-# class QuizActivityViews(CRUDViewPack):
-#     subclass_view_name = 'quiz'
-#     model = models.Quiz
-#     template_basename = '/cs_questions/quiz/'
-#
-#     class StatisticsView(DetailView):
-#         pattern = r'^(?P<pk>\d+)/statistics/'
-

@@ -1,0 +1,113 @@
+[
+{
+  "model": "wagtailcore.page",
+  "pk": 3,
+  "fields": {
+    "path": "00010002",
+    "depth": 2,
+    "numchild": 5,
+    "title": "List of users",
+    "slug": "users",
+    "content_type": [
+      "cs_core",
+      "profileroot"
+    ],
+    "live": true,
+    "has_unpublished_changes": false,
+    "url_path": "/users/",
+    "owner": null,
+    "seo_title": "",
+    "show_in_menus": false,
+    "search_description": "",
+    "go_live_at": null,
+    "expire_at": null,
+    "expired": false,
+    "locked": false,
+    "first_published_at": null,
+    "latest_revision_created_at": null
+  }
+},
+{
+  "model": "wagtailcore.page",
+  "pk": 4,
+  "fields": {
+    "path": "00010003",
+    "depth": 2,
+    "numchild": 1,
+    "title": "Hidden pages",
+    "slug": "hidden",
+    "content_type": [
+      "cs_core",
+      "hiddenroot"
+    ],
+    "live": true,
+    "has_unpublished_changes": false,
+    "url_path": "/hidden/",
+    "owner": null,
+    "seo_title": "",
+    "show_in_menus": false,
+    "search_description": "",
+    "go_live_at": null,
+    "expire_at": null,
+    "expired": false,
+    "locked": false,
+    "first_published_at": null,
+    "latest_revision_created_at": null
+  }
+},
+{
+  "model": "wagtailcore.page",
+  "pk": 5,
+  "fields": {
+    "path": "000100030001",
+    "depth": 3,
+    "numchild": 0,
+    "title": "Pages with no parent",
+    "slug": "rogue",
+    "content_type": [
+      "cs_core",
+      "rogueroot"
+    ],
+    "live": true,
+    "has_unpublished_changes": false,
+    "url_path": "/hidden/rogue/",
+    "owner": null,
+    "seo_title": "",
+    "show_in_menus": false,
+    "search_description": "",
+    "go_live_at": null,
+    "expire_at": null,
+    "expired": false,
+    "locked": false,
+    "first_published_at": null,
+    "latest_revision_created_at": null
+  }
+},
+{
+  "model": "wagtailcore.page",
+  "pk": 6,
+  "fields": {
+    "path": "000100020001",
+    "depth": 3,
+    "numchild": 0,
+    "title": "root's profile",
+    "slug": "root",
+    "content_type": [
+      "cs_core",
+      "profile"
+    ],
+    "live": true,
+    "has_unpublished_changes": false,
+    "url_path": "/users/root/",
+    "owner": null,
+    "seo_title": "",
+    "show_in_menus": false,
+    "search_description": "",
+    "go_live_at": null,
+    "expire_at": null,
+    "expired": false,
+    "locked": false,
+    "first_published_at": null,
+    "latest_revision_created_at": null
+  }
+}

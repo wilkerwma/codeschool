@@ -2,13 +2,29 @@ import collections
 from django.utils.translation import ugettext as __, ugettext_lazy as _
 from codeschool import models
 from codeschool.db import use_db, ask_use_db
+PROGRAMMING_LANGUAGES_CACHE = {}
+FORMAT_ALIASES = {
+    'python3': 'python',
+    'py3': 'python',
+    'py2': 'python2',
+    'gcc': 'c',
+    'g++': 'cpp',
+}
 
 
 class SourceFormatQuerySet(models.QuerySet):
     def supported(self):
+        """
+        Filter-in only the supported formats.
+        """
+
         return self.filter(is_supported=True)
 
     def unsupported(self):
+        """
+        Filter-out the supported formats.
+        """
+
         return self.filter(is_supported=False)
 
 
@@ -19,13 +35,17 @@ class FileFormat(models.Model):
     These can be programming languages or some specific data format.
     """
 
-    ref = models.CharField(max_length=10, primary_key=True)
+    ref = models.CharField(max_length=10, unique=True)
     name = models.CharField(max_length=140)
     comments = models.TextField(blank=True)
     is_binary = models.BooleanField(default=False)
     is_language = models.BooleanField(default=False)
     is_supported = models.BooleanField(default=False)
     objects = models.Manager.from_queryset(SourceFormatQuerySet)()
+
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('name', kwargs.get('ref', 'unnamed format').title())
+        super().__init__(*args, **kwargs)
 
     def ace_mode(self):
         """
@@ -40,6 +60,16 @@ class FileFormat(models.Model):
         """
 
         return self.ref
+
+    def ejudge_ref(self):
+        """
+        A valid reference for the language in the ejudge framework.
+        """
+
+        return self.ref
+
+    def __str__(self):
+        return self.name
 
 
 class ProgrammingLanguage(FileFormat):
@@ -56,98 +86,99 @@ class ProgrammingLanguage(FileFormat):
     )
     unsupported = models.QueryManager(is_supported=False, is_language=True)
 
+    @classmethod
+    def get_language(cls, ref, raises=True):
+        """
+        Return the programming language object from the given ref.
+
+        If raises is False, return None instead of raising a DoesNotExist
+        exception if the requested language does not exist.
+        """
+
+        # We save ProgrammingLanguage instances in a cache for fast access.
+        # This way we avoid unnecessary trips to the db.
+        ref = FORMAT_ALIASES.get(ref, ref)
+        lang = PROGRAMMING_LANGUAGES_CACHE.get(ref, None)
+        if lang is not None:
+            return lang
+
+        # Language is not in cache. Fetch it and save it on second use.
+        try:
+            if isinstance(ref, int) or ref.isdigit():
+                ref = int(ref)
+                lang = cls.objects.get(pk=ref)
+            else:
+                lang = cls.objects.get(ref=ref)
+            PROGRAMMING_LANGUAGES_CACHE[ref] = lang
+            return lang
+        except cls.DoesNotExist:
+            if raises:
+                raise cls.DoesNotExist('invalid language: %r' % ref)
+            return cls.objects.create(
+                ref=ref,
+                name=ref.title(),
+                is_language=True,
+                is_supported=False,
+                comments='*automatically created*'
+            )
+
+    @classmethod
+    def get_or_create_language(cls, ref, name=None):
+        """
+        Return language with the given ref, and create it if it does not exist.
+        """
+
+        try:
+            return cls.get_language(ref)
+        except cls.DoesNotExist:
+            return cls.unsupported.create(ref=ref, name=name or ref)[0]
+
     def save(self, *args, **kwargs):
         self.is_language = True
         super().save(*args, **kwargs)
 
-    @classmethod
-    def get_language(cls, ref):
-        """Return the programming language object from the given ref."""
 
-        try:
-            ref = default_aliases.get(ref, ref)
-            return cls.objects.get(ref=ref)
-        except cls.DoesNotExist:
-            name = default_languages.get(ref)
-            if ref is None:
-                raise
-            else:
-                return cls.objects.create(ref=ref, name=name)
-
-
-def get_language(ref, use_db=None):
+def programming_language(language, raises=True):
     """Return the ProgrammingLanguage object associated with the given language
     reference.
 
-    It creates the new object if it corresponds to a supported language that
-    does not exist in the database.
+    If a ProgrammingLanguage object is passed, it is returned as is. This makes
+    this function useful to normalize values that should be ProgrammingLanguage
+    instances. If raises=False, it will return None for non-existing languages.
 
     Args:
         ref:
             The short primary key reference to the language (e.g., 'python',
-            'c', 'c++', etc)
-        use_db:
-            If False, it does not touch the database and return an unsaved
-            language object. The default behavior is to touch the database
-            unless it is running in a :func:`codeschool.dbg.no_db` block.
+            'c', 'cpp', etc)
+        raises:
+            Controls if an exception should be raised if language does not exist
+            (default is True).
     """
 
-    if ask_use_db(use_db):
-        return ProgrammingLanguage.get_language(ref)
-    else:
-        try:
-            ref = default_aliases.get(ref, ref)
-            return ProgrammingLanguage(
-                ref=ref,
-                name=default_languages[ref]
-            )
-        except KeyError:
-            raise ProgrammingLanguage.DoesNotExist(ref)
+    if isinstance(language, ProgrammingLanguage):
+        return language
+    elif not raises and language is None:
+        return None
+    return ProgrammingLanguage.get_language(language, raises)
 
 
-def get_languages(use_db=None):
-    """Return an iterator with all languages in alphabetical order."""
-
-    # Get initial list
-    if ask_use_db(use_db):
-        L = ProgrammingLanguage.objects.all()
-    else:
-        L = []
-
-    # Fill it with all supported languages not present in the list
-    refs = {lang.ref for lang in L}
-    for ref, name in default_languages.items():
-        if ref not in refs:
-            L.append(get_language(ref, use_db))
-
-    # Sort alphabetically by reference
-    return sorted(L, key=lambda x: x.ref)
-
-
-def make_initial_fixtures():
+#
+# These functions associate data with specific programming languages and their
+# default support in codeschool.
+#
+def format_processor(func):
     """
-    Return a string with the YAML source for the fixtures of all document
-    formats.
-    """
+    Process each class of formats using the process function.
 
-    def subs(v):
-        if isinstance(v, bool):
-            return str(v).lower()
-        return repr(v)
+    The function should take a list of dictionaries that represent keyword
+    arguments that could be passed to the SourceFormat constructor.
+    """
 
     def process(L, **kwargs):
-        for x in L:
-            ref, _, name = x.partition(':')
-            dump.append(
-                '- model: cs_core.fileformat\n'
-                '  pk: %r\n'
-                '  fields:\n'
-                '    name: %r\n' % (ref, name) +
-                ''.join('    %s: %s\n' % (k, subs(v))
-                          for k, v in kwargs.items())
-            )
-
-    dump = []
+        L = (x.partition(':') for x in L)
+        L = ((ref, name) for (ref, _, name) in L)
+        L = (dict(kwargs, ref=ref, name=name) for (ref, name) in L)
+        return func(list(L))
 
     # Binary formats
     process([
@@ -174,15 +205,74 @@ def make_initial_fixtures():
         'java:Java',
         'javascript:Javascript',
         'perl:Perl',
-        'cpp:C++11',
-
+        'haskell:Haskell',
+        'julia:Julia',
+        'go:Go',
     ], is_language=True)
 
     # Supported programming languages
     process([
+        'pytuga:Pytuguês',
         'python:Python 3.5',
         'python2:Python 2.7',
         'c:C99 (gcc compiler)',
+        'cpp:C++11',
     ], is_language=True, is_supported=True)
 
+
+def formats_yaml_dump():
+    """
+    Return a string YAML dump with fixture data for all formats.
+    """
+
+    dump = []
+
+    def process(L, **kwargs):
+        def subs(v):
+            if isinstance(v, bool):
+                return str(v).lower()
+            return repr(v)
+
+        for kwargs in L:
+            ref = kwargs.pop('ref')
+            name = kwargs.pop('name')
+            dump.append(
+                '- model: cs_core.fileformat\n'
+                '  pk: %r\n'
+                '  fields:\n'
+                '    name: %r\n' % (ref, name) +
+                ''.join('    %s: %s\n' % (k, subs(v))
+                          for k, v in kwargs.items())
+            )
+
+    format_processor(process)
     return '\n'.join(dump)
+
+
+def init_file_formats():
+    """
+    Initialize all file formats and save them to the db.
+    """
+
+    def process(L):
+        for kwargs in L:
+            if not FileFormat.objects.filter(ref=kwargs['ref']):
+                FileFormat.objects.create(**kwargs)
+
+    format_processor(process)
+
+
+def init_format_aliases():
+    """
+    Add a few more aliases to the format aliases.
+    """
+
+    def process(lst):
+        for data in lst:
+            FORMAT_ALIASES[data['name']] = data['ref']
+            FORMAT_ALIASES[data['name'].lower()] = data['ref']
+            FORMAT_ALIASES[data['name'].lower().replace(' ', '')] = data['ref']
+
+    format_processor(process)
+
+init_format_aliases()

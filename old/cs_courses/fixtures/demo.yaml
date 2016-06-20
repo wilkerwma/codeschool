@@ -1,0 +1,13 @@
+- model: cs_courses.discipline
+  pk: 1
+  fields:
+    name: Web Programming
+    short_description: Learn web programming with Django
+    long_description: Python, Django, Polymer, jQuery, etc.
+- model: cs_courses.Course
+  pk: 1
+  fields:
+    discipline: 1
+    teacher: 2
+    is_active: true
+    students: [3, 4, 5]

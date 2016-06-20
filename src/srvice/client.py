@@ -2,6 +2,7 @@ import re
 from collections import UserString
 from functools import singledispatch
 from lazy import lazy
+from django.utils.html import escapejs
 from srvice import json
 from srvice.exceptions import *
 is_var_name_re = re.compile(r'^[a-zA-Z_]+[a-zA-Z0-9_]*$')
@@ -274,10 +275,10 @@ class Client:
 
         return self.srvice.go(url, link)
 
-    def dialog(self, action='open', *,
+    def dialog(self, html=None, *,
                dialog='dialog',
                container=None,
-               html=None,
+               action='open',
                source=None):
         """
         Controls dialog box.
@@ -310,12 +311,12 @@ class Client:
         else:
             raise ValueError('invalid action: %r' % action)
 
-        return method(
-            dialogId=dialog,
-            dialogContentId=container,
-            html=html,
-            sourceId=source,
-        )
+        kwargs = {}
+        if html: kwargs['html'] = html
+        if dialog != 'dialog': kwargs['dialogId'] = dialog
+        if container: kwargs['dialogContentId'] = container
+        if source: kwargs['sourceId'] = source
+        return method(**kwargs)
 
 
 def js_compile(client):
@@ -328,7 +329,8 @@ def js_compile(client):
         source = action._js_source_()
         if source:
             lines.append(source)
-    return '\n'.join(lines)
+    js_source = '\n'.join(lines)
+    return js_source
 
 
 @singledispatch

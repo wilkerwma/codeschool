@@ -1,17 +1,16 @@
 from django.utils.translation import ugettext_lazy as _
-from modelcluster.fields import ParentalKey
-from wagtail.wagtailcore.fields import RichTextField
 from wagtail.wagtailforms.models import AbstractEmailForm, AbstractFormField
 from codeschool import panels
+from codeschool import models
 
 
 class FormField(AbstractFormField):
-    page = ParentalKey('FormPage', related_name='form_fields')
+    page = models.ParentalKey('FormPage', related_name='form_fields')
 
 
 class FormPage(AbstractEmailForm):
-    intro = RichTextField(blank=True)
-    thank_you_text = RichTextField(blank=True)
+    intro = models.RichTextField(blank=True)
+    thank_you_text = models.RichTextField(blank=True)
 
     content_panels = AbstractEmailForm.content_panels + [
         panels.FieldPanel('intro', classname="full"),

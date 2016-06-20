@@ -269,9 +269,9 @@ def run_from_manager(manager, inputs, *, raises, timeout):
                 raise
             data.append(error_test_case(ex, ex.__traceback__))
     result = IoSpec(data)
-    result.setmeta('lang', manager.name)
-    result.setmeta('buildargs', manager.buildargs)
-    result.setmeta('shellargs', manager.shellargs)
+    result.set_meta('lang', manager.name)
+    result.set_meta('buildargs', manager.buildargs)
+    result.set_meta('shellargs', manager.shellargs)
     return result
 
 

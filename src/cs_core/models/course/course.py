@@ -3,6 +3,7 @@ from django.apps import apps
 from wagtail.wagtailcore.models import PageQuerySet, PageManager, Page
 from codeschool import models
 from codeschool import panels
+from codeschool.utils import delegate_to
 
 
 class CourseQueryset(PageQuerySet):
@@ -26,7 +27,7 @@ class CourseQueryset(PageQuerySet):
         return qs.distinct()
 
 
-class Course(models.CodeschoolPage):
+class Course(models.RoutablePageMixin, models.CodeschoolPage):
     """
     One specific occurrence of a course for a given teacher in a given period.
     """
@@ -84,6 +85,12 @@ class Course(models.CodeschoolPage):
     )
     objects = PageManager.from_queryset(CourseQueryset)()
 
+    short_description = delegate_to('discipline', True)
+    long_description = delegate_to('discipline', True)
+    short_description_html = delegate_to('discipline', True)
+    long_description_html = delegate_to('discipline', True)
+    lessons = property(lambda x: x.calendar_page.lessons)
+
     @property
     def calendar_page(self):
         return apps.get_model('cs_core', 'CalendarPage').objects.get(
@@ -93,20 +100,17 @@ class Course(models.CodeschoolPage):
 
     @property
     def questions_page(self):
-        raise NotImplementedError
+        return apps.get_model('cs_questions', 'QuestionList').objects.get(
+            depth=self.depth + 1,
+            path__startswith=self.path,
+        )
 
     @property
-    def gradebook_page(self):
-        raise NotImplementedError
-
-    # Properties
-    short_description = property(lambda x: x.discipline.short_description)
-    long_description = property(lambda x: x.discipline.long_description)
-    short_description_html = property(lambda x:
-                                      x.discipline.short_description_html)
-    long_description_html = property(lambda x:
-                                     x.discipline.long_description_html)
-    lessons = property(lambda x: x.calendar_page.lessons    )
+    def gradables_page(self):
+        return apps.get_model('cs_core', 'GradablesPage').objects.get(
+            depth=self.depth + 1,
+            path__startswith=self.path,
+        )
 
     @property
     def discipline(self):
@@ -115,6 +119,10 @@ class Course(models.CodeschoolPage):
     @discipline.setter
     def discipline(self, value):
         self.set_parent(value)
+
+    @property
+    def questions(self):
+        return self.questions_page.questions
 
     def add_question(self, question, copy=True):
         """
@@ -149,13 +157,6 @@ class Course(models.CodeschoolPage):
         """
 
         self.lessons.new_lesson(*args, **kwargs)
-
-    def to_file(self):
-        """Serialize object in a Markdown format."""
-
-    @classmethod
-    def from_file(cls, file):
-        """Load course from file."""
 
     def register_student(self, student):
         """
@@ -193,34 +194,11 @@ class Course(models.CodeschoolPage):
                                                     other=colleague,
                                                     status=colleague_status)
 
-    # Managers
-    @property
-    def past_activities(self):
-        return (
-            self.activities.filter(status=Activity.STATUS_CLOSED) |
-            self.activities.filter(end__lt=timezone.now())
-        ).select_subclasses()
-
-    @property
-    def open_activities(self):
-        return (
-            self.activities.timeframed.all() &
-            self.activities.filter(status=Activity.STATUS_OPEN)
-        ).select_subclasses()
-
-    @property
-    def pending_activities(self):
-        return (
-            self.activities.filter(status=Activity.STATUS_DRAFT) |
-            (self.activities.filter(status=Activity.STATUS_OPEN) &
-             self.activities.filter(end__lt=timezone.now()))
-        ).select_subclasses()
-
     def get_absolute_url(self):
         return url_reverse('course-detail', args=(self.pk,))
 
     def get_user_role(self, user):
-        """Return a string describing the most priviledged role the user
+        """Return a string describing the most privileged role the user
         as in the course. The possible values are:
 
         teacher:
@@ -276,6 +254,11 @@ class Course(models.CodeschoolPage):
     def can_edit(self, user):
         return user in self.teachers.all() or user == self.owner
 
+    def get_context(self, request, *args, **kwargs):
+        context = super().get_context(request, *args, **kwargs)
+        context['activities'] = self.questions
+        return context
+
     # Wagtail admin
     parent_page_types = ['cs_core.Discipline']
     subpage_types = []
@@ -297,68 +280,6 @@ class Course(models.CodeschoolPage):
         ], heading=_('Subscription')),
 
     ]
-
-    # # Migration strategy
-    # migrate_skip_attributes = models.CodeschoolPage.migrate_skip_attributes.union({
-    #     'current_lesson_start', 'current_lesson_index',
-    # })
-    # migrate_attribute_conversions = dict(
-    #     models.CodeschoolPage.migrate_attribute_conversions,
-    #     teacher='owner',
-    # )
-    #
-    # @classmethod
-    # def migrate_extra_kwargs(cls, base):
-    #     return {'title': base.discipline.title}
-    #
-    # @classmethod
-    # def migrate_post_conversions(cls, new):
-    #     from cs_core.models import TimeSlot, Lesson
-    #     base = new.base
-    #     for ts in base.timeslot_set.all():
-    #         print(TimeSlot.objects.create(
-    #             weekday=ts.weekday,
-    #             start=ts.start,
-    #             end=ts.end,
-    #             room=ts.room,
-    #             course=new,
-    #         ))
-    #
-    #     for x in base.lessons:
-    #         n = Lesson(
-    #             course=new,
-    #             title=x.title,
-    #             description='<p>%s</p>' % x.description,
-    #         )
-    #         if n.can_move_to(new):
-    #             n.set_parent(new)
-    #             n.save()
-    #
-    # @classmethod
-    # def migrate_discipline_T(self, x):
-    #     from cs_core.models import Discipline, Faculty
-    #
-    #     try:
-    #         return Discipline.objects.get(base=x)
-    #     except Discipline.DoesNotExist:
-    #         pass
-    #
-    #     faculty = Faculty.objects.first()
-    #     d = Discipline(title=x.name,
-    #                    short_description=x.short_description,
-    #                    body=x.long_description_html,
-    #                    faculty=faculty,
-    #                    base=x)
-    #     d.save()
-    #     return d
-    #
-    # base = models.OneToOneField(
-    #     'cs_courses.Course',
-    #     on_delete=models.SET_NULL,
-    #     related_name='converted',
-    #     blank=True,
-    #     null=True,
-    # )
 
 
 class TimeSlot(models.Model):

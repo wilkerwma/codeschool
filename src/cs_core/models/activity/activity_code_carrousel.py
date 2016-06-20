@@ -1,15 +1,17 @@
+from django.utils.translation import ugettext_lazy as _
 from codeschool import models
 from codeschool import panels
+from codeschool import blocks
 from . import Activity
 
 
-class SyncCodeEditItem(models.Orderable):
+class CodeCarouselItem(models.Orderable):
     """
     A simple state of the code in a SyncCodeActivity.
     """
 
     activity = models.ParentalKey(
-        'SyncCodeActivity',
+        'cs_core.CodeCarouselActivity',
         related_name='items'
     )
     text = models.TextField()
@@ -19,11 +21,11 @@ class SyncCodeEditItem(models.Orderable):
 
     # Wagtail admin
     panels = [
-        panel.FieldPanel('text', widget=blocks.AceWidget()),
+        panels.FieldPanel('text', widget=blocks.AceWidget()),
     ]
 
 
-class SyncCodeActivity(Activity):
+class CodeCarouselActivity(Activity):
     """
     In this activity, the students follow a piece of code that someone
     edit and is automatically updated in all of student machines. It keeps
@@ -46,22 +48,21 @@ class SyncCodeActivity(Activity):
     def last(self):
         try:
             return self.items.order_by('timestamp').last()
-        except SyncCodeEditItem.DoesNotExist:
+        except CodeCarouselItem.DoesNotExist:
             return None
 
     @property
     def first(self):
         try:
             return self.items.order_by('timestamp').first()
-        except SyncCodeEditItem.DoesNotExist:
+        except CodeCarouselItem.DoesNotExist:
             return None
 
     # Wagtail admin
     content_panels = models.CodeschoolPage.content_panels + [
-        panel.MultiFieldPanel([
-            panel.RichTextFieldPanel('short_description'),
-            panel.FieldPanel('grading_method'),
-            panel.FieldPanel('language'),
+        panels.MultiFieldPanel([
+            panels.RichTextFieldPanel('short_description'),
+            panels.FieldPanel('language'),
         ], heading=_('Options')),
-        panel.InlinePanel('items', label='Items'),
+        panels.InlinePanel('items', label='Items'),
     ]

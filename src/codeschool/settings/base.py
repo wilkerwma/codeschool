@@ -36,19 +36,33 @@ PROJECT_DIR = os.path.dirname(SOURCE_FOLDER_DIR)
 INSTALLED_APPS = [
     # Local apps
     'cs_core',
-    'cs_pages',
-    'cs_search',
-    'cs_auth',
-    'cs_courses',
-    'cs_activities',
+    'cs_messages',
+    #'cs_pages',
+    #'cs_search',
+    # 'cs_auth',
+    # 'cs_courses',
+    # 'cs_activities',
     'cs_questions',
-    'cs_polls',
-    'cs_battles',
-    'cs_pbl',
+    #'cs_polls',
+    #'cs_battles',
+    #'cs_pbl',
     'viewpack',
     'srvice',
 
     # Wagtail and dependencies
+    # 'commonblocks',
+    # 'overextends',
+    # 'osm_field',
+    # 'wagtailosm',
+    # 'wagtailgmaps',
+    'wagtailmarkdown',
+    # 'wagtailfontawesome',
+    'wagtailembedder',
+    'wagtail.contrib.wagtailroutablepage',
+    'wagtail.contrib.wagtailapi',
+    'wagtail.contrib.settings',
+    'wagtail.contrib.modeladmin',
+    'wagtail.contrib.table_block',
     'wagtail.wagtailforms',
     'wagtail.wagtailredirects',
     'wagtail.wagtailembeds',
@@ -65,18 +79,17 @@ INSTALLED_APPS = [
     'taggit',
 
     # 3rd party
-    #'debug_toolbar',
-    'address',
     'annoying',
     'djangobower',
     'djinga',
     'django_extensions',
     'easy_thumbnails',
     'guardian',
-    'rest_framework',
     'userena',
+    'polymorphic',
+    'rest_framework',
 
-    # Django
+    # # Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,7 +97,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.sites',
     'django.contrib.staticfiles',
-] + CODESCHOOL_PLUGINS
+]
 
 MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -109,7 +122,8 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 ANONYMOUS_USER_ID = 1
-AUTH_PROFILE_MODULE = 'cs_auth.Profile'
+#AUTH_PROFILE_MODULE = 'cs_auth.Profile'
+AUTH_PROFILE_MODULE = 'cs_core.Profile'
 
 
 # Userena support
@@ -121,7 +135,8 @@ USERENA_DISABLE_PROFILE_LIST = True
 USERENA_ACTIVATION_DAYS = 7
 USERENA_FORBIDDEN_USERNAMES = (
     'signup', 'signout', 'signin', 'activate', 'me', 'password', 'login',
-    'codeschool')
+    'codeschool'
+)
 USERENA_USE_HTTPS = False
 USERENA_REGISTER_PROFILE = False
 
@@ -208,6 +223,7 @@ TEMPLATES = [
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
                 "django.contrib.messages.context_processors.messages",
+                #'wagtail.contrib.settings.context_processors.settings',
             ],
             "filters": {
                 'markdown': markdown,
@@ -299,11 +315,12 @@ COMPRESS_PRECOMPILERS = [
 
 BOWER_INSTALLED_APPS = [
     'jquery',
-    # 'modernizr',
+    'requirejs',
+    'modernizr',
     'mustache',
     'normalize.css',
-    # 'codemirror',
-    # 'highlight',
+    'codemirror',
+    'highlight',
     'ace-builds',
     'dialog-polyfill',
     'material-design-lite',
@@ -417,4 +434,5 @@ REST_FRAMEWORK = {
 # Wagtail settings
 
 WAGTAIL_SITE_NAME = "codeschool"
-
+WAGTAIL_ADDRESS_MAP_CENTER = 'Brasilia, Brazil'
+WAGTAIL_ADDRESS_MAP_ZOOM = 8

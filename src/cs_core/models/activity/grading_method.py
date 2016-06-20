@@ -165,7 +165,7 @@ class GradingMethod(models.Model):
     def _filter_valid_responses(self, responses):
         for response in responses:
             if response.status == response.STATUS_PENDING:
-                response.autograde()
+                response.autograde_response()
             if response.status == response.STATUS_DONE:
                 yield response
 

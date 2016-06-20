@@ -1,0 +1,21 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% block content %}
+    <section>
+        {% if can_download %}
+            <a href="{% url 'object-action' object.pk 'download' %}"><i class="material-icons config-handle">file_download</i></a>
+        {% endif %}
+        <h1>{{ object.title }}</h1>
+        <p id="short-description">{{ object.short_description }}</p>
+
+        {% block header_content %}{% endblock %}
+    </section>
+
+    <div class="object-input">
+        {% block content_body %}
+            <article class="long-description">
+            {{ object.long_description|markdown }}
+            </article>
+        {% endblock %}
+    </div>
+{% endblock %}

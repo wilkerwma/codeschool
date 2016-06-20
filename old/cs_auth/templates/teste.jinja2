@@ -1,0 +1,22 @@
+{% extends 'base.jinja2' %}
+
+{% block content_body %}
+    <p>{{ _('Next') }}: {{ answer|e }}<p/>
+    <p>x: {{ x }}</p>
+    <p>{{ gettext('Hello %(name)s!', name=user.get_full_name()) }}!</p>
+{% endblock %}
+
+{% block nav_sections %}
+    <nav>
+        <p><a href="/courses/">{{ _('Teste') }}</a></p>
+        <ul>
+            <li><a href="/questions/">{{ _('List of questions') }}</a></li>
+            {% for i in L %}
+                <li><a>Link {{ i }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    {{ super() }}
+{% endblock %}
+

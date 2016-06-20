@@ -1,10 +1,10 @@
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, modeladmin_register)
-from .models import SimpleQuestion
+from .models import FormQuestion
 
 
 class MyPageModelAdmin(ModelAdmin):
-    model = SimpleQuestion
+    model = FormQuestion
     menu_label = 'Page Model'  # ditch this to use verbose_name_plural from model
     menu_icon = 'date'  # change as required
     menu_order = 200  # will put in 3rd place (000 being 1st, 100 2nd)

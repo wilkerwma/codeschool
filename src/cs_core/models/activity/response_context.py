@@ -24,11 +24,12 @@ class ResponseContext(models.PolymorphicModel):
     """
 
     class Meta:
-        unique_together = [('parent', 'name')]
+        unique_together = [('activity', 'name')]
 
     # Basic
-    parent = models.ParentalKey(
+    activity = models.ParentalKey(
         'wagtailcore.Page',
+        related_name='contexts',
     )
     name = models.CharField(
         _('name'),
@@ -65,7 +66,7 @@ class ResponseContext(models.PolymorphicModel):
         default=False,
         help_text=_(
             'If set, students will be only be able to see the feedback after '
-            'the activity deadline.'
+            'the activity expires its deadline.'
         )
     )
 
@@ -111,91 +112,9 @@ class ResponseContext(models.PolymorphicModel):
     resources = models.StreamField([], default=[])
 
     def clean(self):
-        if not isinstance(self.parent, (Activity, None.__class__)):
+        if not isinstance(self.activity, Activity):
             return ValidationError({
                 'parent': _('Parent is not an Activity subclass'),
             })
         super().clean()
 
-
-class Response(models.CopyMixin,
-               models.TimeStampedModel,
-               models.PolymorphicModel,
-               models.ClusterableModel):
-    """
-    Gather individual responses.
-    """
-
-    class Meta:
-        unique_together = [('user', 'activity', 'context')]
-        verbose_name = _('final response')
-        verbose_name_plural = _('final responses')
-
-    context = models.ForeignKey(
-        ResponseContext,
-        blank=True,
-        null=True,
-    )
-    activity = models.ForeignKey(
-        'wagtailcore.Page',
-        related_name='responses',
-        on_delete=models.CASCADE,
-    )
-    user = models.ForeignKey(
-        models.User,
-        related_name='responses',
-    )
-    final_grade = models.DecimalField(
-        _('Final grade'),
-        help_text=_(
-            'Final grade given to activity considering all responses, '
-            'penalties, etc.'),
-        max_digits=6,
-        decimal_places=3,
-        blank=True,
-        null=True,
-    )
-
-    @classmethod
-    def get_response(cls, user, activity, context=None):
-        """
-        Return the response object associated with the given
-        user/activity/context.
-
-        Create a new response object if it does not exist.
-        """
-
-        if user is None or activity is None:
-            raise TypeError(
-                'Response objects must be bound to an user or activity.'
-            )
-
-        response, create = Response.objects.get_or_create(
-            user=user, activity=activity, context=context
-        )
-        return response
-
-    def grade(self, method=None, force_update=False):
-        """
-        Return the final grade for the user using the given method.
-
-        If not method is given, it uses the default grading method for the
-        activity.
-        """
-
-        activity = self.activity
-
-        # Choose grading method
-        if method is None and self.final_grade is not None:
-            return self.final_grade
-        elif method is None:
-            grading_method = activity.grading_method
-        else:
-            grading_method = GradingMethod.from_name(activity.owner, method)
-
-        # Grade response. We save the result to the final_grade attribute if
-        # no explicit grading method is given.
-        grade = grading_method.grade(self)
-        if method is None and (force_update or self.final_grade is None):
-            self.final_grade = grade
-        return grade

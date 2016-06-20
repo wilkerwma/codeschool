@@ -1,0 +1,122 @@
+{% extends "viewpack/crud/base.jinja2" %}
+
+{% block content %}
+    <section class="content-cards">
+        <aside>
+            <h1>{{ course.name }}</h1>
+            <p>{{ _('Activities for today') }}</p>
+        </aside>
+
+        <article>
+            {% for activity in activities %}
+                <cs-card onclick="" href="{{ activity.get_absolute_url() }}" icon="{{ activity.material_icon|default('help') }}">
+                    <h1>{{ activity.name }}</h1>
+                    <p>{{ activity.short_description }}</p>
+                </cs-card>
+            {% endfor %}
+
+            {% if role == 'teacher' %}
+                <cs-card onclick="srvice.run('add-activity')"
+                         icon="add_circle" faded>
+                    <h1>{{ _('Add activity') }}</h1>
+                    <p>{{ _('Click here to add new activities to your course') }}.</p>
+                </cs-card>
+            {% else %}
+                <cs-card href="/questions/" icon="add_circle" faded>
+                    <h1>{{ _('Extra questions') }}</h1>
+                    <p>{{ _('Click here to practice with additional questions in your course') }}.</p>
+                </cs-card>
+            {% endif %}
+        </article>
+    </section>
+
+    <section class="content-cards">
+        <aside>
+            <h1>Aulas</h1>
+            <p>Cronograma de aulas.</p>
+        </aside>
+
+        <article>
+            {% if course.lessons %}
+                <sortable-js id="course-lessons"
+                             {% if can_edit %}sync-api="cs_courses.sort-lessons"
+                             sync-id="{{ course.pk }}"
+                             {% else %}disabled{% endif %}>
+                    {% for lesson in course.lessons %}
+                        <div data-id="{{ lesson.pk }}">
+                            <p><span
+                                    class="index">{{ loop.index }}.</span> {{ lesson.title }}
+                                {% if can_edit %}
+                                    <i class="sortable-remove">✖</i>{% endif %}
+                            </p>
+                            {% if lesson.description %}
+                                <div>{{ lesson.description }}</div>{% endif %}
+                        </div>
+                    {% endfor %}
+                </sortable-js>
+            {% else %}
+                <p>{{ _('No lessons available!') }}</p>
+            {% endif %}
+        </article>
+
+    </section>
+
+    <section class="content-cards">
+        <aside>
+            <h1>Colegas</h1>
+            <p>Acesse a lista de todos alunos inscritos no curso.</p>
+        </aside>
+
+        <article>
+            <div>
+                <h2>Alunos inscritos</h2>
+                <ul>
+                    {% for student in course.students.all().exclude(pk=user.pk).order_by('first_name') %}
+                        <li>
+                            <a href="/accounts/{{ student.username }}">{{ student.get_full_name() or student.username }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </article>
+    </section>
+{% endblock %}
+
+
+{% block nav_sections %}
+    <nav>
+        <p>{{ course.name }}</p>
+        <ul>
+            {% if role in ['student', 'staff'] %}
+                <li onclick="srvice.dialog({sourceId: 'confirmation-dialog', action: 'open'})">{{ _('Cancel subscription') }}</li>
+            {% endif %}
+            {% if role == 'teacher' %}
+                <li><a href="./edit/">{{ _('Edit') }}</li>
+            {% endif %}
+        </ul>
+    </nav>
+    {{ super() }}
+{% endblock %}
+
+
+{% block hidden_content %}
+    {{ super() }}
+    {% if role in ['student', 'staff']  %}
+        <div id="confirmation-dialog" class="hidden">
+            <h1>{{ _('Confirmation') }}</h1>
+            <p>{{ gettext('Are you sure you want to leave %(course)s (Prof. %(name)s)?)', course=course.name, name=user.get_full_name()) }}</p>
+            <p>{{ _('All your activities and progress will be deleted.') }}</p>
+            <form id="cancel-subscription-form" method="POST">
+                {% csrf_token %}
+            </form>
+            <div class="toolbar highlight">
+                <button class="separated raised"
+                        onclick="srvice.dialog('close')">{{ _('Cancel') }}</button>
+                <button class="danger" form="cancel-subscription-form" name="action"
+                        value="cancel-subscription">
+                    {{ _('Yes, leave course') }}
+                </button>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

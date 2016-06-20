@@ -8,12 +8,35 @@ from sulfur import Driver as _sulfur_driver
 import pytest_django as _
 from pytest_factoryboy import register
 from django.forms import model_to_dict
+from codeschool import factories as factory
+
+# Useful export names
+fake = factory.fake
 
 
 # Define some fixtures
 @pytest.fixture
 def password():
+    """A random password."""
+
     return fake.password()
+
+
+@pytest.fixture
+def user():
+    """A simple user account (no valid password)"""
+
+    return factory.UserFactory.create()
+
+
+@pytest.fixture
+def user_with_password(password):
+    """User account with password (use together with the password fixture)."""
+
+    user = factory.UserFactory.create()
+    user.set_password(password)
+    user.save()
+    return user
 
 
 @pytest.fixture

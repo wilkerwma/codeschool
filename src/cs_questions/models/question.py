@@ -1,11 +1,12 @@
 from django.utils.translation import ugettext_lazy as _, ugettext as __
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django import forms
+import srvice
 from codeschool import models
 from codeschool import panels
 from codeschool import blocks
-from cs_core.models import Activity, Response, ProgrammingLanguage
+from cs_core.models import Activity, ResponseItem, ResponseContext, Response
+from cs_questions.models import QuestionList
+
 
 QUESTION_STEM_BLOCKS = [
     ('paragraph', blocks.RichTextBlock()),
@@ -16,30 +17,8 @@ QUESTION_STEM_BLOCKS = [
 ]
 
 
-@receiver(post_save, sender='cs_core.Course')
-def on_course_save(instance, created, **kwargs):
-    if created:
-        instance.add_child(instance=QuestionList())
-
-
-class QuestionList(models.CodeschoolPage):
-    """
-    Root page for all questions inside a course.
-    """
-
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault('title', __('List of questions'))
-        kwargs.setdefault('slug', 'questions')
-        super().__init__(*args, **kwargs)
-
-    # Wagtail admin
-    subpage_types = [
-        'cs_questioning.SimpleQuestion',
-        'cs_questioning.CodingIoQuestion'
-    ]
-
-
-class Question(Activity):
+# noinspection PyPropertyAccess
+class Question(models.RoutablePageMixin, Activity):
     """
     Base abstract class for all question types.
     """
@@ -74,35 +53,9 @@ class Question(Activity):
                     'associate to the question page.')
     )
 
-    # Properties
     @property
     def long_description(self):
-        try:
-            value = str(self.stem)
-        except Exception as e:
-            value = e
-        return self.stem
-
-    def update(self):
-        """Tells question object to validate and update any fields necessary
-        to fulfill the validation.
-
-        The default implementation is empty. Subclasses may need to implement
-        some special logic here.
-        """
-
-    def export(self, type=None):
-        """Export question to the given data type.
-
-        This method can return NotImplemented to tell that the designated data
-        type is not supported."""
-
-        return NotImplemented
-
-    def grade(self, response):
-        """Return a Feedback object to the given response."""
-
-        return self.feedback_cls(response, self.answer == response.value)
+        return str(self.stem)
 
     # Permission control
     def can_edit(self, user):
@@ -117,43 +70,32 @@ class Question(Activity):
 
         return not user.courses_as_teacher.empty()
 
-    def get_context(self, request, *args, **kwargs):
-        ctx = super().get_context(request, *args, **kwargs)
-        ctx['form'] = self.get_response_form(request, *args, **kwargs)
-        if request.method == 'POST':
-            ctx['response'] = ctx['form'].get_response()
-        return ctx
-
-    def get_response_form(self, request, *args, **kwargs):
+    # Serving pages and routing
+    @srvice.route(r'^submit-response/$')
+    def respond_route(self, client, **kwargs):
         """
-        Return a ModelForm for a question response.
+        Handles student responses via AJAX and a srvice program.
         """
 
-        raise NotImplementedError(
-            'Please implement the get_response_form method in the subclass.'
-        )
-
-    def _serve(self, request, *args, **kwargs):
-        from cs_questions.views import QuestionInheritanceCRUD
-
-        view = QuestionInheritanceCRUD.as_view(
-            dispatch_to='detail',
-            initkwargs={'object': self}
-        )
-        return view(request)
+        raise NotImplementedError
 
     # Wagtail admin
-    parent_page_types = ['QuestionList', 'cs_core.Discipline', 'cs_core.Faculty']
+    parent_page_types = [
+        'cs_questions.QuestionList',
+        'cs_core.Discipline',
+        'cs_core.Faculty'
+    ]
     content_panels = Activity.content_panels + [
         panels.StreamFieldPanel('stem'),
         panels.MultiFieldPanel([
             panels.FieldPanel('author_name'),
             panels.FieldPanel('comments'),
-        ], heading=_('Optional information'), classname='collapsible collapsed'),
+        ], heading=_('Optional information'),
+           classname='collapsible collapsed'),
     ]
 
 
-class QuestionResponse(Response):
+class QuestionResponseItem(ResponseItem):
     """
     Proxy class for responses to questions.
     """
@@ -161,16 +103,19 @@ class QuestionResponse(Response):
     class Meta:
         proxy = True
 
-    question = property(lambda x: x.activity)
+    question = property(lambda x: x.response.activity.specific)
+    question_id = property(lambda x: x.response.activity_id)
 
-    @question.setter
-    def question(self, value):
-        if not isinstance(value, Question):
-            type_name = type(value).__name__
-            raise TypeError('invalid question type %s' % type_name)
-        self.activity = value
+    @property
+    def is_correct(self):
+        if self.given_grade is None:
+            raise AttributeError('accessing attribute of non-graded response.')
+        else:
+            return self.given_grade == 100
 
     def __init__(self, *args, **kwargs):
+        # Make question an alias to activity.
         question = kwargs.pop('question', None)
-        kwargs.setdefault('activity', question)
+        if question is not None:
+            kwargs.setdefault('activity', question)
         super().__init__(*args, **kwargs)

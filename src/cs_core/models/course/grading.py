@@ -7,7 +7,7 @@ from codeschool import models
 @receiver(post_save, sender='cs_core.Course')
 def save_gradebook(instance, created, **kwargs):
     if created:
-         instance.add_child(instance=GradeBookList())
+         instance.add_child(instance=GradableList())
 
 
 class GradableList(models.CodeschoolPage):

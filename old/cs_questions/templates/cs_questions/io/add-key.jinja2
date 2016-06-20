@@ -1,0 +1,14 @@
+<h1>{{ question.title }}: ({{ _('answer key') }})</h1>
+
+<form method="POST" action="{{ question.get_absolute_url() }}add-key/" class="dialog-wide">
+    {% csrf_token %}
+    <paper-dialog-scrollable>
+        <table class="form">
+            {{ form.as_table() }}
+        </table>
+    </paper-dialog-scrollable>
+
+    <div class="toolbar highlight">
+        <input class="primary" type="submit" name="input" value="{{ _('Submit') }}">
+    </div>
+</form>

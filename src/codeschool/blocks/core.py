@@ -1,8 +1,22 @@
+"""
+Core generic blocks.
+
+I hope these will be merged in Wagtail in the future.
+"""
+
+import random
+import string
 from django import forms
+from django.utils.html import escape
 from django.utils.encoding import force_text
-from wagtail.wagtailcore.blocks import FieldBlock
+from wagtail.wagtailcore.blocks import FieldBlock, CharBlock
+
+__all__ = ['IntegerBlock', 'FloatBlock', 'DecimalBlock', 'RandomIdBlock']
 
 
+#
+#
+#
 class NumericBlockBase(FieldBlock):
     """
     Base class for blocks of numeric types.
@@ -44,3 +58,34 @@ class DecimalBlock(NumericBlockBase):
             decimal_places=decimal_places
         )
         super(DecimalBlock, self).__init__(**kwargs)
+
+
+#
+# Random id strings
+#
+# We are using a very hackish solution. We implement an object that returns
+# a random string each time a str(obj) is called. This happens to work with
+# the wail wagtail produces the final HTML for the block.
+ALPHABET = list(set(escape(string.printable)))
+
+
+def random_hash():
+    """
+    A sufficiently long random string of text that makes it virtually
+    impossible to obtain collisions.
+    """
+
+    # We have 10**19 possibilities!
+    return ''.join(random.choice(ALPHABET) for _ in range(10))
+
+
+class RandomHashString:
+    def __str__(self):
+        return random_hash()
+
+
+#TODO: implement this correctly!
+class RandomIdBlock(CharBlock):
+    def __init__(self, *args, **kwargs):
+        kwargs['default'] = RandomHashString()
+        super().__init__(*args, **kwargs)

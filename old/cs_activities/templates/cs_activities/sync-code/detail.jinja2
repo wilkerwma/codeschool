@@ -1,0 +1,169 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% set can_edit = activity.can_edit(user) %}
+{% block content_title %}{{ _('Coding Activity:') }} {{ super() }}{% endblock %}
+
+{% block object_description %}
+    <div id="code-box" class="mdl-shadow--4dp">
+        <div class="toolbar highlight">
+            <h1 class="separated">{{ _('Follow the code') }}</h1>
+            <button onclick="jump('prev')" class="flat"><i class="material-icons">keyboard_arrow_left</i></button>
+            <button onclick="jump('next')" class="flat"><i class="material-icons">keyboard_arrow_right</i></button>
+            {% if can_edit %}
+                <button onclick="remove_code_item()" class="danger flat"><i class="material-icons">delete</i></button>
+            {% endif %}
+            <button onclick="update()" class="primary flat"><i class="material-icons">refresh</i></button>
+        </div>
+
+        <div id="display-area">
+            <p class="box-title"><span>{{ _('Press the "update" button to refresh') }}</span></p>
+            <ace-editor mode="{{ activity.language.ref }}" read-only>{{ activity.last.text|default('') }}</ace-editor>
+        </div>
+
+        <div id="edit-area">
+            <p class="box-title"><span>{{ _('Edit code and press "update" to send code to the students') }}</span> <span id="edit-message">{{ _('successful update') }}</span></p>
+            <ace-editor mode="{{ activity.language.ref }}"{% if not can_edit %} read-only{% endif %}>{{ activity.last.text|default('') }}</ace-editor>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block style %}
+    {{ super() }}
+    <style>
+        #code-box {
+            border: 1px solid black;
+            margin: 10px;
+            padding: 0;
+        }
+
+        #code-box .toolbar {
+            margin: 0;
+        }
+
+        #code-box .toolbar h1 {
+            margin: 0;
+        }
+
+        #code-box .toolbar {
+            margin-bottom: 15px;
+        }
+
+        #code-box .box-title {
+            padding: 10px 20px 10px 40px;
+            margin: -15px 0 0;
+            background: #666;
+            color: white;
+            font-weight: 300;
+        }
+
+        #edit-message {
+            background: black;
+            color: white;
+            font-weight: bold;
+            padding: 5px 20px;
+            border-radius: 5px;
+            float: right;
+            font-size: 0.8em;
+        }
+    </style>
+{% endblock %}
+
+{% block javascript %}
+    {{ super() }}
+    <script>
+        var item_pk = {{ activity.last.pk|default('null') }};
+        var can_edit = {{ can_edit|default(false)|lower }};
+        var display_area = $('#display-area')[0];
+        var edit_area = $('#edit-area')[0];
+
+        function update() {
+            if (can_edit) {
+                var editor;
+
+                if (!edit_area.hidden) {
+                    editor = $('#edit-area ace-editor')[0];
+                    srvice('cs-activities.code-sync-update', {
+                        pk: {{ activity.pk }},
+                        data: editor.getSession().getValue()
+                    }, function(data) {
+                        $('#edit-message').fadeTo(0, 1).fadeTo(300, 1).fadeTo(300, 0);
+                    });
+                } else {
+                    highlight(false);
+                }
+            } else {
+                highlight();
+                editor = $('#display-area ace-editor')[0];
+
+                srvice('cs-activities.code-sync-get', {
+                    pk: {{ activity.pk }},
+                    item: item_pk,
+                    jump: 'last'
+                }, function(data) {
+                    item_pk = data[0];
+                    editor.setValue(data[1]);
+                });
+            }
+        }
+
+        function highlight(value) {
+            if (value === undefined) {
+                value = true;
+            }
+            edit_area.hidden = value;
+            display_area.hidden = !value;
+        }
+
+
+        function jump(jump, func) {
+            if (display_area.hidden) {
+                highlight();
+                return;
+            }
+
+            highlight();
+            srvice('cs-activities.code-sync-get', {
+                pk: {{ activity.pk }},
+                item: item_pk,
+                jump: jump
+            }, function(data) {
+                var editor = $('#display-area ace-editor')[0];
+                item_pk = data[0];
+                editor.setValue(data[1]);
+
+                if (func !== undefined) {
+                    func();
+                }
+            });
+        }
+
+        function remove_code_item() {
+            if (!edit_area.hidden) {
+                highlight(false);
+                return;
+            }
+
+            var pk = item_pk;
+
+            jump('prev', function() {
+                srvice('cs-activities.code-sync-remove', {
+                    pk: {{ activity.pk }},
+                    item: pk
+                }, function(data) {
+                    var editor = $(display_area).filter('ace-editor')[0];
+                    item_pk = pk;
+                    if (pk === null) {
+                        editor.setValue('');
+                    }
+                });
+            });
+        }
+
+        // Configure on load
+        highlight(!can_edit);
+        $('#edit-message').fadeTo(0, 0);
+    </script>
+{% endblock %}
+
+
