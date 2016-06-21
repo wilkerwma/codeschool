@@ -20,7 +20,7 @@ def bound_question_io(question_io, user, python, source_hello_py):
 # in tests.
 @pytest.fixture
 def iospec_source_hello():
-    return 'who? <john>\nhello john!'
+    return CodingIoQuestionFactory.iospec_source
 
 
 @pytest.fixture
@@ -30,10 +30,7 @@ def iospec_hello(iospec_source_hello):
 
 @pytest.fixture
 def source_hello_py():
-    return '''
-name = input('who? ')
-print("hello %s!" % name)
-'''
+    return CodingIoAnswerKeyFactory.source
 
 
 @pytest.fixture
@@ -48,3 +45,11 @@ int main() {
     printf("hello %s!", name);
 }
 '''
+
+
+# Responses
+@pytest.fixture
+def valid_response_io(bound_question_io, source_hello_py):
+    resp = bound_question_io.register_response_item(source_hello_py)
+    resp.autograde()
+    return resp

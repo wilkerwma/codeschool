@@ -95,6 +95,7 @@ class UserGradebook:
         for question in self.questions:
             response = question.get_response(user)
             attempts = response.num_attempts
+            response.update(force=True)
             grade = response.final_grade
             url = question.get_absolute_url()
             title = escape(question.title)

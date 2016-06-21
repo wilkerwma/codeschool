@@ -14,7 +14,8 @@ from codeschool.shortcuts import lazy
 from codeschool.utils import md5hash
 from cs_core.models import ProgrammingLanguage, programming_language, \
     bound_property
-from cs_questions.models import Question, QuestionResponseItem
+from cs_questions.models import Question, QuestionResponseItem, \
+    register_response_item
 from cs_questions.renderers import render_html
 from iospec import parse_string as parse_iospec
 
@@ -103,15 +104,30 @@ class CodingIoQuestion(Question):
         Instances can be bound to a programming language.
         """
 
-        return getattr(self, '_language', None)
+        return getattr(self, '_language_bind', None)
 
     @language.setter
     def language(self, value):
-        self._language = programming_language(value, raises=False)
+        self._language_bind = programming_language(value, raises=False)
 
     @property
     def is_language_bound(self):
         return self.language is not None
+
+    @property
+    def default_language(self):
+        """
+        The main language associated with this question if a single answer key
+        is defined.
+        """
+
+        return self.answer_key_items.get().language
+
+    def _language(self, language=None, raises=True):
+        # Shortcut used internally to normalize the given language
+        if language is None:
+            return self.language or self.default_language
+        return programming_language(language, raises)
 
     def __init__(self, *args, **kwargs):
         # Supports automatic conversion between iospec data and iospec_source
@@ -267,9 +283,7 @@ class CodingIoQuestion(Question):
         no object is found.
         """
 
-        language = programming_language(self.language or language, raises=False)
-        if language is None:
-            return None
+        language = self._language(language)
         try:
             return self.answer_key_items.get(language=language)
         except AnswerKeyItem.DoesNotExist:
@@ -282,7 +296,13 @@ class CodingIoQuestion(Question):
 
         key = self.answer_key_item(language)
         if key is None or key.iospec_source is None:
-            return self.iospec
+            new_key = self.answer_key_item()
+            if key == new_key:
+                if self.iospec.is_simple:
+                    raise ValueError('no valid iospec is defined for the '
+                                     'question')
+                return iospec.expand_inputs(self.iospec_size)
+            key = new_key
 
         # We check if the answer key item is synchronized with the parent hash
         if key.iospec_hash != key.parent_hash():
@@ -312,6 +332,20 @@ class CodingIoQuestion(Question):
             return ''
         return key.source
 
+    def run_code(self, source=None, iospec=None, language=None):
+        """
+        Run the given source code string for the programming language using the
+        default IoSpec.
+
+        If no code string is given, runs the reference source code, it it
+        exists.
+        """
+
+        if language is None:
+            language = self.answer_key_items.get().language
+        key = self.answer_key_item(language)
+        return key.run(source, iospec)
+
     def update_iospec_source(self):
         """
         Updates the iospec_source attribute with the current iospec object.
@@ -325,7 +359,7 @@ class CodingIoQuestion(Question):
 
     def register_response_item(self, source, language=None, **kwargs):
         response_data = {
-            'language': (language or self.language).ref,
+            'language': self._language(language).ref,
             'source': source,
         }
         kwargs.update(response_data=response_data)
@@ -532,6 +566,23 @@ class AnswerKeyItem(models.Model):
             self.iospec_source = self.iospec.source()
         super().save(*args, **kwds)
 
+    def run(self, source=None, iospec=None):
+        """
+        Runs the given source against the given iospec.
+
+        If no source is given, use the reference implementation.
+
+        If no iospec is given, user the default. The user may also pass a list
+        of input strings.
+        """
+
+        source = source or self.source
+        iospec = iospec or self.iospec
+        if not source:
+            raise ValueError('a source code string must be provided.')
+
+        return run_code(source, iospec, self.language.ejudge_ref())
+
     def parent_hash(self):
         """
         Return the iospec hash from the question current iospec/iospec_size.
@@ -540,8 +591,8 @@ class AnswerKeyItem(models.Model):
         parent = self.question
         return md5hash(parent.iospec_source + str(parent.iospec_size))
 
-    def __str__(self):
-        return 'AnswerKey(%s, %s)' % (self.question, self.language)
+    def __repr__(self):
+        return '<AnswerKey: %s, %s)' % (self.question, self.language)
 
     # Wagtail admin
     panels = [
@@ -551,6 +602,7 @@ class AnswerKeyItem(models.Model):
     ]
 
 
+@register_response_item(CodingIoQuestion)
 class CodingIoResponseItem(QuestionResponseItem):
     """
     A response proxy class specialized in CodingIoQuestion responses.
@@ -576,32 +628,35 @@ class CodingIoResponseItem(QuestionResponseItem):
 
     @language.setter
     def language(self, value):
-        self.response_data['language'] = value.ref
+        self.response_data['language'] = programming_language(value).ref
 
     # Feedback properties
+    @lazy
+    def feedback(self):
+        if not self.feedback_data:
+            return None
+
+        data = dict(self.feedback_data)
+        data['grade'] = self.final_grade / 100
+        del data['source']
+        del data['language']
+        return iospec.feedback.Feedback.from_json(data)
+
     feedback_title = property(lambda x: x.feedback and x.feedback.title)
-    feedback_hint = property(lambda x: x.feedback and x.feedback.hint)
-    feedback_status = property(lambda x: x.feedback and x.feedback.status)
     feedback_testcase = property(lambda x: x.feedback and x.feedback.testcase)
     feedback_answer_key = property(lambda x: x.feedback and x.feedback.answer_key)
+    feedback_hint = property(lambda x: x.feedback_data.get('hint'))
+    feedback_message = property(lambda x: x.feedback_data.get('message'))
+    feedback_status = property(lambda x: x.feedback_data.get('status'))
 
     @property
     def answer_key(self):
         return self.question.answer_key(self.language)
 
     def __init__(self, *args, **kwargs):
-        self.feedback = kwargs.get('feedback', None)
         super().__init__(*args, **kwargs)
-
-    @classmethod
-    def from_db(cls, *args, **kwargs):
-        instance = super().from_db(*args, **kwargs)
-        if instance.feedback_data:
-            instance.feedback = iospec.feedback.Feedback.from_json(
-                dict(instance.feedback_data,
-                     grade=instance.given_grade / 100)
-            )
-        return instance
+        if 'feedback' in kwargs:
+            self.update_feedback(feedback=kwargs['feedback'])
 
     def clean(self):
         super().clean()
@@ -616,15 +671,36 @@ class CodingIoResponseItem(QuestionResponseItem):
         grade.
         """
 
+        # Compute feedback
         source = self.source
         language_ref = self.language.ejudge_ref()
         answer_key = self.answer_key
-        self.feedback = grade_code(source, answer_key, lang=language_ref)
+        feedback = grade_code(source, answer_key, lang=language_ref)
+
+        # Save data and return grade
+        self.update_feedback(feedback, update_grade=False)
         return self.feedback.grade * 100
 
+    def update_feedback(self, feedback=None, update_grade=True):
+        """
+        Update feedback_data dictionary with info from feedback object
+        """
+        feedback = feedback or self.feedback
 
-# Let us define the response_class attribute for CodingIoQuestions
-CodingIoQuestion.response_item_class = CodingIoResponseItem
+        self.feedback_data.update(
+            answer_key=feedback.answer_key.to_json(),
+            testcase=feedback.answer_key.to_json(),
+            status=feedback.status,
+        )
+        if feedback.message:
+            self.feedback_data['message'] = self.feedback.message
+        if feedback.hint:
+            self.feedback_data['hint'] = self.feedback.hint
+
+        if update_grade:
+            self.given_grade = feedback.grade * 100
+
+        self.feedback = feedback
 
 
 # We define a fake abstract model just to use the ModelForm class since it will

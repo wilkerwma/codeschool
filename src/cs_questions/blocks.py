@@ -19,8 +19,6 @@ class ResponseForm(forms.Form):
     We must store the type and index for the block in a hidden input.
     """
 
-    response_id = forms.IntegerField(widget=widgets.HiddenInput())
-
     def to_json(self):
         """
         Convert validated form data to JSON.
@@ -36,7 +34,7 @@ class AnswerBlock(blocks.StructBlock):
     Base class for answer blocks.
     """
 
-    response_form = ResponseForm
+    response_form_class = ResponseForm
 
     name = blocks.CharBlock(
         verbose_name=_('name'),
@@ -83,7 +81,7 @@ class AnswerBlock(blocks.StructBlock):
     def render(self, value):
         form = self.get_form(value)
         if form:
-            return form
+            return form.as_table()
         else:
             return super().render(value)
 
@@ -92,10 +90,13 @@ class AnswerBlock(blocks.StructBlock):
         Return an initialized response form for the object.
         """
 
-        if self.response_form:
-            form = self.response_form()
-            form['response'].label = value['name']
-            return form.as_table()
+        if self.response_form_class:
+            form = self.response_form_class()
+            response_field = form['response']
+            response_field.name = '%s__%s' % (response_field.name, value['ref'])
+            response_field.html_name = response_field.name
+            response_field.label = value['name']
+            return form
         return None
 
 
@@ -116,7 +117,7 @@ class NumericAnswerBlock(AnswerBlock):
     Represents a numeric answer.
     """
 
-    response_form = NumericResponseForm
+    response_form_class = NumericResponseForm
 
     answer = blocks.DecimalBlock(
         required=True,
@@ -148,7 +149,7 @@ class BooleanAnswerBlock(AnswerBlock):
     Represents a numeric answer.
     """
 
-    response_form = BooleanResponseForm
+    response_form_class = BooleanResponseForm
 
     answer = blocks.BooleanBlock(
         required=True,

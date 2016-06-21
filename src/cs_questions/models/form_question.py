@@ -1,11 +1,13 @@
 from decimal import Decimal
 from django.core.exceptions import ValidationError
 from django.utils.translation import ugettext_lazy as _
+import srvice
 from codeschool import models
 from codeschool import blocks
 from codeschool import panels
 from codeschool.shortcuts import lazy
-from cs_questions.models import Question, QuestionResponseItem
+from cs_questions.models import Question, QuestionResponseItem, \
+    register_response_item
 import cs_questions.blocks
 NOT_PROVIDED = object()
 
@@ -36,6 +38,37 @@ class FormQuestion(Question):
             'different types of answer fields.'
         )
     )
+
+    def clean(self):
+        super().clean()
+        data = list(self.form_values())
+        if not data:
+            raise ValidationError({
+                'body': _('At least one form entry is necessary.'),
+            })
+
+        # Test if ref keys are unique: when we implement this correctly, there
+        # will have a 1 in 10**19 chance of collision. So we wouldn't expect
+        # this to ever fail.
+        ref_set = {value['ref'] for value in data}
+        if len(ref_set) < len(data):
+            raise ValidationError({
+                'body': _('Answer block ref keys are not unique.'),
+            })
+
+    def register_response_item(self, raw_data=None, **kwargs):
+        # Transform all values received as strings and normalize them to the
+        # correct python objects.
+        if raw_data is not None:
+            response_data = {}
+            children = self.stream_children_map()
+            for key, value in raw_data.items():
+                child = children[key]
+                block = child.block
+                blk_value = child.value
+                response_data[key] = block.normalize_response(blk_value, value)
+            kwargs['response_data'] = response_data
+        return super().register_response_item(**kwargs)
 
     def stream_children(self):
         """
@@ -81,18 +114,6 @@ class FormQuestion(Question):
             raise KeyError(key)
         return default
 
-    def form_value(self, ref, default=NOT_PROVIDED):
-        """
-        Return the form data for the given key.
-        """
-
-        try:
-            return self.stream_child(key).value
-        except KeyError:
-            if default is NOT_PROVIDED:
-                raise
-            return default
-
     def form_block(self, key, default=NOT_PROVIDED):
         """
         Return the AnswerBlock instance for the given key.
@@ -105,26 +126,48 @@ class FormQuestion(Question):
                 raise
             return default
 
-    def clean(self):
-        super().clean()
-        data = list(self.form_values())
-        if not data:
-            raise ValidationError({
-                'body': _('At least one form entry is necessary.'),
-            })
+    def form_value(self, ref, default=NOT_PROVIDED):
+        """
+        Return the form data for the given key.
+        """
 
-        # Test if ref keys are unique: when we implement this correctly, there
-        # will have a 1 in 10**19 chance of collision. So we wouldn't expect
-        # this to ever fail.
-        ref_set = {value['ref'] for value in data}
-        if len(ref_set) < len(data):
-            raise ValidationError({
-                'body': _('Answer block ref keys are not unique.'),
-            })
+        try:
+            return self.stream_child(key).value
+        except KeyError:
+            if default is NOT_PROVIDED:
+                raise
+            return default
+
+    def stream_children_map(self):
+        """
+        Return a dictionary mapping keys to the corresponding stream values.
+        """
+
+        return {blk.value['ref']: blk for blk in self.body}
+
+    # Serving pages and routing
+    @srvice.route(r'^submit-response/$')
+    def respond_route(self, client, **kwargs):
+        """
+        Handles student responses via AJAX and a srvice program.
+        """
+
+        data = {}
+        for key, value in kwargs.items():
+            if key.startswith('response__') and value:
+                key = key[10:]  # strips the heading 'response__'
+                data[key] = value
+
+        response_item = self.register_response_item(
+            raw_data=data,
+            user=client.user,
+            autograde=True
+        )
+        client.dialog(html=response_item.html_feedback())
 
     def get_response_form(self):
-
-        return 42
+        block = self.body[0]
+        return block.render()
 
     def get_context(self, request, *args, **kwargs):
         context = super().get_context(request, *args, **kwargs)
@@ -137,6 +180,7 @@ class FormQuestion(Question):
     content_panels.insert(-1, panels.StreamFieldPanel('body'))
 
 
+@register_response_item(FormQuestion)
 class FormResponseItem(QuestionResponseItem):
     """
     A response to a FormQuestion.
@@ -160,6 +204,7 @@ class FormResponseItem(QuestionResponseItem):
 
     @responses.setter
     def responses(self, value):
+        # Atomic operation
         old_data, self.response_data = self.response_data, {}
         try:
             for k, v in value.items():
@@ -187,8 +232,9 @@ class FormResponseItem(QuestionResponseItem):
 
         total = Decimal(0)
         achieved = Decimal(0)
+        response_data = self.response_data or {}
         for key, stream_child in self.question.stream_items():
-            response = self.response_data.get(key, None)
+            response = response_data.get(key, None)
             value = stream_child.value
             weight = Decimal(value.get('value', 1.0))
             total += weight
@@ -198,3 +244,4 @@ class FormResponseItem(QuestionResponseItem):
                 achieved += weight * block.autograde_response(value, response)
 
         return achieved / total
+

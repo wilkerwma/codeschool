@@ -10,6 +10,11 @@ FORMAT_ALIASES = {
     'gcc': 'c',
     'g++': 'cpp',
 }
+ACE_ALIASES = {
+    'c': 'c_cpp',
+    'cpp': 'c_cpp',
+    'python2': 'python',
+}
 
 
 class SourceFormatQuerySet(models.QuerySet):
@@ -52,7 +57,7 @@ class FileFormat(models.Model):
         Return the ace mode associated with the language.
         """
 
-        return self.ref
+        return ACE_ALIASES.get(self.ref)
 
     def pygments_mode(self):
         """

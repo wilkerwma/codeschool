@@ -2,10 +2,16 @@ import decimal
 import json
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
+from django.core.signals import Signal
 from codeschool.jinja.filters import markdown
 from codeschool import models
 from codeschool.utils import md5hash
 from cs_core.models.activity import Response
+
+
+#: This signal is emitted when a response item finishes its autograde() method
+#: successfully and sets the ResponseItem status to STATUS_DONE.
+autograde_signal = Signal(providing_args=['response_item', 'given_grade'])
 
 
 class ResponseItem(models.CopyMixin,
@@ -62,12 +68,10 @@ class ResponseItem(models.CopyMixin,
     feedback_data = models.JSONField(
         null=True,
         blank=True,
-        default=dict,
     )
     response_data = models.JSONField(
         null=True,
         blank=True,
-        default=dict,
     )
     response_hash = models.CharField(
         max_length=32,
@@ -111,6 +115,20 @@ class ResponseItem(models.CopyMixin,
     course = property(lambda x: x.activity.course)
 
     def __init__(self, *args, **kwargs):
+        # Django is loading object from the database -- we step out the way
+        if args and not kwargs:
+            super().__init__(*args, **kwargs)
+            return
+
+        # We create the response_data and feedback_data manually always using
+        # copies of passed dicts. We save these variables here, init object and
+        # then copy this data to the initialized dictionaries
+        response_data = kwargs.pop('response_data', None) or {}
+        feedback_data = kwargs.pop('feedback_data', None) or {}
+
+        # This part makes a ResponseItem instance initialize from a user +
+        # activity + context instead of requiring a response object. The
+        # response is automatically created on demand.
         user = kwargs.pop('user', None)
         if user:
             context = kwargs.pop('context', None)
@@ -129,19 +147,27 @@ class ResponseItem(models.CopyMixin,
                 context=context,
                 activity=activity
             )
-            kwargs.setdefault('response', response)
+            kwargs['response'] = response
+
         if 'context' in kwargs or 'activity' in kwargs:
             raise TypeError(
-                'you must provide an user to instanciate a bound response item.'
+                'Must provide an user to instantiate a bound response item.'
             )
         super().__init__(*args, **kwargs)
+
+        # Now that we have initialized the response item, we fill the data
+        # passed in the response_data and feedback_data dictionaries.
+        self.response_data = dict(self.response_data or {}, **response_data)
+        self.feedback_data = dict(self.response_data or {}, **feedback_data)
 
     def __str__(self):
         if self.given_grade is None:
             grade = self.status
         else:
             grade = '%s pts' % self.final_grade
-        return '<Response: %s by %s (%s)>' % (self.activity, self.user, grade)
+        user = self.user
+        activity = self.activity
+        return '<ResponseItem: %s by %s (%s)>' % (activity, user, grade)
 
     def save(self, *args, **kwargs):
         if not self.response_hash:
@@ -165,7 +191,7 @@ class ResponseItem(models.CopyMixin,
             return None
         return self.feedback_data
 
-    def autograde(self, commit=True, force=False):
+    def autograde(self, commit=True, force=False, silent=False):
         """
         Performs automatic grading.
 
@@ -173,6 +199,18 @@ class ResponseItem(models.CopyMixin,
         order to make automatic grading work. This method may write any
         relevant information to the `feedback_data` attribute and must return
         a numeric value from 0 to 100 with the given automatic grade.
+
+        Args:
+            commit:
+                If false, prevents saving the object when grading is complete.
+                The user must save the object manually after calling this
+                method.
+            force:
+                If true, force regrading the item even if it has already been
+                graded.
+            silent:
+                Prevents the autograde_signal from triggering in the end of
+                a successful autograde.
         """
 
         if self.status == self.STATUS_PENDING or force:
@@ -193,6 +231,12 @@ class ResponseItem(models.CopyMixin,
                 if self.final_grade is None:
                     self.final_grade = self.given_grade
                 self.status = self.STATUS_DONE
+                if not silent:
+                    autograde_signal.send_robust(
+                        self.__class__,
+                        response_item=self,
+                        given_grade=self.given_grade
+                    )
             if commit and self.pk:
                 self.save(update_fields=['status', 'feedback_data',
                                          'given_grade', 'final_grade'])
@@ -293,12 +337,14 @@ class ResponseItem(models.CopyMixin,
         """
 
         if response_data:
-            data = json.dumps(response_data)
+            data = json.dumps(response_data, default=json_default)
             return md5hash(data)
         return ''
 
     # Feedback and visualization
     ok_message = _('*Congratulations!* Your response is correct!')
+    ok_with_penalties = _('Your response is correct, but you did not achieved '
+                          'the maximum grade.')
     wrong_message = _('I\'m sorry, your response is wrong.')
     partial_message = _('Your answer is partially correct: you achieved only '
                         '%(grade)d%% of the total grade.')
@@ -309,14 +355,16 @@ class ResponseItem(models.CopyMixin,
         """
 
         if self.is_done:
-            data = {'grade': (self.grade or 0)}
+            data = {'grade': (self.final_grade or 0)}
 
-            if self.grade == 100:
+            if self.final_grade == 100:
                 return markdown(self.ok_message)
-            elif not self.grade:
+            elif self.given_grade == 100:
+                return markdown(self.ok_with_penalties_message)
+            elif not self.given_grade:
                 return markdown(self.wrong_message)
             else:
-                return markdown(aself.partial_message % data)
+                return markdown(self.partial_message % data)
         else:
             return markdown(_('Your response has not been graded yet!'))
 
@@ -334,3 +382,21 @@ class InvalidResponseError(Exception):
 
 # Save a copy in the class namespace for convenience
 ResponseItem.InvalidResponseError = InvalidResponseError
+
+
+# The default serializer for JSON data. We have to accept a few extra types
+# when calculating the hash from a JSON dump.
+from functools import singledispatch
+from decimal import Decimal
+#from datetime import date, time, datetime
+
+
+@singledispatch
+def json_default(x):
+    raise TypeError
+
+
+@json_default.register(Decimal)
+def _(x):
+    return str(x)
+

@@ -27158,9 +27158,11 @@ style this element.
                         textarea.value = '';
                         var form = (elem.form? $('#' + elem.form): $(textarea).closest('form'))[0];
 
-                        form.addEventListener('submit', function() {
-                            $(textarea).val(elem.getValue());
-                        }, true);
+                        if (form) {
+                            form.addEventListener('submit', function() {
+                                $(textarea).val(elem.getValue());
+                            }, true);
+                        }
                     });
                 },
 

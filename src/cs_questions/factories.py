@@ -9,7 +9,10 @@ class CodingIoAnswerKeyFactory(factory.DjangoModelFactory):
         model = models.AnswerKeyItem
 
     language = factory.LazyAttribute(lambda x: programming_language('python'))
-    source = "print('hello', input('who? '))"
+    source = '''
+name = input('who? ')
+print("hello %s!" % name)
+'''
 
 
 class CodingIoQuestionFactory(factory.DjangoModelFactory):
@@ -19,6 +22,6 @@ class CodingIoQuestionFactory(factory.DjangoModelFactory):
     title = factory.fake_sentence(2)
     short_description = factory.fake_sentence()
     long_description = factory.fake_text()
-    iospec_source = 'who? <me>\nhello me'
+    iospec_source = 'who? <john>\nhello john!'
     owner = factory.SubFactory(UserFactory)
     answer_key = factory.RelatedFactory(CodingIoAnswerKeyFactory, 'question')
