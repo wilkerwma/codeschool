@@ -1,22 +1,22 @@
-import hashlib
-from iospec import parse_string as parse_iospec, SimpleTestCase
-import iospec.feedback
-import ejudge
-from django.conf import settings
-from django.utils.translation import ugettext_lazy as _
-from django.utils.html import mark_safe, escape
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.utils.html import mark_safe, escape
+from django.utils.translation import ugettext_lazy as _
+
+import ejudge
+import iospec.feedback
 import srvice
 from codeschool import models
-from codeschool import fields
 from codeschool import panels
-from codeschool.shortcuts import lazy
 from codeschool.forms import register_parent_prefetch
+from codeschool.shortcuts import lazy
+from codeschool.utils import md5hash
 from cs_core.models import ProgrammingLanguage, programming_language, \
     bound_property
 from cs_questions.models import Question, QuestionResponseItem
 from cs_questions.renderers import render_html
+from iospec import parse_string as parse_iospec
 
 
 # noinspection PyPropertyAccess
@@ -324,8 +324,11 @@ class CodingIoQuestion(Question):
             self.iospec_source = self.iospec.source()
 
     def register_response_item(self, source, language=None, **kwargs):
-        kwargs['language'] = language or self.language
-        kwargs['source'] = source
+        response_data = {
+            'language': (language or self.language).ref,
+            'source': source,
+        }
+        kwargs.update(response_data=response_data)
         return super().register_response_item(**kwargs)
 
     # Serving pages and routing
@@ -567,7 +570,7 @@ class CodingIoResponseItem(QuestionResponseItem):
     def language(self):
         try:
             lang_id = self.response_data['language']
-            return ProgrammingLanguage.get_language(lang_id)
+            return ProgrammingLanguage.get_language(ref=lang_id)
         except (KeyError, ProgrammingLanguage.DoesNotExist):
             return None
 
@@ -619,6 +622,7 @@ class CodingIoResponseItem(QuestionResponseItem):
         self.feedback = grade_code(source, answer_key, lang=language_ref)
         return self.feedback.grade * 100
 
+
 # Let us define the response_class attribute for CodingIoQuestions
 CodingIoQuestion.response_item_class = CodingIoResponseItem
 
@@ -646,14 +650,6 @@ class ResponseForm(forms.ModelForm):
 #
 # Utility functions
 #
-def md5hash(st):
-    """Compute the hex-md5 hash of string.
-
-    Returns a string of 32 ascii characters."""
-
-    return hashlib.md5(st.encode('utf8')).hexdigest()
-
-
 def run_code(source, inputs, lang=None):
     """Runs source code with given inputs and return the corresponding IoSpec
     tree."""

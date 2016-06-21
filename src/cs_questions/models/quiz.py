@@ -110,16 +110,19 @@ class Quiz(Activity):
 
         return super().register_response_item(user=user, context=context)
 
-    def process_response_item(self, response):
+    def process_response_item(self, response, recycled=False):
         """
         Process a question response and adds a reference to it in the related
         QuizResponseItem.
         """
-        user = response.user
-        context = response.context
-        quiz_response_item = self.register_response_item(user=user,
-                                                         context=context)
-        quiz_response_item.register_response(response)
+
+        # We do not register recycled responses
+        if not recycled:
+            user = response.user
+            context = response.context
+            quiz_response_item = self.register_response_item(user=user,
+                                                             context=context)
+            quiz_response_item.register_response(response)
 
     # Wagtail admin
     parent_page_types = ['cs_questions.QuizList']

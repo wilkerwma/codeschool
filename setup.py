@@ -86,6 +86,7 @@ setup(
         'django-polymorphic',
         'django-filter',
         'djangorestframework',
+        'jsonfield',
 
         # Wagtail
         'wagtail',

@@ -1,8 +1,10 @@
 import decimal
+import json
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from codeschool.jinja.filters import markdown
 from codeschool import models
+from codeschool.utils import md5hash
 from cs_core.models.activity import Response
 
 
@@ -19,6 +21,10 @@ class ResponseItem(models.CopyMixin,
         automatic, depending on the activity.
     waiting:
         Waiting for manual feedback.
+    incomplete:
+        For long-term activities, this tells that the student started a response
+        and is completing it gradually, but the final response was not achieved
+        yet.
     invalid:
         The response has been sent, but contains malformed data.
     done:
@@ -63,6 +69,10 @@ class ResponseItem(models.CopyMixin,
         blank=True,
         default=dict,
     )
+    response_hash = models.CharField(
+        max_length=32,
+        blank=True,
+    )
     given_grade = models.DecimalField(
         _('Percentage of maximum grade'),
         help_text=_(
@@ -86,13 +96,6 @@ class ResponseItem(models.CopyMixin,
     )
     manual_override = models.BooleanField(
         default=False
-    )
-    parent = models.ForeignKey(
-        'self',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='children',
     )
 
     # Status properties
@@ -133,14 +136,19 @@ class ResponseItem(models.CopyMixin,
             )
         super().__init__(*args, **kwargs)
 
-    class InvalidResponseError(Exception):
-        """Raised by compute_response() when the response is invalid."""
+    def __str__(self):
+        if self.given_grade is None:
+            grade = self.status
+        else:
+            grade = '%s pts' % self.final_grade
+        return '<Response: %s by %s (%s)>' % (self.activity, self.user, grade)
 
-    # Compute grades
-    def get_response_set(self, user):
-        """Return the response set associated to this response."""
+    def save(self, *args, **kwargs):
+        if not self.response_hash:
+            self.response_hash = self.get_response_hash(self.response_hash)
+        super().save(*args, **kwargs)
 
-    def get_feedback(self, commit=True):
+    def get_feedback_data(self, commit=True):
         """Return the feedback object associated to the given response.
 
         This method may trigger the autograde() method, if grading was not
@@ -182,7 +190,8 @@ class ResponseItem(models.CopyMixin,
                 self.status = self.STATUS_WAITING
             else:
                 self.given_grade = decimal.Decimal(value)
-                self.final_grade = self.given_grade
+                if self.final_grade is None:
+                    self.final_grade = self.given_grade
                 self.status = self.STATUS_DONE
             if commit and self.pk:
                 self.save(update_fields=['status', 'feedback_data',
@@ -204,12 +213,89 @@ class ResponseItem(models.CopyMixin,
             'and saved into the database.' % type(self).__name__
         )
 
-    def __str__(self):
-        if self.given_grade is None:
-            grade = self.status
+    def regrade(self, method, commit=True):
+        """
+        Recompute the grade for the given response item.
+
+        If status != 'done', it simply calls the .autograde() method. Otherwise,
+        it accept different strategies for updating to the new grades:
+            'update':
+                Recompute the grades and replace the old values with the new
+                ones. Only saves the response item if the feedback_data or the
+                given_grade attributes change.
+            'best':
+                Only update if the if the grade increase.
+            'worst':
+                Only update if the grades decrease.
+            'best-feedback':
+                Like 'best', but updates feedback_data even if the grades
+                change.
+            'worst-feedback':
+                Like 'worst', but updates feedback_data even if the grades
+                change.
+
+        Return a boolean telling if the regrading was necessary.
+        """
+        if self.status != self.STATUS_DONE:
+            return self.autograde()
+
+        # We keep a copy of the state, if necessary. We only have to take some
+        # action if the state changes.
+        def rollback():
+            self.__dict__.clear()
+            self.__dict__.update(state)
+
+        state = self.__dict__.copy()
+        self.autograde(force=True, commit=False)
+
+        # Each method deals with the new state in a different manner
+        if method == 'update':
+            if state != self.__dict__:
+                if commit:
+                    self.save()
+                return False
+            return True
+        elif method in ('best', 'best-feedback'):
+            if self.given_grade <= state.get('given_grade', 0):
+                new_feedback_data = self.feedback_data
+                rollback()
+                if new_feedback_data != self.feedback_data:
+                    self.feedback_data = new_feedback_data
+                    if commit:
+                        self.save()
+                    return True
+                return False
+            elif commit:
+                self.save()
+            return True
+
+        elif method in ('worst', 'worst-feedback'):
+            if self.given_grade >= state.get('given_grade', 0):
+                new_feedback_data = self.feedback_data
+                rollback()
+                if new_feedback_data != self.feedback_data:
+                    self.feedback_data = new_feedback_data
+                    if commit:
+                        self.save()
+                    return True
+                return False
+            elif commit:
+                self.save()
+            return True
         else:
-            grade = '%s pts' % self.final_grade
-        return '<Response: %s by %s (%s)>' % (self.activity, self.user, grade)
+            rollback()
+            raise ValueError('invalid method: %s' % method)
+
+    @classmethod
+    def get_response_hash(cls, response_data):
+        """
+        Computes a hash for the response_data attribute.
+        """
+
+        if response_data:
+            data = json.dumps(response_data)
+            return md5hash(data)
+        return ''
 
     # Feedback and visualization
     ok_message = _('*Congratulations!* Your response is correct!')
@@ -241,12 +327,10 @@ class ResponseItem(models.CopyMixin,
     def can_view(self, user):
         return user == self.user
 
-    # # Migration
-    # from cs_activities.models import Response
-    # base = models.OneToOneField(
-    #     Response,
-    #     on_delete=models.SET_NULL,
-    #     related_name='converted',
-    #     blank=True,
-    #     null=True,
-    # )
+
+class InvalidResponseError(Exception):
+        """Raised by compute_response() when the response is invalid."""
+
+
+# Save a copy in the class namespace for convenience
+ResponseItem.InvalidResponseError = InvalidResponseError

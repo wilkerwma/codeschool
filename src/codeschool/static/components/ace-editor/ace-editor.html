@@ -1,6 +1,7 @@
 <!--link rel="import" href="../../bower_components/polymer/polymer.html"-->
 <dom-module id="ace-editor">
     <template>
+        <textarea id="textarea" style="display: none;" name="{{ name }}" form="{{ form }}"></textarea>
         <div id="editor"><content></content></div>
     </template>
 
@@ -66,12 +67,10 @@
                     },
                     name: {
                         type: String,
-                        observer: '_onNameChanged',
                         reflectToAttribute: true
                     },
                     form: {
                         type: String,
-                        observer: '_onFormChanged',
                         readOnly: true,
                         reflectToAttribute: true
                     }
@@ -101,17 +100,14 @@
                         elem._onWrapModeChanged(elem.wrapMode);
                         elem._onHighlightActiveLineChanged(elem.highlightActiveLine);
                         elem._onShowPrintMarginChanged(elem.showPrintMargin);
-                        elem.name && elem._onNameChanged(elem.name);
-                        elem.form && elem._onFormChanged(elem.form);
 
                         // Connect submit event of an eventual parent form
-                        var textarea = $(elem.getTextarea());
-                        $(textarea).val('');
-                        var form = (elem.form? $('#' + elem.form): textarea.closest('form'))[0];
+                        var textarea = elem.getTextarea();
+                        textarea.value = '';
+                        var form = (elem.form? $('#' + elem.form): $(textarea).closest('form'))[0];
 
                         form.addEventListener('submit', function() {
-                            var value = elem.getValue();
-                            textarea.val(value);
+                            $(textarea).val(elem.getValue());
                         }, true);
                     });
                 },
@@ -125,7 +121,7 @@
                 },
 
                 getTextarea: function() {
-                    return $(this.$.editor).find('textarea')[0];
+                    return this.$.textarea;
                 },
 
                 // Observers
@@ -137,8 +133,6 @@
                 _onWrapModeChanged:             function(value) {this.ace && this.ace.getSession().setUseWrapMode(value)},
                 _onHighlightActiveLineChanged:  function(value) {this.ace && this.ace.setHighlightActiveLine(value)},
                 _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)},
-                _onNameChanged:                 function(value) {this.ace && this.getTextarea().setAttribute('name', value)},
-                _onFormChanged:                 function(value) {this.ace && this.getTextarea().setAttribute('form', value)}
             })
         );
     </script>

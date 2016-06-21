@@ -19,6 +19,9 @@ class QuestionList(models.RoutablePageMixin, models.RootList):
     Root page for all questions inside a course.
     """
 
+    class Meta:
+        proxy = True
+
     @property
     def questions(self):
         return [x.specific for x in self.get_children()]
@@ -64,6 +67,9 @@ class QuizList(models.RootList):
     """
     Root page for all quizzes inside a course.
     """
+
+    class Meta:
+        proxy = True
 
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('title', __('Quizzes'))
