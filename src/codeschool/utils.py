@@ -2,6 +2,7 @@
 Like codeschool.shortcuts for things that do not touch the database or any
 django-related settings.
 """
+import hashlib
 from functools import partial
 import pprint
 
@@ -163,3 +164,11 @@ class delegate_to:
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+
+def md5hash(st):
+    """Compute the hex-md5 hash of string.
+
+    Returns a string of 32 ascii characters."""
+
+    return hashlib.md5(st.encode('utf8')).hexdigest()

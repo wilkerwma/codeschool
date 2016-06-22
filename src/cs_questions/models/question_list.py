@@ -19,6 +19,9 @@ class QuestionList(models.RoutablePageMixin, models.RootList):
     Root page for all questions inside a course.
     """
 
+    class Meta:
+        proxy = True
+
     @property
     def questions(self):
         return [x.specific for x in self.get_children()]
@@ -65,6 +68,9 @@ class QuizList(models.RootList):
     Root page for all quizzes inside a course.
     """
 
+    class Meta:
+        proxy = True
+
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('title', __('Quizzes'))
         kwargs.setdefault('slug', 'quizzes')
@@ -89,6 +95,7 @@ class UserGradebook:
         for question in self.questions:
             response = question.get_response(user)
             attempts = response.num_attempts
+            response.update(force=True)
             grade = response.final_grade
             url = question.get_absolute_url()
             title = escape(question.title)

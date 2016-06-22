@@ -39,7 +39,7 @@ def system_objects(apps, schema_editor):
     )
 
     # Rogue root
-    apps.get_model('cs_core', 'hiddenroot').objects.create(
+    apps.get_model('cs_core', 'rogueroot').objects.create(
         path="000100020001",
         depth=3,
         numchild=0,
@@ -56,9 +56,9 @@ def system_objects(apps, schema_editor):
 
     # Fix the number of children in the root node
     root = apps.get_model('wagtailcore', 'page').objects.get(path='0001')
-    root.numchild = 2
+    root.numchild += 1
     root.save(update_fields=['numchild'])
-    first_page = apps.get_model('wagtailcore', 'page').objects.get(path='0001')
+    first_page = apps.get_model('wagtailcore', 'page').objects.get(path='00010001')
     first_page.numchild = 1
     first_page.save(update_fields=['numchild'])
 

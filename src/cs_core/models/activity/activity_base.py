@@ -54,6 +54,7 @@ class bound_property(property):
     """
 
 
+# noinspection PyPropertyAccess
 class Activity(models.CopyMixin,
                models.ShortDescribablePage):
     """
@@ -84,7 +85,6 @@ class Activity(models.CopyMixin,
     resources = models.StreamField(RESOURCE_BLOCKS)
     objects = models.PageManager.from_queryset(ActivityQueryset)()
 
-    # --------------------------------------------------------------------------
     # References
     @property
     def course(self):
@@ -108,7 +108,6 @@ class Activity(models.CopyMixin,
         return cls.objects.get_or_create(activity_id=self.id,
                                          name='default')[0]
 
-    # --------------------------------------------------------------------------
     #: Define the default material icon used in conjunction with instances of
     #: the activity class.
     default_material_icon = 'help'
@@ -134,7 +133,6 @@ class Activity(models.CopyMixin,
 
         return '<i class="material-icon">%s</i>' % self.material_icon
 
-    # --------------------------------------------------------------------------
     # We define the optional user and context objects to bind responses to the
     # question object. These are not saved into the database, but are rather
     # used as default values to fill-in in the response objects. These objects
@@ -168,7 +166,6 @@ class Activity(models.CopyMixin,
             raise TypeError('invalid context: %r' % value)
         self._context = value
 
-    # Bound tests
     @property
     def is_user_bound(self):
         return self.user is not None
@@ -177,7 +174,6 @@ class Activity(models.CopyMixin,
     def is_context_bound(self):
         return self.context is not None
 
-    # --------------------------------------------------------------------------
     def __init__(self, *args, **kwargs):
         # Get parent page from initialization
         course = kwargs.pop('course', None)
@@ -220,8 +216,9 @@ class Activity(models.CopyMixin,
         # Return self so this method can be chained.
         return self
 
-    # --------------------------------------------------------------------------
+    #
     # Response control
+    #
     def get_response(self, user=None, context=None):
         """
         Get the response associated with given user and context.
@@ -235,31 +232,84 @@ class Activity(models.CopyMixin,
         return Response.get_response(user=user, context=context, activity=self)
 
     def register_response_item(self, *,
+                               response_data=None,
                                user=None,
                                context=None,
                                autograde=False,
-                               **kwargs):
+                               recycle=False,
+                               _kwargs=None):
         """
         Create a new response item object for the given question and saves it on
         the database.
+
+        Args:
+            user:
+                The user who submitted the response.
+            context:
+                The context object associated with the response. Uses the
+                default context, if not given.
+            autograde:
+                If true, calls the autograde() method in the response to
+                give the automatic gradings.
+            recycle:
+                If true, recycle response items with the same content as the
+                submission. It checks if a different submission exists with the
+                same response_data attribute. If so, it returns this submission
+                instead of saving a new one in the database.
+            _kwargs:
+                Additional arguments that should be passed to the
+                response item constructor. This should only be used by
+                subclasses to pass extra arguments to the super method.
         """
+
+        response_item_class = self.response_item_class
+
+        # Check if the user and context are given
         user = user or self.user
         context = context or self.context
-        response = self.response_item_class(
-            user=user,
-            context=context,
-            activity=self,
-            **kwargs,
-        )
+        if user is None:
+            raise TypeError('a valid user is required')
+
+        # We compute the hash and compare it with values on the database
+        # if recycle is enabled
+        response_hash = response_item_class.get_response_hash(response_data)
+        response = None
+        recycled = False
+        if recycle:
+            recyclable = response_item_class.objects.filter(
+                activity=self,
+                context=context,
+                response_hash=response_hash,
+            )
+            for pk, value in recyclable.values_list('id', 'response_data'):
+                if value == response_data:
+                    response = recyclable.get(pk=pk)
+                    recycled = True
+
+        # Proceed if no response was created
+        if response is None:
+            response = self.response_item_class(
+                user=user,
+                context=context,
+                activity=self,
+                response_hash=response_hash,
+                response_data=response_data,
+                **(_kwargs or {}),
+            )
+
+        # If the context owner is not the current activity, we have to take
+        # additional steps to finalize the response_item to a proper state.
         if context.activity_id != self.id:
-            context.activity.process_response_item(response)
+            context.activity.process_response_item(response, recycled)
+
+        # Finalize response item
         if autograde:
             response.autograde()
         else:
             response.save()
         return response
 
-    def process_response_item(self, response):
+    def process_response_item(self, response, recycled=False):
         """
         Process this response item generated by other activities using a context
         that you own.
@@ -277,6 +327,15 @@ class Activity(models.CopyMixin,
 
         response = self.get_response(user, context)
         return response.response_items.count() >= 1
+
+    def correct_responses(self, context=None):
+        """
+        Return a queryset with all correct responses for the given context.
+        """
+
+        done = apps.get_model('cs_core', 'ResponseItem').STATUS_DONE
+        items = self.response_items(context, status=done)
+        return items.filter(given_grade=100)
 
     # def get_user_response(self, user, method='first'):
     #     """
@@ -371,7 +430,84 @@ class Activity(models.CopyMixin,
     #         grades[user] = grade
     #     return grades
 
+    #
+    # Statistics
+    #
+    def response_items(self, context=None, status=None, user=None):
+        """
+        Return a queryset with all response items associated with the given
+        activity.
+
+        Can filter by context, status and user
+        """
+
+        items = self.response_item_class.objects
+        queryset = items.filter(response__activity_id=self.id)
+
+        # Filter context
+        if context != 'any':
+            context = context or self.context
+            queryset = queryset.filter(response__context_id=context.id)
+
+        # Filter user
+        user = user or self.user
+        if user:
+            queryset = queryset.filter(response__user_id=user.id)
+
+        # Filter by status
+        if status:
+            queryset = queryset.filter(status=status)
+
+        return queryset
+
+    def _stats(self, attr, context, by_item=False):
+        if by_item:
+            items = self.response_items(context, self.STATUS_DONE)
+            values_list = items.values_list(attr, flat=True)
+            return Statistics(attr, values_list)
+        else:
+            if context == 'any':
+                items = self.responses.all()
+            else:
+                context = context or self.context
+                items = self.responses.all().filter(context=context)
+            return Statistics(attr, items.values_list(attr, flat=True))
+
+    def best_final_grade(self, context=None):
+        """
+        Return the best final grade given for this activity.
+        """
+
+        return self._stats('final_grade', context).max()
+
+    def best_given_grade(self, context=None):
+        """
+        Return the best grade given for this activity before applying any
+        penalties and bonuses.
+        """
+
+        return self._stats('given_grade', context).min()
+
+    def mean_final_grade(self, context=None, by_item=False):
+        """
+        Return the average value for the final grade for this activity.
+
+        If by_item is True, compute the average over all response items instead
+        of using the responses for each student.
+        """
+
+        return self._stats('final_grade', context, by_item).mean()
+
+    def mean_given_grade(self, by_item=False):
+        """
+        Return the average value for the given grade for this activity.
+        """
+
+        return self._stats('given_grade', context, by_item).mean()
+
+    #
     # Permission control
+    #
     def can_edit(self, user):
         """
         Return True if user has permissions to edit activity.
@@ -408,3 +544,87 @@ class Activity(models.CopyMixin,
     settings_panels = models.CodeschoolPage.settings_panels + [
         panels.StreamFieldPanel('resources'),
     ]
+
+
+from collections import Sequence
+from codeschool.utils import lazy
+
+
+class Statistics(Sequence):
+    """
+    An object that computes a series of statistical data over some data set.
+    """
+
+    def __init__(self, name, data, default=0):
+        self.name = name
+        self.data = list(data)
+        self.default = default
+
+    @lazy
+    def _sorted(self):
+        """
+        Cache sorted values with no given key function.
+        """
+
+        return sorted(self.data)
+
+    def __len__(self):
+        return len(self.data)
+
+    def __iter__(self):
+        return iter(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+    def max(self, key=lambda x: x, default=None):
+        """
+        Return the greatest value in data.
+        """
+
+        default = 0 if default is None else self.default
+        return max(self.data, key=key, default=default)
+
+    def min(self, key=lambda x: x, default=None):
+        """
+        Return the smallest value in data.
+        """
+
+        default = 0 if default is None else self.default
+        return min(self.data, key=key, default=default)
+
+    def sum(self, default=None):
+        """
+        Return the sum of all data values.
+        """
+
+        default = 0 if default is None else self.default
+        return sum(self.data, default)
+
+    def mean(self, default=None):
+        """
+        Return the mean value from data
+        """
+
+        return self.sum(default) / len(self.data)
+
+    def sorted(self, key=lambda x: x):
+        """
+        Return a list with all data values sorted by the given key function.
+        """
+
+        return self._sorted if key is None else sorted(self.data, key=key)
+
+    def median(self, key=lambda x: x):
+        """
+        Median of the data set using key function to sort values
+        """
+
+        sorted_data = self.sorted(key)
+        N = len(sorted_data)
+        if N % 2:
+            return sorted_data[N // 2]
+        elif N == 0:
+            raise ValueError('empty data set has no median')
+        else:
+            return (sorted_data[N // 2] + sorted_data[N // 2 - 1]) / 2

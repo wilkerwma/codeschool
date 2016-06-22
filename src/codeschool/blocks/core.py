@@ -66,7 +66,7 @@ class DecimalBlock(NumericBlockBase):
 # We are using a very hackish solution. We implement an object that returns
 # a random string each time a str(obj) is called. This happens to work with
 # the wail wagtail produces the final HTML for the block.
-ALPHABET = list(set(escape(string.printable)))
+ALPHABET = list(string.ascii_letters + string.digits + '_')
 
 
 def random_hash():
@@ -75,8 +75,11 @@ def random_hash():
     impossible to obtain collisions.
     """
 
-    # We have 10**19 possibilities!
-    return ''.join(random.choice(ALPHABET) for _ in range(10))
+    # We have 10**18 possibilities!
+    choice = '0'
+    while choice[0].isdigit():
+        choice = ''.join(random.choice(ALPHABET) for _ in range(10))
+    return choice
 
 
 class RandomHashString:

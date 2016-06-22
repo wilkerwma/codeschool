@@ -93,28 +93,43 @@ class Course(models.RoutablePageMixin, models.CodeschoolPage):
 
     @property
     def calendar_page(self):
+        content_type = models.ContentType.objects.get(
+            app_label='cs_core',
+            model='calendarpage'
+        )
         return apps.get_model('cs_core', 'CalendarPage').objects.get(
             depth=self.depth + 1,
             path__startswith=self.path,
+            content_type_id=content_type,
         )
 
     @property
     def questions_page(self):
+        content_type = models.ContentType.objects.get(
+            app_label='cs_questions',
+            model='questionlist'
+        )
         return apps.get_model('cs_questions', 'QuestionList').objects.get(
             depth=self.depth + 1,
             path__startswith=self.path,
+            content_type_id=content_type,
         )
 
     @property
     def gradables_page(self):
+        content_type = models.ContentType.objects.get(
+            app_label='cs_core',
+            model='gradablespage'
+        )
         return apps.get_model('cs_core', 'GradablesPage').objects.get(
             depth=self.depth + 1,
             path__startswith=self.path,
+            content_type_id=content_type,
         )
 
     @property
     def discipline(self):
-        return self.get_parent().discipline_instance
+        return self.get_parent().specific
 
     @discipline.setter
     def discipline(self, value):

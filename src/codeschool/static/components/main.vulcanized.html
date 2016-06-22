@@ -27053,6 +27053,7 @@ style this element.
 
 <dom-module id="ace-editor" assetpath="ace-editor/">
     <template>
+        <textarea id="textarea" style="display: none;" name="{{ name }}" form="{{ form }}"></textarea>
         <div id="editor"><content></content></div>
     </template>
 
@@ -27118,12 +27119,10 @@ style this element.
                     },
                     name: {
                         type: String,
-                        observer: '_onNameChanged',
                         reflectToAttribute: true
                     },
                     form: {
                         type: String,
-                        observer: '_onFormChanged',
                         readOnly: true,
                         reflectToAttribute: true
                     }
@@ -27153,18 +27152,17 @@ style this element.
                         elem._onWrapModeChanged(elem.wrapMode);
                         elem._onHighlightActiveLineChanged(elem.highlightActiveLine);
                         elem._onShowPrintMarginChanged(elem.showPrintMargin);
-                        elem.name && elem._onNameChanged(elem.name);
-                        elem.form && elem._onFormChanged(elem.form);
 
                         // Connect submit event of an eventual parent form
-                        var textarea = $(elem.getTextarea());
-                        $(textarea).val('');
-                        var form = (elem.form? $('#' + elem.form): textarea.closest('form'))[0];
+                        var textarea = elem.getTextarea();
+                        textarea.value = '';
+                        var form = (elem.form? $('#' + elem.form): $(textarea).closest('form'))[0];
 
-                        form.addEventListener('submit', function() {
-                            var value = elem.getValue();
-                            textarea.val(value);
-                        }, true);
+                        if (form) {
+                            form.addEventListener('submit', function() {
+                                $(textarea).val(elem.getValue());
+                            }, true);
+                        }
                     });
                 },
 
@@ -27177,7 +27175,7 @@ style this element.
                 },
 
                 getTextarea: function() {
-                    return $(this.$.editor).find('textarea')[0];
+                    return this.$.textarea;
                 },
 
                 // Observers
@@ -27189,8 +27187,6 @@ style this element.
                 _onWrapModeChanged:             function(value) {this.ace && this.ace.getSession().setUseWrapMode(value)},
                 _onHighlightActiveLineChanged:  function(value) {this.ace && this.ace.setHighlightActiveLine(value)},
                 _onShowPrintMarginChanged:      function(value) {this.ace && this.ace.setShowPrintMargin(value)},
-                _onNameChanged:                 function(value) {this.ace && this.getTextarea().setAttribute('name', value)},
-                _onFormChanged:                 function(value) {this.ace && this.getTextarea().setAttribute('form', value)}
             })
         );
     </script>

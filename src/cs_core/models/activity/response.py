@@ -77,6 +77,14 @@ class Response(models.CopyMixin,
         )
         return response
 
+    def __str__(self):
+        tries = self.num_attempts
+        user = self.user
+        activity = self.activity
+        grade = '%s pts' % (self.final_grade or 0)
+        fmt = '<Response: %s by %s (%s, %s tries)>'
+        return fmt % (activity, user, grade, tries)
+
     def update(self, force=False):
         """
         Synchronize object so its state accounts for the latest responses.
