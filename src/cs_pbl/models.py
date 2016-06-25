@@ -1,19 +1,19 @@
 from django.db import models
-from cs_activities.models import Activity, Response
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from codeschool import models
-from codeschool.models import User
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
+from codeschool import models
+from cs_core.models import Activity, autograde_signal
 
 
-@receiver(post_save, sender=Response)
+@receiver(autograde_signal)
 def my_handle(response, **kwargs):
     category = category_from_response(response)
     register_points(response.user, response.activity, category)
+
+def category_from_response(response):
+    print(response)
 
 def register_points(user, activity, category):
     given_points = GivenPoints.objects.get(user=user, activity=activity)
@@ -38,13 +38,23 @@ class Action(models.Model):
     points_incomplete = models.PositiveIntegerField(default=5)
     points_correct = models.PositiveIntegerField(default=10)
     points_correct_at_first_try = models.PositiveIntegerField(default=12)
-    activity = models.ForeignKey(Activity)
-
+    activity = models.ForeignKey(models.Page)
     name = models.CharField(_('name'), default="Action", max_length=200)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.activity is not None:
+            self.activity = self.activity.specific
+
+    def clean(self):
+        super().clean()
+        self.activity = self.activity.specific
+        if not isinstance(self.activity, Activity):
+            raise ValidationError({'activity': _('Page is not an activity!')})
 
     def get_absolute_url(self):
         return reverse('detail')
-        # , kwargs={'name':self.name})
+        # , kwargs={'name':self.name}
 
     class Meta():
         verbose_name = _('action')

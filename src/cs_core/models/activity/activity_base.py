@@ -294,7 +294,7 @@ class Activity(models.CopyMixin,
                 activity=self,
                 response_hash=response_hash,
                 response_data=response_data,
-                **(_kwargs or {}),
+                **(_kwargs or {})
             )
 
         # If the context owner is not the current activity, we have to take

@@ -175,7 +175,7 @@ class FormQuestion(Question):
         return context
 
     # Wagtail admin
-    parent_page_types = ['cs_core.Faculty']
+    #parent_page_types = ['cs_questions.QuestionList']
     content_panels = Question.content_panels[:]
     content_panels.insert(-1, panels.StreamFieldPanel('body'))
 
