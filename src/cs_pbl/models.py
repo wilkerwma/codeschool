@@ -21,8 +21,13 @@ def register_pbl_response(given_grade, response_item, **kwargs):
     activity = response_item.activity
     actions = Action.objects.filter(activity=activity)
 
+    previous_points = pbl_user.accumulated_points
+
     for action in actions:
         register_points(pbl_user, action, category)
+
+    if previous_points < pbl_user.accumulated_points:
+        register_point_badge(previous_points, pbl_user)
 
     # response_item.response grupo de reponse itens do mesmo usuário e da mesma atividade
     # response.itens é o manager do django.
@@ -44,6 +49,21 @@ def register_points(user, action, category):
     given_points, created = GivenPoints.objects.get_or_create(user=user, action=action)
 
     given_points.update(category)
+
+def register_point_badge(previous_points, pbl_user):
+        '''
+        point_badges = PointBadge.objects.filter(
+            required_points__gt=previous_points
+        ).filter(
+            required_points__lte=pbl_user.accumulated_points
+        )
+        '''
+
+        point_badges = PointBadge.objects.filter()
+
+        for point_badge in point_badges:
+            if point_badge.required_points <= pbl_user.accumulated_points:
+                GivenBadge.objects.get_or_create(badge=point_badge, user=pbl_user)
 
 class HasCategoryMixin:
     CATEGORY_TRIED = 'tried'
@@ -106,13 +126,12 @@ class PointBadge(BaseBadge):
     required_points = models.IntegerField(default=0)
 
 class GoalStep(HasCategoryMixin, models.Model):
-    badge = models.ForeignKey(BaseBadge, null=True)
+    point_badge = models.ForeignKey(PointBadge, null=True)
     action = models.ForeignKey(Action)
     category = models.CharField(choices=HasCategoryMixin.CATEGORY_CHOICES, null=True, blank=True, max_length=20)
     required = models.BooleanField()
 
-    def give_badge(self, pbl_user):
-        pass
+
 
 class PblUser(models.Model):
     user = models.OneToOneField(models.User, related_name='pbl_user')
@@ -152,6 +171,9 @@ class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
             self.save()
 
 class GivenBadge(models.TimeStampedModel):
+    class Meta:
+        unique_together = [['badge','user']]
+
     badge = models.ForeignKey(BaseBadge)
     user = models.ForeignKey(PblUser, null='True')
 
