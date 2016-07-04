@@ -1,0 +1,11 @@
+{% extends "viewpack/crud/detail.jinja2" %}
+
+{% block content_body %}
+      {{ _('Points tried') }}  : {{ object.points_tried }} <br>
+      {{ _('Points incomplete') }}  : {{ object.points_incomplete }} <br>
+      {{ _('Points correct') }}  : {{ object.points_correct }} <br>
+      {{ _('Points correct at first try') }}  : {{ object.points_correct_at_first_try }} <br>
+
+    {{ super() }}
+
+{% endblock %}

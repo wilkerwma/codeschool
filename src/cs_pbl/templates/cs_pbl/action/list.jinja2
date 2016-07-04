@@ -2,4 +2,10 @@
 
 {% block content_title %}
   <h1> {{ _('List of Actions') }}  <h1>
+
+{% endblock %}
+
+{% block list_item %}
+      <a href="../action/{{object.pk}}"> {{ object.name }}</a>
+
 {% endblock %}

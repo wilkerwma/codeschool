@@ -232,7 +232,7 @@ class ResponseItem(models.CopyMixin,
                     self.final_grade = self.given_grade
                 self.status = self.STATUS_DONE
                 if not silent:
-                    autograde_signal.send_robust(
+                    autograde_signal.send(
                         self.__class__,
                         response_item=self,
                         given_grade=self.given_grade
@@ -399,4 +399,3 @@ def json_default(x):
 @json_default.register(Decimal)
 def _(x):
     return str(x)
-

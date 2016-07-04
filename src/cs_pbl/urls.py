@@ -25,6 +25,10 @@ class ActionCRUD(CRUDViewPack):
     model = Action
     template_extension = '.jinja2'
     template_basename = 'cs_pbl/action/'
+    context_data = {
+        'content_color': "purple",
+
+    }
 
 
 urlpatterns = [
