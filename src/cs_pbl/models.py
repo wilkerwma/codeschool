@@ -9,8 +9,8 @@ from cs_core.models import Activity, autograde_signal
 
 
 @receiver(autograde_signal)
-def my_handle(given_grade, response_item, **kwargs):
-    #print('autograde!', response_item.activity)
+def register_pbl_response(given_grade, response_item, **kwargs):
+
     try:
         pbl_user = response_item.user.pbl_user
     except PblUser.DoesNotExist:
@@ -18,19 +18,16 @@ def my_handle(given_grade, response_item, **kwargs):
 
     category = category_from_response(response_item)
 
-    a = response_item.activity
-    actions = Action.objects.filter(activity=a)
+    activity = response_item.activity
+    actions = Action.objects.filter(activity=activity)
 
     for action in actions:
         register_points(pbl_user, action, category)
+
     # response_item.response grupo de reponse itens do mesmo usuário e da mesma atividade
     # response.itens é o manager do django.
 
-    #register_points(response.user, response.activity, category)
-
 def category_from_response(response_item):
-
-    print(response_item.STATUS_DONE)
     if response_item.status == response_item.STATUS_INCOMPLETE:
         return GivenPoints.CATEGORY_INCOMPLETE
     elif response_item.status != response_item.STATUS_DONE:
@@ -43,12 +40,10 @@ def category_from_response(response_item):
         else:
             return GivenPoints.CATEGORY_CORRECT
 
-
 def register_points(user, action, category):
     given_points, created = GivenPoints.objects.get_or_create(user=user, action=action)
 
     given_points.update(category)
-
 
 class HasCategoryMixin:
     CATEGORY_TRIED = 'tried'
@@ -62,7 +57,6 @@ class HasCategoryMixin:
         (CATEGORY_CORRECT_AT_FIRST_TRY, _('correct_at_first_try'))
     ]
     category = models.CharField(choices=CATEGORY_CHOICES)
-
 
 class Action(models.Model):
     points_tried = models.PositiveIntegerField(default=5)
@@ -87,10 +81,6 @@ class Action(models.Model):
         if not isinstance(self.activity, Activity):
             raise ValidationError({'activity': _('Page is not an activity!')})
 
-    #def get_absolute_url(self):
-        #return  "badge/" % self.pk
-    #    return  reverse('action', args=[str(self.pk)])
-
     class Meta():
         verbose_name = _('action')
         verbose_name_plural = _('actions')
@@ -100,36 +90,29 @@ class Action(models.Model):
     def __str__(self):
         return self.name
 
-class Badge(models.Model):
+class BaseBadge(models.PolymorphicModel):
     name = models.CharField(_('name'), max_length=200)
-    image = models.ImageField(upload_to = 'static/badge', default = '/static/badge/none.jpg')
+    image = models.ImageField(upload_to = 'static/badge', default = '/static/badge/none.png')
     short_description = models.TextField(_('short description'))
     long_description = models.TextField(_('long description'), blank=True)
 
     def get_absolute_url(self):
         return  reverse('/detail')
 
+    def __str__(self):
+        return self.name
 
-class GivenBadge(models.TimeStampedModel):
-    badge = models.ForeignKey(Badge)
-    users = models.ForeignKey(models.User)
-
-
-class Goal(models.Model):
-    badge = models.ForeignKey(
-        Badge,
-        related_name='goals'
-    )
-    required_points = models.PositiveIntegerField(default=0)
-    # required_actions = models.ManyToManyField(Action)
-
+class PointBadge(BaseBadge):
+    required_points = models.IntegerField(default=0)
 
 class GoalStep(HasCategoryMixin, models.Model):
-    goal = models.ForeignKey(Goal, related_name='steps')
+    badge = models.ForeignKey(BaseBadge, null=True)
     action = models.ForeignKey(Action)
     category = models.CharField(choices=HasCategoryMixin.CATEGORY_CHOICES, null=True, blank=True, max_length=20)
     required = models.BooleanField()
 
+    def give_badge(self, pbl_user):
+        pass
 
 class PblUser(models.Model):
     user = models.OneToOneField(models.User, related_name='pbl_user')
@@ -137,7 +120,7 @@ class PblUser(models.Model):
     username = delegate_to('user')
     first_name = delegate_to('user')
     last_name = delegate_to('user')
-    get_full_name = delegate_to('user')    
+    get_full_name = delegate_to('user')
 
 class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
     action = models.ForeignKey(Action)
@@ -167,3 +150,11 @@ class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
             pbl_user.save()
             self.points = value
             self.save()
+
+class GivenBadge(models.TimeStampedModel):
+    badge = models.ForeignKey(BaseBadge)
+    user = models.ForeignKey(PblUser, null='True')
+
+    name = delegate_to('basebadge')
+    short_description = delegate_to('basebadge')
+    long_description = delegate_to('basebadge')
