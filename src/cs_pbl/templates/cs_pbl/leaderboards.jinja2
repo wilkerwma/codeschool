@@ -7,9 +7,9 @@
 {% block content_body %}
 
 <ol>
-  {% for user in user_list %}
+  {% for pbl_user in object_list.order_by('-accumulated_points') %}
   <li>
-    {{ user.username }}
+    <b>{{ pbl_user.username }}: </b> {{ pbl_user.accumulated_points }} {{_('Points')}}
   </li>
  {% endfor %}
 </ol>

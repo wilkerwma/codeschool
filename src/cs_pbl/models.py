@@ -134,7 +134,10 @@ class GoalStep(HasCategoryMixin, models.Model):
 class PblUser(models.Model):
     user = models.OneToOneField(models.User, related_name='pbl_user')
     accumulated_points = models.PositiveIntegerField(default=0)
-
+    username = delegate_to('user')
+    first_name = delegate_to('user')
+    last_name = delegate_to('user')
+    get_full_name = delegate_to('user')    
 
 class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
     action = models.ForeignKey(Action)
@@ -147,18 +150,18 @@ class GivenPoints(HasCategoryMixin, models.TimeStampedModel):
     def value(self, category):
         if category == self.CATEGORY_CORRECT:
             return self.action.points_correct
-        elif self.category == self.CATEGORY_INCOMPLETE:
+        elif category == self.CATEGORY_INCOMPLETE:
             return self.action.points_incomplete
-        elif self.category == self.CATEGORY_TRIED:
+        elif category == self.CATEGORY_TRIED:
             return self.action.points_tried
-        elif self.category == self.CATEGORY_CORRECT_AT_FIRST_TRY:
+        elif category == self.CATEGORY_CORRECT_AT_FIRST_TRY:
             return self.action.points_correct_at_first_try
         else:
-            raise ValueError('invalid category: %s' % self.category)
+            raise ValueError('invalid category: %s' % category)
 
     def update(self, category):
         value = self.value(category)
-        if value > self.points:
+        if value >= self.points:
             pbl_user = self.user
             pbl_user.accumulated_points += value - self.points
             pbl_user.save()
