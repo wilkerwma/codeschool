@@ -1,12 +1,12 @@
 from django.test import TestCase
-import pytest
+#import pytest
 from . import models
+#from codeschool.tests import *
+
 # Create your tests here.
 
 def action():
-    return Action(12, 2, 222)
+    return Action(1, 2, 3, 4,1, 'Acao')
 
 def test_action_creation(action):
-    assert action.points == 12
-    assert action.activity == 2
-    assert action.user == 222
+    assert action.points_tried == 1

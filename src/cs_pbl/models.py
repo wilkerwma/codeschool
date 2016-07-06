@@ -25,6 +25,7 @@ def register_pbl_response(given_grade, response_item, **kwargs):
 
     for action in actions:
         register_points(pbl_user, action, category)
+        register_activity_badge(pbl_user, action)
 
     if previous_points < pbl_user.accumulated_points:
         register_point_badge(previous_points, pbl_user)
@@ -64,6 +65,14 @@ def register_point_badge(previous_points, pbl_user):
         for point_badge in point_badges:
             if point_badge.required_points <= pbl_user.accumulated_points:
                 GivenBadge.objects.get_or_create(badge=point_badge, user=pbl_user)
+
+def register_activity_badge(pbl_user, action):
+    action_badge = ActionBadge.objects.filter()
+
+    for action_badges in action_badge:
+        if  action.pk == action_badge.action.pk:
+            GivenBadge.objects.get_or_create(badge=action_badge, user=pbl_user)
+
 
 class HasCategoryMixin:
     CATEGORY_TRIED = 'tried'
@@ -124,6 +133,9 @@ class BaseBadge(models.PolymorphicModel):
 
 class PointBadge(BaseBadge):
     required_points = models.IntegerField(default=0)
+
+class ActionBadge(BaseBadge):
+    action = models.ForeignKey(Action)
 
 class GoalStep(HasCategoryMixin, models.Model):
     point_badge = models.ForeignKey(PointBadge, null=True)
