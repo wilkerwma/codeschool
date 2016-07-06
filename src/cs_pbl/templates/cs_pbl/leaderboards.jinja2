@@ -6,12 +6,38 @@
 
 {% block content_body %}
 
-<ol>
+<h2> {{ _("The Students are sorted by the accumulated points")}} </h2>
+
+<ol class="center">
   {% for pbl_user in object_list.order_by('-accumulated_points') %}
   <li>
-    <b>{{ pbl_user.username }}: </b> {{ pbl_user.accumulated_points }} {{_('Points')}}
+     {{ pbl_user.username }}: {{ pbl_user.accumulated_points }} {{_('Points')}}
   </li>
  {% endfor %}
 </ol>
 
 {% endblock %}
+
+{% block style%}
+{{ super() }}
+  <style>
+
+  .center { text-align: center; list-style-position:inside;}
+
+    ol :nth-child(1) {
+      color: gold;
+       font-size: 2.5em;
+    }
+
+    ol :nth-child(2) {
+      color: silver;
+       font-size: 2em;
+    }
+
+    ol :nth-child(3) {
+    color: #C87533;
+     font-size: 1.5em;
+    }
+  </style>
+
+{%endblock%}

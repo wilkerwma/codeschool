@@ -1,5 +1,5 @@
 from django.test import TestCase
-#import pytest
+import pytest
 from . import models
 #from codeschool.tests import *
 

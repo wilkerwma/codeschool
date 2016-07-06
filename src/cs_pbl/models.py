@@ -29,6 +29,7 @@ def register_pbl_response(given_grade, response_item, **kwargs):
 
     if previous_points < pbl_user.accumulated_points:
         register_point_badge(previous_points, pbl_user)
+        register_hybrid_badge(pbl_user, previous_points, action)
 
     # response_item.response grupo de reponse itens do mesmo usuário e da mesma atividade
     # response.itens é o manager do django.
@@ -67,12 +68,18 @@ def register_point_badge(previous_points, pbl_user):
                 GivenBadge.objects.get_or_create(badge=point_badge, user=pbl_user)
 
 def register_activity_badge(pbl_user, action):
-    action_badge = ActionBadge.objects.filter()
+    action_badges = ActionBadge.objects.filter()
 
-    for action_badges in action_badge:
+    for action_badge in action_badges:
         if  action.pk == action_badge.action.pk:
             GivenBadge.objects.get_or_create(badge=action_badge, user=pbl_user)
 
+def register_hybrid_badge(pbl_user, action, previous_points):
+    hybrid_badges = HybridBadge.objects.filter()
+
+    for hybrid_badge in hybrid_badges:
+        if (action.pk == action_badge.action.pk) and (point_badge.required_points <= pbl_user.accumulated_points):
+            HybridBadge.objects.get_or_create(badge=hybrid_badge, user=pbl_user)
 
 class HasCategoryMixin:
     CATEGORY_TRIED = 'tried'
@@ -92,7 +99,9 @@ class Action(models.Model):
     points_incomplete = models.PositiveIntegerField(default=0)
     points_correct = models.PositiveIntegerField(default=10)
     points_correct_at_first_try = models.PositiveIntegerField(default=12)
+
     activity = models.ForeignKey(models.Page)
+
     name = models.CharField(_('name'), default="Action", max_length=200)
     short_description = delegate_to('activity')
     long_description = delegate_to('activity')
@@ -135,6 +144,10 @@ class PointBadge(BaseBadge):
     required_points = models.IntegerField(default=0)
 
 class ActionBadge(BaseBadge):
+    action = models.ForeignKey(Action)
+
+class HybridBadge(BaseBadge):
+    required_points = models.IntegerField(default=0)
     action = models.ForeignKey(Action)
 
 class GoalStep(HasCategoryMixin, models.Model):
